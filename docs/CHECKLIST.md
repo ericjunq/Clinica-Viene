@@ -25,7 +25,12 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
 - [~] CI: testes do backend (`./mvnw verify`) + relatórios de teste e cobertura; validação do `compose.yaml` e build da imagem do backend (sem publicar) — a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial` — **implementado — aguardando a primeira execução** (push indisponível nesta máquina, Q-008)
 - [ ] CI: testes do frontend, lint (Spotless — Q-004), metas de cobertura, scan de dependências (conforme existirem)
-- [ ] Gerar frontend Angular (`frontend/`) + Dockerfile multi-stage do frontend
+- [x] Gerar frontend Angular 22.3 (`frontend/`, standalone, zoneless, SCSS, Vitest, sem SSR) + casca mínima — branch `frontend-projeto-angular` — testes unitários **executados localmente: 2 passaram** (`npm test -- --watch=false`) e `npm run build` ok (2026-11-26)
+- [~] Dockerfile multi-stage do frontend (Node 24 → nginx sem root, proxy `/api/` → backend) + serviço `frontend` no compose (profile `app`) + proxy do `ng serve` — branch `frontend-projeto-angular` — **implementado — não executado** (sem Docker nesta máquina; roda no job `docker` do CI)
+- [~] CI: job `frontend` (npm ci, Vitest, build) e build da imagem do frontend — branch `frontend-projeto-angular` — aguardando a primeira execução (Q-008)
+- [ ] Lint do frontend (angular-eslint) e Prettier no CI
+- [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
+- [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)
 - [ ] Proteção da branch `main` (PR + CI verde) — configuração no GitHub, feita pelo autor
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
 - [ ] Decidir forma de carregar seeds de configuração real (D-048 — A CONFIRMAR)

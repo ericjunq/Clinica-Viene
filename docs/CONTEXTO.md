@@ -335,9 +335,9 @@ Todos os enums persistidos como STRING.
 
 Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modulith-bom`), Lombok (gerenciado pelo Boot) + MapStruct.
 
-**Frontend**: Angular (versão estável atual), standalone components, **PrimeNG** (componentes) + **FullCalendar** (`@fullcalendar/angular`, agenda) — D-043; `signature_pad`, Vitest, Playwright.
+**Frontend**: Angular **22.3** (standalone components, zoneless — sem zone.js, SCSS, sem SSR — D-057), **PrimeNG** (componentes) + **FullCalendar** (`@fullcalendar/angular`, agenda) — D-043; `signature_pad`, Vitest, Playwright.
 
-**Infra**: Docker (imagens multi-stage), `compose.yaml` na raiz (Postgres `18.7-alpine`, Mailpit; backend no profile `app`; storage S3 local A CONFIRMAR — D-056), credenciais no `.env` (fora do Git) a partir de `.env.example`, GitHub Actions.
+**Infra**: Docker (imagens multi-stage, processos sem root), `compose.yaml` na raiz (Postgres `18.7-alpine`, Mailpit; backend e frontend no profile `app` — frontend em nginx com `/api/` encaminhado ao backend no mesmo domínio; storage S3 local A CONFIRMAR — D-056), credenciais no `.env` (fora do Git) a partir de `.env.example`, GitHub Actions.
 
 **Estrutura do repositório (D-044)**: `backend/` (Maven), `frontend/` (Angular), `docs/`, `.github/workflows/`, `compose.yaml` e `.env.example` na raiz.
 
@@ -363,7 +363,7 @@ Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modu
 - **Frontend unitário**: Vitest.
 - **E2E navegador**: Playwright contra o ambiente docker-compose.
 - **Cobertura**: JaCoCo (meta inicial 80% em `financeiro`, `prontuario`, `identidade`).
-- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (qualquer branch) e em PR para `main`. Hoje: job `backend` (build + testes unitários e de integração com `./mvnw verify` + relatórios de teste e JaCoCo como artefatos) e job `docker` (valida `compose.yaml` e constrói a imagem do backend, sem publicar). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. Merge só com CI verde.
+- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (qualquer branch) e em PR para `main`. Hoje: job `backend` (build + testes unitários e de integração com `./mvnw verify` + relatórios de teste e JaCoCo como artefatos), job `frontend` (npm ci, Vitest, build de produção) e job `docker` (valida `compose.yaml` e constrói as imagens do backend e do frontend, sem publicar). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. Merge só com CI verde.
 - **CD**: **adiado** (D-046) — sem deploy por enquanto. Quando houver hospedagem: publicação da imagem no GHCR em merge na `main` + deploy.
 
 ---

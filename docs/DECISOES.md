@@ -158,6 +158,12 @@ Motivo: bebês e crianças frequentemente não têm CPF; o alerta reduz cadastro
 Ordem: 1) `docs-fundacao-projeto` → 2) `backend-estrutura-monorepo` → 3) `docker-compose-base` → 4) `ci-pipeline-inicial`. Cada uma criada a partir da anterior (a `main` ainda não tem nada disso); PRs devem ser mergeados nessa ordem. Substitui as branches locais provisórias `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (nunca publicadas).
 Motivo: o autor não está presente para mergear entre uma e outra; empilhar mantém uma branch por implementação sem bloquear o trabalho.
 
+**D-057 — Frontend: Angular 22.3, zoneless, sem SSR, servido por nginx com `/api/` no mesmo domínio** · 2026-11-26
+- Gerado com `ng new` (Angular CLI 22.3.0): standalone, **zoneless** (padrão atual do Angular, detecção de mudanças por signals), SCSS, Vitest, roteamento, **sem SSR** (sistema interno autenticado; SEO irrelevante e SSR traria um servidor Node a mais para proteger).
+- Produção/compose: imagem `nginxinc/nginx-unprivileged` (sem root); o nginx encaminha `/api/` para o backend → mesmo domínio, sem CORS, cookies/tokens mais simples de proteger. Em dev, `ng serve` usa `proxy.conf.json` com o mesmo efeito.
+- Branch `frontend-projeto-angular`, empilhada sobre `ci-pipeline-inicial` (D-054).
+Motivo: stack atual e enxuta; menos superfície de ataque.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

@@ -104,7 +104,6 @@ public class SessaoService {
     public static String hash(String valor) {
         return TokenUtils.sha256(valor);
     }
-    }
 
     /** Truncado em microssegundos: a precisão do PostgreSQL (o valor em memória fica igual ao gravado). */
     private Instant agora() {

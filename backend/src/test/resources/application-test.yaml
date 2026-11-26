@@ -3,3 +3,10 @@ spring:
   flyway:
     # Dados fictícios só existem nos testes (D-047): db/testdata fica em src/test e nunca vai para o jar.
     locations: classpath:db/migration,classpath:db/testdata
+
+clinicaviene:
+  cripto:
+    # Chaves FICTÍCIAS, exclusivas dos testes. Nunca usar em outro ambiente.
+    chaves: v1:bD0OJ2DQDhuJo7PkAai3cvLzjA9fxxy9naHXWJ03xQs=,v2:ZAYglggI6eGQbS+w/JkBpg0+KjODXI5NP4YHTuMGugw=
+    chave-ativa: v2
+    cpf-hmac-chave: EGXBpRu/5d1AeSsVzXXIPuxpJ55IbTlqQhkebzwDG+s=

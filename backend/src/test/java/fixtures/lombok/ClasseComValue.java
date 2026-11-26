@@ -1,4 +1,4 @@
-package com.github.ericjunq.fixtures.lombok;
+package fixtures.lombok;
 
 import lombok.Value;
 

@@ -1,4 +1,4 @@
-package com.github.ericjunq.Clinica_Viene;
+package br.com.clinicaviene;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

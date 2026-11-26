@@ -1,4 +1,4 @@
-package com.github.ericjunq.Clinica_Viene.arquitetura;
+package br.com.clinicaviene.arquitetura;
 
 import static com.tngtech.archunit.lang.conditions.ArchConditions.be;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -7,12 +7,12 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.github.ericjunq.fixtures.lombok.ClasseComValue;
-import com.github.ericjunq.fixtures.lombok.EntidadeComAllArgsConstructor;
-import com.github.ericjunq.fixtures.lombok.EntidadeComData;
-import com.github.ericjunq.fixtures.lombok.EntidadeComEqualsAndHashCode;
-import com.github.ericjunq.fixtures.lombok.EntidadeComToString;
-import com.github.ericjunq.fixtures.lombok.EntidadeCorreta;
+import fixtures.lombok.ClasseComValue;
+import fixtures.lombok.EntidadeComAllArgsConstructor;
+import fixtures.lombok.EntidadeComData;
+import fixtures.lombok.EntidadeComEqualsAndHashCode;
+import fixtures.lombok.EntidadeComToString;
+import fixtures.lombok.EntidadeCorreta;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -88,7 +88,7 @@ class EntidadesLombokArchTest {
 
     private static final JavaClasses CODIGO_DA_APLICACAO = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("com.github.ericjunq.Clinica_Viene");
+            .importPackages("br.com.clinicaviene");
 
     @Test
     void codigoDaAplicacaoRespeitaAsRegrasDoLombok() {

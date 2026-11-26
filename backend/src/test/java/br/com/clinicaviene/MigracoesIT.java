@@ -1,4 +1,4 @@
-package com.github.ericjunq.Clinica_Viene;
+package br.com.clinicaviene;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

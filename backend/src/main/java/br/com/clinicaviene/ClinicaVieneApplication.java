@@ -1,4 +1,4 @@
-package com.github.ericjunq.Clinica_Viene;
+package br.com.clinicaviene;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

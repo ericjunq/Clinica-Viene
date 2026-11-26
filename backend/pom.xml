@@ -8,8 +8,8 @@
 		<version>4.2.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.github.ericjunq</groupId>
-	<artifactId>Clinica-Viene</artifactId>
+	<groupId>br.com.clinicaviene</groupId>
+	<artifactId>clinica-viene</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>

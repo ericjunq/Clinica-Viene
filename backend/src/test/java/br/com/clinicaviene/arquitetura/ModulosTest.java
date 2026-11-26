@@ -1,6 +1,6 @@
-package com.github.ericjunq.Clinica_Viene.arquitetura;
+package br.com.clinicaviene.arquitetura;
 
-import com.github.ericjunq.Clinica_Viene.ClinicaVieneApplication;
+import br.com.clinicaviene.ClinicaVieneApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 

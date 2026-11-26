@@ -1,4 +1,4 @@
-package com.github.ericjunq.Clinica_Viene;
+package br.com.clinicaviene;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

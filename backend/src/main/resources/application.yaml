@@ -54,7 +54,7 @@ clinicaviene:
     cpf-hmac-chave: ${CPF_HMAC_CHAVE:}
   auth:
     # D-071 — chave privada RSA (PKCS#8, em Base64 numa linha só). Sem ela a aplicação não sobe.
-    # Gerar: openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform DER | base64 -w0
+    # Gerar: openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 | openssl pkcs8 -topk8 -nocrypt -outform DER | base64 -w0
     chave-privada-jwt: ${JWT_CHAVE_PRIVADA:}
     duracao-token-acesso: 15m
     duracao-sessao: 12h

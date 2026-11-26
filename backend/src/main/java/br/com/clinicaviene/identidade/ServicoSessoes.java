@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -124,8 +125,9 @@ class ServicoSessoes {
         }
     }
 
+    /** Truncado em microssegundos: a precisão do PostgreSQL (o valor em memória fica igual ao gravado). */
     private Instant agora() {
-        return Instant.now(relogio);
+        return Instant.now(relogio).truncatedTo(ChronoUnit.MICROS);
     }
 
     /**

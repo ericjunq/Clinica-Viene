@@ -1,6 +1,13 @@
 spring:
   application:
     name: clinica-viene
+  config:
+    # Em dev (rodando a partir de backend/), lê as variáveis do .env da raiz. Em produção o arquivo não existe
+    # e as variáveis vêm do ambiente.
+    import: optional:file:../.env[.properties]
+  mvc:
+    problemdetails:
+      enabled: true
   jpa:
     open-in-view: false
     hibernate:
@@ -28,3 +35,20 @@ spring:
     compose:
       # Em dev (rodando pela IDE a partir de backend/), sobe a infraestrutura do compose.yaml da raiz.
       file: ../compose.yaml
+
+springdoc:
+  # OpenAPI/Swagger UI desligados por padrão (produção); ligue com OPENAPI_HABILITADO=true em dev.
+  api-docs:
+    enabled: ${OPENAPI_HABILITADO:false}
+  swagger-ui:
+    enabled: ${OPENAPI_HABILITADO:false}
+  paths-to-match: /api/v1/**
+
+clinicaviene:
+  openapi:
+    habilitado: ${OPENAPI_HABILITADO:false}
+  cripto:
+    # D-052 — sem estas chaves a aplicação não sobe (valores vazios falham na validação).
+    chaves: ${CRIPTO_CHAVES:}
+    chave-ativa: ${CRIPTO_CHAVE_ATIVA:}
+    cpf-hmac-chave: ${CPF_HMAC_CHAVE:}

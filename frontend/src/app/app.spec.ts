@@ -1,22 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { App } from './app';
 
 describe('App', () => {
-  beforeEach(async () => {
+  it('cria o componente raiz', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideRouter([]), MessageService],
     }).compileComponents();
-  });
 
-  it('cria o componente raiz', () => {
-    const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('exibe o nome da clínica no topo', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const elemento = fixture.nativeElement as HTMLElement;
-    expect(elemento.querySelector('h1')?.textContent).toContain('ClinicaViene');
+    expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
   });
 });

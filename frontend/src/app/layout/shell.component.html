@@ -1,0 +1,18 @@
+<p-menubar [model]="itens()">
+  <ng-template #start>
+    <strong class="marca">ClinicaViene</strong>
+  </ng-template>
+  <ng-template #end>
+    <span class="usuario">{{ usuario()?.nomeCompleto }} · {{ usuario()?.perfil }}</span>
+    <p-button
+      label="Sair"
+      icon="pi pi-sign-out"
+      severity="secondary"
+      [text]="true"
+      (onClick)="sair()"
+    />
+  </ng-template>
+</p-menubar>
+<main class="conteudo">
+  <router-outlet />
+</main>

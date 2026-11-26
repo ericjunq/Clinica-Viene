@@ -1,0 +1,24 @@
+<main class="pagina-publica">
+  <p-card header="ClinicaViene" subheader="Acesso ao sistema">
+    <form [formGroup]="form" (ngSubmit)="entrar()" class="formulario">
+      <label for="cpf">CPF</label>
+      <p-inputmask
+        inputId="cpf"
+        formControlName="cpf"
+        mask="999.999.999-99"
+        placeholder="000.000.000-00"
+        [autoClear]="false"
+      />
+
+      <label for="senha">Senha</label>
+      <p-password inputId="senha" formControlName="senha" [feedback]="false" [toggleMask]="true" />
+
+      @if (erro(); as mensagem) {
+        <p-message severity="error">{{ mensagem }}</p-message>
+      }
+
+      <p-button type="submit" label="Entrar" [loading]="enviando()" styleClass="largura-total" />
+      <a routerLink="/recuperar-senha">Esqueci minha senha</a>
+    </form>
+  </p-card>
+</main>

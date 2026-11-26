@@ -1,0 +1,133 @@
+<div class="cabecalho">
+  <h1>Usuários</h1>
+  <p-button label="Novo usuário" icon="pi pi-plus" (onClick)="abrirCadastro()" />
+</div>
+
+<p-table
+  [value]="usuarios()"
+  [loading]="carregando()"
+  dataKey="id"
+  [tableStyle]="{ 'min-width': '50rem' }"
+>
+  <ng-template #header>
+    <tr>
+      <th>Nome</th>
+      <th>CPF</th>
+      <th>E-mail</th>
+      <th>Perfil</th>
+      <th>Registro</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-u>
+    <tr>
+      <td>{{ u.nomeCompleto }}</td>
+      <td>{{ u.cpfMascarado }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.perfil }}</td>
+      <td>
+        @if (u.conselho) {
+          {{ u.conselho }} {{ u.numeroRegistro }}/{{ u.ufRegistro }}
+        }
+      </td>
+      <td>
+        <p-tag [value]="u.status" [severity]="u.status === 'ATIVO' ? 'success' : 'danger'" />
+      </td>
+      <td>
+        @if (podeAlterarStatus(u)) {
+          <p-button
+            [label]="u.status === 'ATIVO' ? 'Desativar' : 'Ativar'"
+            [severity]="u.status === 'ATIVO' ? 'danger' : 'success'"
+            [text]="true"
+            (onClick)="alternarStatus(u)"
+          />
+        }
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="7">Nenhum usuário.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  header="Novo usuário"
+  [modal]="true"
+  [visible]="dialogoAberto()"
+  (visibleChange)="dialogoAberto.set($event)"
+  [style]="{ width: '32rem' }"
+>
+  <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
+    <label for="nome">Nome completo</label>
+    <input pInputText id="nome" formControlName="nomeCompleto" />
+
+    <label for="cpf-novo">CPF</label>
+    <p-inputmask
+      inputId="cpf-novo"
+      formControlName="cpf"
+      mask="999.999.999-99"
+      [autoClear]="false"
+    />
+
+    <label for="email">E-mail</label>
+    <input pInputText id="email" type="email" formControlName="email" />
+
+    <label for="telefone">Telefone</label>
+    <input pInputText id="telefone" formControlName="telefone" />
+
+    <label for="perfil">Perfil</label>
+    <p-select
+      inputId="perfil"
+      [options]="perfisDisponiveis()"
+      optionLabel="label"
+      optionValue="value"
+      formControlName="perfil"
+    />
+
+    @if (ehProfissional()) {
+      <label for="area">Área de atuação</label>
+      <p-select
+        inputId="area"
+        [options]="areas"
+        formControlName="areaAtuacao"
+        placeholder="Selecione"
+      />
+      <label for="conselho">Conselho</label>
+      <p-select
+        inputId="conselho"
+        [options]="conselhos"
+        formControlName="conselho"
+        placeholder="Selecione"
+      />
+      <label for="numero">Número do registro</label>
+      <input pInputText id="numero" formControlName="numeroRegistro" />
+      <label for="uf">UF do registro</label>
+      <p-select inputId="uf" [options]="ufs" formControlName="ufRegistro" placeholder="UF" />
+    }
+
+    <label for="senha-provisoria">Senha provisória</label>
+    <p-password
+      inputId="senha-provisoria"
+      formControlName="senhaProvisoria"
+      [feedback]="false"
+      [toggleMask]="true"
+    />
+    <small
+      >Mínimo 12 caracteres, com maiúscula, minúscula e caractere especial. O usuário troca no
+      primeiro acesso.</small
+    >
+
+    @if (erroFormulario(); as mensagem) {
+      <p-message severity="error">{{ mensagem }}</p-message>
+    }
+    <p-button
+      type="submit"
+      label="Criar usuário"
+      [loading]="salvando()"
+      styleClass="largura-total"
+    />
+  </form>
+</p-dialog>

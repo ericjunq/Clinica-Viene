@@ -1,0 +1,43 @@
+<main class="pagina-publica">
+  <p-card
+    header="Trocar senha"
+    [subheader]="obrigatoria ? 'Sua senha é provisória: defina uma senha nova para continuar.' : ''"
+  >
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
+      <label for="senha-atual">Senha atual</label>
+      <p-password
+        inputId="senha-atual"
+        formControlName="senhaAtual"
+        [feedback]="false"
+        [toggleMask]="true"
+      />
+
+      <label for="nova-senha">Nova senha</label>
+      <p-password
+        inputId="nova-senha"
+        formControlName="novaSenha"
+        [feedback]="false"
+        [toggleMask]="true"
+      />
+      @if (form.controls.novaSenha.touched && regrasFaltando().length) {
+        <small class="p-error">A senha precisa ter: {{ regrasFaltando().join(', ') }}.</small>
+      }
+
+      <label for="confirmacao">Confirme a nova senha</label>
+      <p-password
+        inputId="confirmacao"
+        formControlName="confirmacao"
+        [feedback]="false"
+        [toggleMask]="true"
+      />
+      @if (form.touched && form.errors?.['senhasDiferentes']) {
+        <small class="p-error">As senhas não conferem.</small>
+      }
+
+      @if (erro(); as mensagem) {
+        <p-message severity="error">{{ mensagem }}</p-message>
+      }
+      <p-button type="submit" label="Salvar" [loading]="enviando()" styleClass="largura-total" />
+    </form>
+  </p-card>
+</main>

@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, ToastModule],
   selector: 'app-root',
-  styleUrl: './app.scss',
-  templateUrl: './app.html',
+  template: `
+    <p-toast />
+    <router-outlet />
+  `,
 })
-export class App {
-  protected readonly titulo = 'ClinicaViene';
-}
+export class App {}

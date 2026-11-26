@@ -1,0 +1,80 @@
+<main class="pagina-publica">
+  <p-card header="Recuperar senha">
+    @switch (etapa()) {
+      @case ('cpf') {
+        <form [formGroup]="formCpf" (ngSubmit)="pedirCodigo()" class="formulario">
+          <p>Informe seu CPF. Enviaremos um código para o e-mail cadastrado.</p>
+          <label for="cpf">CPF</label>
+          <p-inputmask
+            inputId="cpf"
+            formControlName="cpf"
+            mask="999.999.999-99"
+            placeholder="000.000.000-00"
+            [autoClear]="false"
+          />
+          @if (erro(); as mensagem) {
+            <p-message severity="error">{{ mensagem }}</p-message>
+          }
+          <p-button
+            type="submit"
+            label="Enviar código"
+            [loading]="enviando()"
+            styleClass="largura-total"
+          />
+          <a routerLink="/login">Voltar ao login</a>
+        </form>
+      }
+      @case ('codigo') {
+        <form [formGroup]="formSenha" (ngSubmit)="redefinir()" class="formulario">
+          @if (info(); as texto) {
+            <p-message severity="info">{{ texto }}</p-message>
+          }
+          <label for="codigo">Código recebido por e-mail</label>
+          <p-inputotp inputId="codigo" formControlName="codigo" [length]="6" [integerOnly]="true" />
+
+          <label for="nova-senha">Nova senha</label>
+          <p-password
+            inputId="nova-senha"
+            formControlName="novaSenha"
+            [feedback]="false"
+            [toggleMask]="true"
+          />
+          @if (formSenha.controls.novaSenha.touched && regrasFaltando().length) {
+            <small class="p-error">A senha precisa ter: {{ regrasFaltando().join(', ') }}.</small>
+          }
+
+          <label for="confirmacao">Confirme a nova senha</label>
+          <p-password
+            inputId="confirmacao"
+            formControlName="confirmacao"
+            [feedback]="false"
+            [toggleMask]="true"
+          />
+          @if (formSenha.touched && formSenha.errors?.['senhasDiferentes']) {
+            <small class="p-error">As senhas não conferem.</small>
+          }
+
+          @if (erro(); as mensagem) {
+            <p-message severity="error">{{ mensagem }}</p-message>
+          }
+          <p-button
+            type="submit"
+            label="Redefinir senha"
+            [loading]="enviando()"
+            styleClass="largura-total"
+          />
+          <a routerLink="/login">Voltar ao login</a>
+        </form>
+      }
+      @case ('concluido') {
+        <div class="formulario">
+          <p-message severity="success"
+            >Senha redefinida. Entre com a senha nova (a verificação em duas etapas continua
+            valendo).</p-message
+          >
+          <a routerLink="/login">Ir para o login</a>
+        </div>
+      }
+    }
+  </p-card>
+</main>

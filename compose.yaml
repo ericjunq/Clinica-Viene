@@ -1,10 +1,10 @@
 # Ambiente de desenvolvimento — D-050.
-#   docker compose up -d                       -> só infraestrutura (Postgres, Mailpit)
+#   docker compose up -d                       -> só infraestrutura (Postgres, Mailpit, SeaweedFS)
 #   docker compose --profile app up -d --build -> infraestrutura + backend + frontend em container
 #                                                 (frontend em http://localhost:4200, /api/ vai para o backend)
 # Credenciais vêm do .env (fora do Git). Crie com: cp .env.example .env
 # Ao rodar o backend pela IDE, o spring-boot-docker-compose usa este arquivo (spring.docker.compose.file).
-# Storage S3 local: pendente (D-056 — imagem do MinIO indisponível).
+# Storage S3 local: SeaweedFS, só para dev/teste (D-056). Storage de produção: A CONFIRMAR (D-060).
 
 services:
   postgres:
@@ -31,6 +31,17 @@ services:
     ports:
       - "127.0.0.1:${MAILPIT_PORTA_SMTP:-1025}:1025"
       - "127.0.0.1:${MAILPIT_PORTA_WEB:-8025}:8025"
+
+  seaweedfs:
+    # Storage S3 compatível (Apache-2.0) só para dev/teste — D-056. O código usa apenas o AWS SDK S3
+    # com endpoint configurável, então o storage é intercambiável.
+    # Sem autenticação S3 em dev (porta só em 127.0.0.1); credenciais entram com o módulo de documentos (Fase 2).
+    image: chrislusf/seaweedfs:4.55
+    command: server -dir=/data -s3 -s3.port=8333
+    ports:
+      - "127.0.0.1:${SEAWEEDFS_PORTA_S3:-8333}:8333"
+    volumes:
+      - seaweedfs-dados:/data
 
   backend:
     profiles: [app]
@@ -61,3 +72,4 @@ services:
 
 volumes:
   postgres-dados:
+  seaweedfs-dados:

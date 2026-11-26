@@ -64,6 +64,10 @@ clinicaviene:
     tentativas-desafio: 5
     # Cookie só via HTTPS (navegadores tratam http://localhost como seguro em dev).
     cookie-seguro: ${AUTH_COOKIE_SEGURO:true}
+    # Rate limit do login (Bucket4j, em memória).
+    limite-login-por-ip: 20
+    limite-falhas-por-cpf: 5
+    janela-limite-tentativas: 15m
   dev-inicial:
     # D-048 — só usados com o banco sem usuários; depois remova do ambiente.
     cpf: ${DEV_INICIAL_CPF:}

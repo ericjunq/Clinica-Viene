@@ -11,15 +11,10 @@ import br.com.clinicaviene.exceptions.RenovacaoConcorrenteException;
 import br.com.clinicaviene.exceptions.SessaoInvalidaException;
 import br.com.clinicaviene.repository.TokenRenovacaoRepository;
 import br.com.clinicaviene.repository.UsuarioRepository;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import br.com.clinicaviene.util.TokenUtils;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,15 +35,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SessaoService {
 
-    private static final int BYTES_TOKEN = 32;
-
     private final TokenRenovacaoRepository tokens;
     private final UsuarioRepository usuarios;
     private final TokenAcessoService emissor;
     private final AuditoriaService auditoria;
     private final AuthProperties propriedades;
     private final Clock relogio;
-    private final SecureRandom aleatorio = new SecureRandom();
 
     /** Abre uma sessão nova (chamado depois do 2FA concluído). */
     @Transactional
@@ -103,21 +95,15 @@ public class SessaoService {
     }
 
     private SessaoDto emitir(Usuario usuario, UUID cadeia, Instant fimDaSessao, Instant agora) {
-        byte[] bytes = new byte[BYTES_TOKEN];
-        aleatorio.nextBytes(bytes);
-        String valorRenovacao = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        String valorRenovacao = TokenUtils.gerar();
         tokens.save(new TokenRenovacao(usuario.getId(), cadeia, hash(valorRenovacao), agora, fimDaSessao));
         TokenAcessoDto acesso = emissor.emitir(usuario);
         return new SessaoDto(acesso.valor(), acesso.expiraEm(), valorRenovacao, fimDaSessao, usuario);
     }
 
     public static String hash(String valor) {
-        try {
-            byte[] resumo = MessageDigest.getInstance("SHA-256").digest(valor.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(resumo);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
+        return TokenUtils.sha256(valor);
+    }
     }
 
     /** Truncado em microssegundos: a precisão do PostgreSQL (o valor em memória fica igual ao gravado). */

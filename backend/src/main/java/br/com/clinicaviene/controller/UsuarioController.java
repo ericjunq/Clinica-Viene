@@ -3,6 +3,7 @@ package br.com.clinicaviene.controller;
 import br.com.clinicaviene.auth.UsuarioAutenticadoProvider;
 import br.com.clinicaviene.dto.AlterarStatusRequest;
 import br.com.clinicaviene.dto.NovoUsuarioRequest;
+import br.com.clinicaviene.dto.TrocarSenhaRequest;
 import br.com.clinicaviene.dto.UsuarioResponse;
 import br.com.clinicaviene.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -44,6 +45,13 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public UsuarioResponse buscar(@PathVariable UUID id) {
         return UsuarioResponse.from(usuarioService.buscar(id, usuarioAutenticadoProvider.obter()));
+    }
+
+    /** Troca da própria senha (permitida mesmo com troca obrigatória pendente). */
+    @PostMapping("/eu/senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void trocarPropriaSenha(@Valid @RequestBody TrocarSenhaRequest request) {
+        usuarioService.trocarPropriaSenha(usuarioAutenticadoProvider.obter(), request.senhaAtual(), request.novaSenha());
     }
 
     @PatchMapping("/{id}/status")

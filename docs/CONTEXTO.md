@@ -279,6 +279,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
   - **Token de acesso**: JWT assinado (RSA, chave do ambiente), 15 min, só na memória do frontend, enviado no header `Authorization`.
   - **Token de renovação**: valor aleatório opaco (hash no banco), 12 h, cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`, rotação a cada uso; reuso de token já trocado revoga toda a cadeia (sessão).
   - Status do usuário checado a cada requisição (inativo perde acesso na hora).
+- **Endpoints** (`/api/v1/auth`): `POST /login` → `{desafio, etapa}`; `POST /2fa/cadastro` → QR code; `POST /2fa/confirmar` → sessão + códigos de recuperação; `POST /2fa/verificar` (`TOTP` ou `RECUPERACAO`) → sessão; `POST /renovar`; `POST /logout`; `GET /eu`. Troca da própria senha: `POST /api/v1/usuarios/eu/senha`. Limites e detalhes: D-079.
 - **2FA (D-072)**: TOTP (app autenticador, RFC 6238) + 10 códigos de recuperação de uso único (guardados como hash); alternativa: código de 6 dígitos por e-mail. Segredo TOTP guardado cifrado.
 - **Reenvio de e-mails e códigos (D-073)**: vale para código 2FA por e-mail, recuperação de senha, convites de cadastro e códigos de assinatura. Espera crescente entre envios (1, 2, 5, 10 min); máximo **5 envios** por destinatário e finalidade, depois só após **1 hora**; código/link errado 5 vezes é invalidado. Tudo configurável e auditado; respostas sempre genéricas (não revelam se CPF/e-mail existe).
 - Criptografia de campos sensíveis (anamnese, CPF) e de backups; documentos em storage privado.

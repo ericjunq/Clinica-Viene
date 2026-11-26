@@ -18,6 +18,9 @@ import org.springframework.validation.annotation.Validated;
  * @param duracaoDesafio validade do desafio entre a senha e o 2FA
  * @param tentativasDesafio códigos 2FA errados permitidos por desafio
  * @param cookieSeguro marca o cookie de renovação como {@code Secure}
+ * @param limiteLoginPorIp tentativas de login por IP dentro da janela
+ * @param limiteFalhasPorCpf senhas erradas por CPF dentro da janela
+ * @param janelaLimiteTentativas janela dos limites de tentativas
  */
 @Validated
 @ConfigurationProperties("clinicaviene.auth")
@@ -28,7 +31,10 @@ public record AuthProperties(
         @NotNull Duration toleranciaRenovacaoConcorrente,
         @NotNull Duration duracaoDesafio,
         @Min(1) int tentativasDesafio,
-        boolean cookieSeguro) {
+        boolean cookieSeguro,
+        @Min(1) int limiteLoginPorIp,
+        @Min(1) int limiteFalhasPorCpf,
+        @NotNull Duration janelaLimiteTentativas) {
 
     public static final String EMISSOR = "clinica-viene";
 

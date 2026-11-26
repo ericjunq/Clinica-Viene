@@ -251,6 +251,16 @@ Consequências registradas:
 - A regra "dado de saúde só é acessado pelo service que audita" passa a ser convenção (CLAUDE.md), não verificação automática. Pode ser reforçada depois com regras ArchUnit específicas (ex.: só `ProntuarioService` usa `ProntuarioRepository`) — a avaliar quando surgir o primeiro dado de saúde (Fase 2).
 Motivo: preferência do autor por uma estrutura mais conhecida e direta de navegar, também como material de estudo.
 
+**D-079 — Detalhes do login em 2 passos** · 2026-11-26
+- **Rate limit** (Bucket4j, em memória): 20 tentativas de login por IP e 5 senhas erradas por CPF a cada 15 min (configurável). Bloqueio → HTTP 429 com `Retry-After` e auditoria `LOGIN_BLOQUEADO_TENTATIVAS`. O limite por CPF conta só falhas e vale de qualquer IP.
+- **Resposta genérica** para CPF inexistente, senha errada ou usuário inativo ("CPF ou senha inválidos."), com o hash Argon2 verificado mesmo sem usuário (mesmo tempo de resposta).
+- **Desafio**: token opaco de uso único, 5 min, 5 códigos errados (configurável).
+- **TOTP**: janela de ±1 passo (30 s) para tolerar relógio do celular; **anti-replay** — cada código vale uma vez (último passo aceito guardado em `totp_uso`).
+- **Códigos de recuperação**: 10, formato `XXXX-XXXX-XXXX-XXXX` sem caracteres ambíguos (~79 bits), guardados como SHA-256, uso único; mostrados uma única vez, ao confirmar o cadastro do 2FA. Digitação tolerante (hífen, espaço, minúsculas).
+- **QR code** gerado no backend (ZXing) e devolvido como `data:image/png;base64` — o segredo não passa por serviço externo de QR.
+- Cookie de renovação: `cv_renovacao`.
+Motivo: segurança contra força bruta e enumeração de CPFs sem travar o usuário legítimo.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

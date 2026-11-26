@@ -35,6 +35,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler({
+        CredenciaisInvalidasException.class,
+        DesafioInvalidoException.class,
+        CodigoInvalidoException.class,
+        SessaoInvalidaException.class
+    })
+    ProblemDetail naoAutenticado(RuntimeException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(RenovacaoConcorrenteException.class)
+    ProblemDetail renovacaoConcorrente(RenovacaoConcorrenteException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(MuitasTentativasException.class)
+    ResponseEntity<ProblemDetail> muitasTentativas(MuitasTentativasException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.getSegundosParaTentarDeNovo()))
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage()));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     ProblemDetail acessoNegado(AccessDeniedException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Acesso negado.");

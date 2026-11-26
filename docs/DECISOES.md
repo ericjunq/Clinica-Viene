@@ -237,6 +237,13 @@ Motivo: evitar abuso (spam, custo de envio, força bruta) sem travar o usuário 
 **D-076 — `audit_log` append-only garantido por trigger no banco** · 2026-11-26
 Função + trigger (`CREATE FUNCTION`/`CREATE TRIGGER`, compatível com a D-047) que rejeitam `UPDATE` e `DELETE`. Motivo: a garantia não depende só do código da aplicação.
 
+**D-077 — Camadas dentro de cada módulo e nomes com sufixo do papel** · 2026-11-26
+Pedido do autor: organizar em `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`, `auth/` etc., com nomes claros (`UsuarioService`, `LoginService`, `UsuarioController`, `ProntuarioRepository`). Discutidas duas opções:
+- (A) camadas no topo do projeto (um `service/` para tudo) — **recusada** (R-015);
+- (B) camadas **dentro de cada módulo** do Spring Modulith — **aceita**.
+Motivo: B mantém a D-002 e a verificação automática de limites entre módulos (`ModulosTest`); com A, qualquer service poderia ler, por exemplo, o repositório da anamnese sem passar pela auditoria — a regra "toda leitura de dado de saúde é auditada" passaria a depender só de disciplina. B também mantém cada assunto junto e as pastas pequenas. Módulos se comunicam por chamada de método no mesmo processo (não é microsserviço; sem HTTP entre módulos).
+O que um módulo expõe aos outros fica marcado com `@NamedInterface` no `package-info.java` do subpacote. Classes da Fase 0/1 renomeadas (ex.: `ServicoUsuarios` → `UsuarioService`, `RepositorioUsuarios` → `UsuarioRepository`, `ControladorUsuarios` → `UsuarioController`, `EntradaAuditoria` → `AuditLog`, `TratadorDeErros` → `GlobalExceptionHandler`, `Cifrador` → `CifradorAesGcm`, `HashCpf` → `CpfHasher`).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 
@@ -273,6 +280,9 @@ Motivo: espaço de ~10⁹ CPFs é quebrável por força bruta em pouco tempo.
 Motivo: só valeria no container de dev; produção e testes ficariam sem a extensão.
 
 **R-014 — Imagens Docker com tag `latest`** · 2026-11-26 · Substituída por D-050.
+
+**R-015 — Camadas no topo do projeto (um `controller/`, `service/`, `repository/` para o sistema todo)** · 2026-11-26 · Substituída por D-077.
+Motivo: perderia a verificação de limites entre módulos (D-002) e a garantia estrutural de que dados de saúde só são acessados pelos serviços que auditam.
 
 ---
 

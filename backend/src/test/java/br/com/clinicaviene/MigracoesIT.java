@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
-class MigracoesIT {
+public class MigracoesIT {
 
     @Autowired
     private JdbcTemplate jdbc;

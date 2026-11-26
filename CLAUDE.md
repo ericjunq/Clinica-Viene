@@ -47,6 +47,28 @@ Documentação desatualizada é considerada bug.
 - Nenhum dado real de paciente fora de produção.
 - CPF (paciente e responsável) criptografado com AES-GCM + coluna `cpf_hash` (HMAC-SHA256) para unicidade e busca (D-052).
 
+## Estrutura e nomes do backend (D-077)
+
+Monólito modular (Spring Modulith — D-002): cada módulo é um pacote em `br.com.clinicaviene` (`identidade`, `auditoria`, `pacientes`…) e, **dentro dele**, pastas por camada:
+
+```
+<modulo>/
+  controller/   XxxController            (REST, fino: só converte e delega)
+  service/      XxxService               (regras de negócio e autorização)
+  repository/   XxxRepository            (Spring Data)
+  entity/       Xxx                      (entidades JPA)
+  dto/          XxxRequest, XxxResponse, XxxDto (records)
+  enums/        enums persistidos como STRING
+  exceptions/   XxxException
+  auth/ config/ validation/ …            (quando o módulo precisar)
+```
+
+- **Nomes claros**, com o papel no sufixo em inglês e o domínio em português: `UsuarioService`, `LoginService`, `UsuarioController`, `ProntuarioRepository`, `NovoUsuarioRequest`, `UsuarioResponse`, `SessaoInvalidaException`.
+- Um módulo só usa de outro o que estiver marcado com `@NamedInterface` no `package-info.java` do subpacote (ex.: `auditoria/service`, `auditoria/dto`, `auditoria/enums`). O resto é interno, e o `ModulosTest` reprova o build se for usado de fora.
+- `compartilhado` é aberto (`Type.OPEN`): infraestrutura comum (`config/`, `cripto/`, `exceptions/`, `security/`, `util/`).
+- Comunicação entre módulos: chamada de método (mesmo processo, sem HTTP) ou eventos do Spring Modulith.
+- Testes ficam no mesmo pacote da classe testada.
+
 ## Lombok (D-051)
 
 - **Permitido**: `@Getter`, `@Setter` (só onde necessário), `@NoArgsConstructor(access = AccessLevel.PROTECTED)` em entidades, `@RequiredArgsConstructor` em services, `@Slf4j`, `@Builder` pontual.

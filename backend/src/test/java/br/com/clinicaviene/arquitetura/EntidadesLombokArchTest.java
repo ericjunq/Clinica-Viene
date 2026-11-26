@@ -7,12 +7,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import fixtures.lombok.ClasseComValue;
-import fixtures.lombok.EntidadeComAllArgsConstructor;
-import fixtures.lombok.EntidadeComData;
-import fixtures.lombok.EntidadeComEqualsAndHashCode;
-import fixtures.lombok.EntidadeComToString;
-import fixtures.lombok.EntidadeCorreta;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -21,6 +15,12 @@ import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
+import fixtures.lombok.ClasseComValue;
+import fixtures.lombok.EntidadeComAllArgsConstructor;
+import fixtures.lombok.EntidadeComData;
+import fixtures.lombok.EntidadeComEqualsAndHashCode;
+import fixtures.lombok.EntidadeComToString;
+import fixtures.lombok.EntidadeCorreta;
 import jakarta.persistence.Entity;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
  * Como o {@code lombok.config} liga {@code lombok.addLombokGeneratedAnnotation}, todo código
  * gerado recebe {@code @lombok.Generated} (retenção CLASS), e é isso que as regras detectam.
  */
-class EntidadesLombokArchTest {
+public class EntidadesLombokArchTest {
 
     private static final String GERADO_PELO_LOMBOK = "lombok.Generated";
 

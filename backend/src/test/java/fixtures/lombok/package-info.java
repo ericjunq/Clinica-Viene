@@ -4,3 +4,5 @@
  * Hibernate e o Spring Modulith não as enxergam.
  */
 package fixtures.lombok;
+
+import br.com.clinicaviene.arquitetura.EntidadesLombokArchTest;

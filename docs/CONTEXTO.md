@@ -60,7 +60,9 @@ Regras:
 | `auditoria` | Log imutável de acessos e alterações |
 | `lgpd` | Termos versionados, aceites, consentimentos opcionais, solicitações do titular |
 
-Módulos só se comunicam por API pública do módulo ou eventos de domínio. Limites verificados em teste (`ApplicationModules.verify()`).
+Módulos só se comunicam por API pública do módulo ou eventos de domínio, no mesmo processo (chamada de método; não é microsserviço). Limites verificados em teste (`ApplicationModules.verify()`).
+
+**Organização interna (D-077)**: dentro de cada módulo, pastas por camada — `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/` (e `auth/`, `config/`, `validation/` quando necessário) — com nomes `XxxController`, `XxxService`, `XxxRepository`, `XxxRequest`/`XxxResponse`/`XxxDto`, `XxxException`. A API pública de um módulo é marcada com `@NamedInterface` (ex.: `auditoria/service`, `auditoria/dto`, `auditoria/enums`).
 
 ---
 

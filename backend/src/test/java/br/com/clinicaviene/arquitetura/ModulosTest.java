@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 
 /** Verifica os limites entre os módulos do monólito modular (D-002). */
-class ModulosTest {
+public class ModulosTest {
 
     @Test
     void limitesDosModulosSaoRespeitados() {

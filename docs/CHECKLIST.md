@@ -76,6 +76,8 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 **1G. Recuperação de senha por e-mail** (opcional)
 - [ ] Token de uso único e curta duração, com regras de reenvio (D-073)
 
+- [~] Reorganizar backend em camadas dentro dos módulos com nomes `XxxService`/`XxxController`/`XxxRepository` (D-077)
+
 **Testes da fase**
 - [ ] Matriz de autorização (cada perfil × cada endpoint)
 - [ ] Cobertura JaCoCo ≥ 80% em `identidade`

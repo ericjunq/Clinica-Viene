@@ -9,6 +9,8 @@ public enum AcaoAuditoria {
     USUARIO_DESATIVADO,
     USUARIO_PERFIL_ALTERADO,
     SENHA_ALTERADA,
+    SENHA_RECUPERACAO_SOLICITADA,
+    SENHA_REDEFINIDA,
 
     // Autenticação (Fase 1)
     LOGIN_SENHA_OK,

@@ -67,7 +67,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 
 **1E. 2FA**
 - [x] TOTP (RFC 6238, janela ±1, anti-replay) + QR code (ZXing) + 10 códigos de recuperação (D-072, D-079)
-- [ ] Código 2FA por e-mail com regras de reenvio (D-073)
+- [~] Código 2FA por e-mail (`POST /auth/2fa/email`, método `EMAIL`) com regras de reenvio genéricas em `EnvioCodigoService` (espera 1/2/5/10 min, 5 envios, depois 1 h; 10 min de validade; 5 erros) (D-072, D-073) — `EnvioCodigoServiceIT`, `AuthControllerIT`
 
 **1F. Frontend**
 - [ ] PrimeNG; telas de login, 2FA (cadastro com QR, verificação, recuperação, envio por e-mail), troca de senha, usuários (lista, cadastro, ativar/desativar)
@@ -75,7 +75,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [ ] Playwright + job E2E no CI (compose completo)
 
 **1G. Recuperação de senha por e-mail** (opcional)
-- [ ] Token de uso único e curta duração, com regras de reenvio (D-073)
+- [~] Recuperação de senha: `POST /auth/senha/recuperar` (resposta sempre igual) → código de 6 dígitos por e-mail → `POST /auth/senha/redefinir`; senha validada antes de gastar o código; derruba as sessões; 2FA continua exigido no login (D-073, D-080) — `AuthControllerIT`
 
 - [x] Reorganizar backend em camadas na raiz (`controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`…) com nomes `XxxService`/`XxxController`/`XxxRepository` (D-078; substitui a D-077); `ModulosTest` removido — **CI verde**
 - [x] `@RequiredArgsConstructor` nos services, controllers e componentes (D-051)

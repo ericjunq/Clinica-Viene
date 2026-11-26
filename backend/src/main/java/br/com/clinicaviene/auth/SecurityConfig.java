@@ -52,6 +52,7 @@ public class SecurityConfig {
                                     HttpMethod.POST,
                                     "/api/v1/auth/login",
                                     "/api/v1/auth/2fa/**",
+                                    "/api/v1/auth/senha/**",
                                     "/api/v1/auth/renovar",
                                     "/api/v1/auth/logout")
                             .permitAll();

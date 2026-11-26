@@ -261,6 +261,13 @@ Motivo: preferência do autor por uma estrutura mais conhecida e direta de naveg
 - Cookie de renovação: `cv_renovacao`.
 Motivo: segurança contra força bruta e enumeração de CPFs sem travar o usuário legítimo.
 
+**D-080 — Códigos por e-mail (2FA e recuperação de senha)** · 2026-11-26
+- Um serviço único (`EnvioCodigoService`) aplica a D-073 a toda finalidade (`DOIS_FATORES_EMAIL`, `RECUPERACAO_SENHA`), com limites independentes por finalidade. Código de 6 dígitos, hash SHA-256 no banco, 10 min de validade, uso único; envio novo invalida o anterior.
+- 2FA por e-mail só depois do app cadastrado (primeiro acesso exige o app — D-072).
+- Recuperação de senha por **código** (não link): o usuário informa CPF, recebe o código no e-mail cadastrado e define a senha nova. A solicitação responde sempre igual (não revela se o CPF existe); em espera de reenvio, ignora em silêncio em vez de responder 429. Redefinir derruba todas as sessões; o 2FA continua exigido no próximo login (a recuperação de senha não contorna o segundo fator).
+- E-mails sem dado clínico nem pessoal além do necessário (sem CPF/nome); falha de envio vai para o log sem destinatário nem conteúdo.
+- Testes com servidor SMTP de teste (GreenMail).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

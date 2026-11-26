@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -44,7 +45,8 @@ public class RelogioAjustavel extends Clock {
         @Bean
         @Primary
         public RelogioAjustavel relogioAjustavel() {
-            return new RelogioAjustavel(Instant.now());
+            // Em microssegundos, como o PostgreSQL guarda.
+            return new RelogioAjustavel(Instant.now().truncatedTo(ChronoUnit.MICROS));
         }
     }
 }

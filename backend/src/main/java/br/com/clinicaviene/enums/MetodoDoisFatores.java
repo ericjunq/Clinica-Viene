@@ -5,5 +5,7 @@ public enum MetodoDoisFatores {
     /** Código de 6 dígitos do app autenticador. */
     TOTP,
     /** Código de recuperação de uso único. */
-    RECUPERACAO
+    RECUPERACAO,
+    /** Código de 6 dígitos enviado por e-mail (alternativa quando o usuário está sem o celular). */
+    EMAIL
 }

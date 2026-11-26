@@ -15,13 +15,22 @@ import br.com.clinicaviene.enums.Perfil;
 import br.com.clinicaviene.repository.UsuarioRepository;
 import br.com.clinicaviene.util.CpfHasher;
 import br.com.clinicaviene.util.TotpUtils;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +48,9 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class AuthControllerIT {
+
+    @RegisterExtension
+    static final GreenMailExtension GREENMAIL = new GreenMailExtension(ServerSetupTest.SMTP);
 
     private static final String SENHA = "Senha#Provisoria1";
     private static final String NOVA_SENHA = "Nova#Senha12345";
@@ -200,6 +212,73 @@ class AuthControllerIT {
     }
 
     @Test
+    void codigo2faPorEmailComoAlternativaAoAppComEsperaParaReenviar() {
+        String cpf = criarUsuario(Perfil.ADMIN);
+        String email = emailDe(cpf);
+
+        // primeiro acesso: o e-mail não substitui o cadastro do app
+        String desafioCadastro = login(cpf, SENHA).path("desafio");
+        post("/api/v1/auth/2fa/email", Map.of("desafio", desafioCadastro)).then().statusCode(422);
+
+        cadastrar2fa(cpf);
+        String desafio = login(cpf, SENHA).path("desafio");
+        post("/api/v1/auth/2fa/email", Map.of("desafio", desafio))
+                .then()
+                .statusCode(202)
+                .body("podeReenviarEm", notNullValue());
+        String codigo = ultimoCodigo(email);
+
+        // reenviar logo em seguida: espera de 1 min (429 + Retry-After)
+        Response reenvio = post("/api/v1/auth/2fa/email", Map.of("desafio", desafio));
+        reenvio.then().statusCode(429);
+        assertThat(Long.parseLong(reenvio.getHeader("Retry-After"))).isBetween(1L, 60L);
+
+        verificar(desafio, "EMAIL", codigo).then().statusCode(200).body("tokenAcesso", notNullValue());
+    }
+
+    @Test
+    void recuperacaoDeSenhaPorEmailSemRevelarCadastroEDerrubandoSessoes() {
+        String cpf = criarUsuario(Perfil.ADMIN);
+        String email = emailDe(cpf);
+        Cadastro cadastro = cadastrar2fa(cpf);
+        String cookieAntigo = cadastro.cookie();
+
+        // CPF sem cadastro e CPF cadastrado: mesma resposta
+        String mensagemDesconhecido = post("/api/v1/auth/senha/recuperar", Map.of("cpf", CpfsFicticios.gerar()))
+                .then()
+                .statusCode(202)
+                .extract()
+                .path("mensagem");
+        int emailsAntes = GREENMAIL.getReceivedMessages().length;
+        post("/api/v1/auth/senha/recuperar", Map.of("cpf", cpf))
+                .then()
+                .statusCode(202)
+                .body("mensagem", equalTo(mensagemDesconhecido));
+        assertThat(GREENMAIL.getReceivedMessages()).hasSize(emailsAntes + 1);
+        String codigo = ultimoCodigo(email);
+
+        // senha fraca não gasta o código; código errado → 401
+        post("/api/v1/auth/senha/redefinir", Map.of("cpf", cpf, "codigo", codigo, "novaSenha", "fraca"))
+                .then()
+                .statusCode(422);
+        String errado = codigo.equals("000000") ? "111111" : "000000";
+        post("/api/v1/auth/senha/redefinir", Map.of("cpf", cpf, "codigo", errado, "novaSenha", NOVA_SENHA))
+                .then()
+                .statusCode(401);
+        post("/api/v1/auth/senha/redefinir", Map.of("cpf", cpf, "codigo", codigo, "novaSenha", NOVA_SENHA))
+                .then()
+                .statusCode(204);
+
+        // senha antiga não entra; a nova entra e ainda exige o 2FA; sessões antigas caíram
+        login(cpf, SENHA).then().statusCode(401);
+        login(cpf, NOVA_SENHA).then().statusCode(200).body("etapa", equalTo("VERIFICAR_2FA"));
+        renovar(cookieAntigo).then().statusCode(401);
+        post("/api/v1/auth/senha/redefinir", Map.of("cpf", cpf, "codigo", codigo, "novaSenha", "Outra#Senha12345"))
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
     void validaOCorpoDaRequisicao() {
         post("/api/v1/auth/login", Map.of("cpf", "")).then().statusCode(400).body("erros", notNullValue());
         post("/api/v1/auth/2fa/verificar", Map.of("desafio", "x", "metodo", "TOTP", "codigo", "123456"))
@@ -209,7 +288,7 @@ class AuthControllerIT {
 
     // --- apoio ---
 
-    private record Cadastro(String segredo, String token, List<String> codigosRecuperacao) {}
+    private record Cadastro(String segredo, String token, List<String> codigosRecuperacao, String cookie) {}
 
     /** Faz o primeiro acesso completo (cadastro do 2FA) e devolve o segredo, o token e os códigos. */
     private Cadastro cadastrar2fa(String cpf) {
@@ -218,7 +297,8 @@ class AuthControllerIT {
         Response sessao =
                 post("/api/v1/auth/2fa/confirmar", Map.of("desafio", desafio, "codigo", codigoAtual(segredo)));
         sessao.then().statusCode(200);
-        return new Cadastro(segredo, sessao.path("tokenAcesso"), sessao.path("codigosRecuperacao"));
+        return new Cadastro(
+                segredo, sessao.path("tokenAcesso"), sessao.path("codigosRecuperacao"), sessao.getCookie("cv_renovacao"));
     }
 
     private String criarUsuario(Perfil perfil) {
@@ -237,6 +317,27 @@ class AuthControllerIT {
         usuarioRepository.saveAndFlush(new Usuario(
                 dados, cpfHasher.calcular(dados.cpf()), passwordEncoder.encode(SENHA), null, relogio.instant()));
         return dados.cpf();
+    }
+
+    private String emailDe(String cpf) {
+        return usuarioRepository.findByCpfHash(cpfHasher.calcular(cpf)).orElseThrow().getEmail();
+    }
+
+    /** Código de 6 dígitos do último e-mail recebido pelo endereço. */
+    private String ultimoCodigo(String email) {
+        MimeMessage mensagem = Arrays.stream(GREENMAIL.getReceivedMessages())
+                .filter(m -> {
+                    try {
+                        return Arrays.stream(m.getAllRecipients()).anyMatch(a -> a.toString().contains(email));
+                    } catch (MessagingException e) {
+                        return false;
+                    }
+                })
+                .reduce((primeira, segunda) -> segunda)
+                .orElseThrow(() -> new AssertionError("Nenhum e-mail para " + email));
+        Matcher m = Pattern.compile("\\b(\\d{6})\\b").matcher(GreenMailUtil.getBody(mensagem));
+        assertThat(m.find()).isTrue();
+        return m.group(1);
     }
 
     private String codigoAtual(String segredo) {

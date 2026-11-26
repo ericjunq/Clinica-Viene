@@ -10,6 +10,7 @@ import br.com.clinicaviene.entity.DesafioLogin;
 import br.com.clinicaviene.entity.TotpUso;
 import br.com.clinicaviene.entity.Usuario;
 import br.com.clinicaviene.enums.AcaoAuditoria;
+import br.com.clinicaviene.enums.FinalidadeEnvio;
 import br.com.clinicaviene.enums.MetodoDoisFatores;
 import br.com.clinicaviene.exceptions.CodigoInvalidoException;
 import br.com.clinicaviene.exceptions.DesafioInvalidoException;
@@ -55,6 +56,7 @@ public class DoisFatoresService {
     private final CodigoRecuperacaoRepository codigoRecuperacaoRepository;
     private final TotpUsoRepository totpUsoRepository;
     private final SessaoService sessaoService;
+    private final EnvioCodigoService envioCodigoService;
     private final AuditoriaService auditoriaService;
     private final AuthProperties authProperties;
     private final Clock clock;
@@ -98,7 +100,25 @@ public class DoisFatoresService {
         return new SessaoComCodigosDto(sessaoService.iniciar(usuario), codigos);
     }
 
-    /** Acessos seguintes: confere o código do app (TOTP) ou um código de recuperação, e entra. */
+    /**
+     * Acessos seguintes, sem o celular: envia um código de 6 dígitos para o e-mail cadastrado (D-072), com as
+     * regras de reenvio da D-073. Só vale depois do app cadastrado (o primeiro acesso exige o app).
+     *
+     * @return a partir de quando um novo envio será permitido
+     */
+    @Transactional(noRollbackFor = DesafioInvalidoException.class)
+    public Instant enviarCodigoEmail(String tokenDesafio) {
+        DesafioLogin desafio = desafioValido(tokenDesafio);
+        Usuario usuario = usuarioAtivo(desafio);
+        if (!usuario.isTotpAtivo()) {
+            throw new RegraNegocioException("No primeiro acesso, cadastre o app autenticador.");
+        }
+        Instant liberadoEm = envioCodigoService.enviar(usuario, FinalidadeEnvio.DOIS_FATORES_EMAIL);
+        auditoriaService.registrar(RegistroAuditoria.de(usuario.getId(), AcaoAuditoria.CODIGO_EMAIL_ENVIADO));
+        return liberadoEm;
+    }
+
+    /** Acessos seguintes: confere o código do app (TOTP), de recuperação ou do e-mail, e entra. */
     @Transactional(noRollbackFor = {CodigoInvalidoException.class, DesafioInvalidoException.class})
     public SessaoDto verificar(String tokenDesafio, MetodoDoisFatores metodo, String codigo) {
         DesafioLogin desafio = desafioValido(tokenDesafio);
@@ -111,6 +131,11 @@ public class DoisFatoresService {
             case TOTP -> {
                 OptionalLong passo = TotpUtils.verificar(usuario.totpSegredo(), codigo, passoAtual(), JANELA_TOTP);
                 if (passo.isEmpty() || !registrarUsoTotp(usuario, passo.getAsLong())) {
+                    throw falha(desafio, usuario);
+                }
+            }
+            case EMAIL -> {
+                if (!envioCodigoService.verificar(usuario, FinalidadeEnvio.DOIS_FATORES_EMAIL, codigo)) {
                     throw falha(desafio, usuario);
                 }
             }

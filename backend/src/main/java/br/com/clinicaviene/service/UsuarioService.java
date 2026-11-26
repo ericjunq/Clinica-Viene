@@ -191,10 +191,7 @@ public class UsuarioService {
     }
 
     private static void exigirSenhaValida(String senha) {
-        List<String> violacoes = PoliticaSenhaValidator.violacoes(senha);
-        if (!violacoes.isEmpty()) {
-            throw new RegraNegocioException("A senha precisa " + String.join(", ", violacoes) + ".");
-        }
+        PoliticaSenhaValidator.exigirValida(senha);
     }
 
     private static NovoUsuarioDto normalizar(NovoUsuarioDto d) {

@@ -1,5 +1,6 @@
 package br.com.clinicaviene.validation;
 
+import br.com.clinicaviene.exceptions.RegraNegocioException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,14 @@ public final class PoliticaSenhaValidator {
             violacoes.add("ter pelo menos 1 caractere especial");
         }
         return violacoes;
+    }
+
+    /** Lança {@link RegraNegocioException} com as regras não atendidas. */
+    public static void exigirValida(String senha) {
+        List<String> violacoes = violacoes(senha);
+        if (!violacoes.isEmpty()) {
+            throw new RegraNegocioException("A senha precisa " + String.join(", ", violacoes) + ".");
+        }
     }
 
     public static boolean valida(String senha) {

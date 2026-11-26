@@ -8,6 +8,10 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  mail:
+    # Em dev, Mailpit (docker compose); em produção, o provedor de e-mail contratado.
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
   jpa:
     open-in-view: false
     hibernate:
@@ -68,6 +72,15 @@ clinicaviene:
     limite-login-por-ip: 20
     limite-falhas-por-cpf: 5
     janela-limite-tentativas: 15m
+  email:
+    remetente: ${EMAIL_REMETENTE:nao-responda@clinicaviene.local}
+  envio-codigo:
+    # D-073 — espera antes do 2º, 3º, 4º e 5º envio; máximo de 5 envios; depois, só após 1 hora.
+    esperas: 1m, 2m, 5m, 10m
+    maximo-envios: 5
+    bloqueio: 1h
+    validade: 10m
+    tentativas: 5
   dev-inicial:
     # D-048 — só usados com o banco sem usuários; depois remova do ambiente.
     cpf: ${DEV_INICIAL_CPF:}

@@ -5,6 +5,7 @@ import br.com.clinicaviene.entity.Usuario;
 import br.com.clinicaviene.enums.Perfil;
 import br.com.clinicaviene.repository.UsuarioRepository;
 import br.com.clinicaviene.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @EnableConfigurationProperties(DevInicialProperties.class)
+@RequiredArgsConstructor
 public class DevInicialRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevInicialRunner.class);
@@ -25,12 +27,6 @@ public class DevInicialRunner implements ApplicationRunner {
     private final UsuarioRepository repositorio;
     private final UsuarioService servico;
     private final DevInicialProperties propriedades;
-
-    DevInicialRunner(UsuarioRepository repositorio, UsuarioService servico, DevInicialProperties propriedades) {
-        this.repositorio = repositorio;
-        this.servico = servico;
-        this.propriedades = propriedades;
-    }
 
     @Override
     public void run(ApplicationArguments argumentos) {

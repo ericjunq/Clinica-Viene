@@ -22,6 +22,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </ul>
  */
 @Service
+@RequiredArgsConstructor
 public class SessaoService {
 
     private static final int BYTES_TOKEN = 32;
@@ -47,21 +49,6 @@ public class SessaoService {
     private final AuthProperties propriedades;
     private final Clock relogio;
     private final SecureRandom aleatorio = new SecureRandom();
-
-    public SessaoService(
-            TokenRenovacaoRepository tokens,
-            UsuarioRepository usuarios,
-            TokenAcessoService emissor,
-            AuditoriaService auditoria,
-            AuthProperties propriedades,
-            Clock relogio) {
-        this.tokens = tokens;
-        this.usuarios = usuarios;
-        this.emissor = emissor;
-        this.auditoria = auditoria;
-        this.propriedades = propriedades;
-        this.relogio = relogio;
-    }
 
     /** Abre uma sessão nova (chamado depois do 2FA concluído). */
     @Transactional

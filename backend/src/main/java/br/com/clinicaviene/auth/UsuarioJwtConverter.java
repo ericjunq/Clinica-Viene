@@ -5,6 +5,7 @@ import br.com.clinicaviene.repository.UsuarioRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.DisabledException;
@@ -20,15 +21,12 @@ import org.springframework.stereotype.Component;
  * recebe acesso às rotas de troca de senha (sem a autoridade {@link #SESSAO_COMPLETA}).
  */
 @Component
+@RequiredArgsConstructor
 public class UsuarioJwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     public static final String SESSAO_COMPLETA = "SESSAO_COMPLETA";
 
     private final UsuarioRepository repositorio;
-
-    UsuarioJwtConverter(UsuarioRepository repositorio) {
-        this.repositorio = repositorio;
-    }
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {

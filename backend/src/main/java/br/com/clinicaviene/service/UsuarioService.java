@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * método recebe quem está agindo ({@link UsuarioAutenticado}) e aplica {@link PerfilPermissoes}.
  */
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
 
     private static final String ENTIDADE = "Usuario";
@@ -41,21 +43,6 @@ public class UsuarioService {
     private final AuditoriaService auditoria;
     private final SessaoService sessoes;
     private final Clock relogio;
-
-    public UsuarioService(
-            UsuarioRepository repositorio,
-            CpfHasher hashCpf,
-            PasswordEncoder codificador,
-            AuditoriaService auditoria,
-            SessaoService sessoes,
-            Clock relogio) {
-        this.repositorio = repositorio;
-        this.hashCpf = hashCpf;
-        this.codificador = codificador;
-        this.auditoria = auditoria;
-        this.sessoes = sessoes;
-        this.relogio = relogio;
-    }
 
     @Transactional
     public Usuario criar(NovoUsuarioDto dados, UsuarioAutenticado ator) {

@@ -8,6 +8,7 @@ import br.com.clinicaviene.entity.Usuario;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -17,17 +18,12 @@ import org.springframework.stereotype.Component;
 
 /** Emite o JWT de acesso: {@code sub} = id do usuário, claim {@code perfil}, validade curta (D-071). */
 @Component
+@RequiredArgsConstructor
 public class TokenAcessoService {
 
     private final JwtEncoder codificador;
     private final AuthProperties propriedades;
     private final Clock relogio;
-
-    TokenAcessoService(JwtEncoder codificador, AuthProperties propriedades, Clock relogio) {
-        this.codificador = codificador;
-        this.propriedades = propriedades;
-        this.relogio = relogio;
-    }
 
     public TokenAcessoDto emitir(Usuario usuario) {
         Instant agora = Instant.now(relogio);

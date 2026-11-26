@@ -76,7 +76,8 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 **1G. Recuperação de senha por e-mail** (opcional)
 - [ ] Token de uso único e curta duração, com regras de reenvio (D-073)
 
-- [~] Reorganizar backend em camadas na raiz (`controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`…) com nomes `XxxService`/`XxxController`/`XxxRepository` (D-078; substitui a D-077); `ModulosTest` removido
+- [x] Reorganizar backend em camadas na raiz (`controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`…) com nomes `XxxService`/`XxxController`/`XxxRepository` (D-078; substitui a D-077); `ModulosTest` removido — **CI verde**
+- [x] `@RequiredArgsConstructor` nos services, controllers e componentes (D-051)
 
 - [ ] Avaliar regras ArchUnit de acesso a dados de saúde (só o service do assunto usa o repository) — D-078, na Fase 2
 

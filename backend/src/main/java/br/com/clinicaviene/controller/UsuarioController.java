@@ -8,6 +8,7 @@ import br.com.clinicaviene.service.UsuarioService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,15 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 /** Gestão de usuários: {@code /api/v1/usuarios}. As regras de acesso ficam no {@link UsuarioService}. */
 @RestController
 @RequestMapping("/api/v1/usuarios")
+@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
-
-    public UsuarioController(UsuarioService usuarioService, UsuarioAutenticadoProvider usuarioAutenticadoProvider) {
-        this.usuarioService = usuarioService;
-        this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

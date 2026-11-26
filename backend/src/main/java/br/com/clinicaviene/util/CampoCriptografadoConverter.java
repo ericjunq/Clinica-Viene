@@ -2,6 +2,7 @@ package br.com.clinicaviene.util;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,13 +14,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Converter
+@RequiredArgsConstructor
 public class CampoCriptografadoConverter implements AttributeConverter<String, String> {
 
     private final CifradorAesGcm cifrador;
-
-    public CampoCriptografadoConverter(CifradorAesGcm cifrador) {
-        this.cifrador = cifrador;
-    }
 
     @Override
     public String convertToDatabaseColumn(String valor) {

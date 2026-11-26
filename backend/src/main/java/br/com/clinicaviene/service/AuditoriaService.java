@@ -6,6 +6,7 @@ import br.com.clinicaviene.repository.AuditLogRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,21 +15,17 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Registro de auditoria (D-006, D-076). API pública do módulo {@code auditoria}.
+ * Registro de auditoria (D-006, D-076). Usado pelos outros services para registrar eventos.
  *
  * <p>O IP é obtido da requisição HTTP atual, quando houver (atrás do nginx, via cabeçalhos de proxy —
  * {@code server.forward-headers-strategy}).
  */
 @Service
+@RequiredArgsConstructor
 public class AuditoriaService {
 
     private final AuditLogRepository repositorio;
     private final Clock relogio;
-
-    AuditoriaService(AuditLogRepository repositorio, Clock relogio) {
-        this.repositorio = repositorio;
-        this.relogio = relogio;
-    }
 
     /**
      * Registra dentro da transação atual: se a operação for desfeita (rollback), o registro também é. Use

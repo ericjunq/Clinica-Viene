@@ -1,6 +1,7 @@
 # Ambiente de desenvolvimento — D-050.
 #   docker compose up -d                       -> só infraestrutura (Postgres, Mailpit)
-#   docker compose --profile app up -d --build -> infraestrutura + backend em container
+#   docker compose --profile app up -d --build -> infraestrutura + backend + frontend em container
+#                                                 (frontend em http://localhost:4200, /api/ vai para o backend)
 # Credenciais vêm do .env (fora do Git). Crie com: cp .env.example .env
 # Ao rodar o backend pela IDE, o spring-boot-docker-compose usa este arquivo (spring.docker.compose.file).
 # Storage S3 local: pendente (D-056 — imagem do MinIO indisponível).
@@ -48,6 +49,15 @@ services:
         condition: service_healthy
       mailpit:
         condition: service_started
+
+  frontend:
+    profiles: [app]
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORTA:-4200}:8080"
+    depends_on:
+      - backend
 
 volumes:
   postgres-dados:

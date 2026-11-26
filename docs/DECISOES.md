@@ -268,6 +268,14 @@ Motivo: segurança contra força bruta e enumeração de CPFs sem travar o usuá
 - E-mails sem dado clínico nem pessoal além do necessário (sem CPF/nome); falha de envio vai para o log sem destinatário nem conteúdo.
 - Testes com servidor SMTP de teste (GreenMail).
 
+**D-081 — Frontend da Fase 1 (telas de acesso e usuários)** · 2026-11-26
+- Estrutura: `core/` (`models`, `services`, `interceptors`, `guards`, `validators`), `layout/` (`ShellComponent`), `pages/` (uma pasta por tela: `login`, `dois-fatores`, `trocar-senha`, `recuperar-senha`, `inicio`, `usuarios`). Nomes claros (`AuthService`, `UsuarioService`, `LoginPage`…), em linha com a D-078.
+- Token de acesso **só em memória** no `AuthService` (nunca `localStorage`); ao abrir/recarregar a página, a sessão é restaurada chamando `/auth/renovar` (cookie HttpOnly). O `authInterceptor` põe o token nas chamadas e, com 401, renova uma vez e repete; renovações simultâneas são compartilhadas e o 409 (outra aba renovou) é tentado de novo.
+- Guards só escondem telas (a regra de verdade está no backend): sessão, troca de senha pendente → `/trocar-senha`, perfil (`Usuários` só para DEV/MASTER).
+- PrimeNG 22 com tema Aura; telas carregadas sob demanda (lazy loading). Orçamento do pacote inicial ajustado para 800 kB (aviso) / 1,5 MB (erro): o tema do PrimeNG ocupa a maior parte e o sistema é interno.
+- Regra de senha repetida no frontend só por usabilidade.
+- **E2E (Playwright) no CI**: job `e2e` sobe o ambiente completo (`docker compose --profile app`) com `.env` descartável (chaves geradas na hora, DEV inicial fictício) e percorre o primeiro acesso no navegador, calculando o código TOTP no teste.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

@@ -101,7 +101,7 @@ cd backend
 docker run --rm -v "$PWD":/app -v /var/run/docker.sock:/var/run/docker.sock -w /app maven:3-eclipse-temurin-25 ./mvnw verify
 # frontend (em frontend/)
 npm test                           # unitários (Vitest)
-npx playwright test                # E2E
+npx playwright test                # E2E (ambiente completo no ar; variáveis E2E_DEV_CPF/E2E_DEV_SENHA)
 # infraestrutura de dev (Postgres, Mailpit) — na raiz, com .env criado a partir de .env.example
 docker compose up -d
 # ambiente completo (infra + backend em container)

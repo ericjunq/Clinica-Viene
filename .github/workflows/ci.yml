@@ -115,3 +115,75 @@ jobs:
 
       - name: Construir imagem do frontend
         run: docker build --tag clinica-viene-frontend:ci frontend
+
+  e2e:
+    name: E2E — navegador (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # CPF e senha FICTÍCIOS do usuário DEV inicial, só para este ambiente descartável de CI.
+      E2E_DEV_CPF: '526.018.159-06'
+      E2E_DEV_SENHA: 'Provisoria#Dev2026'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # .env descartável: chaves geradas na hora (nunca reaproveitadas) e o DEV inicial fictício.
+      - name: Gerar .env do ambiente de teste
+        run: |
+          cp .env.example .env
+          sed -i "s#^CRIPTO_CHAVES=.*#CRIPTO_CHAVES=v1:$(openssl rand -base64 32)#" .env
+          sed -i "s#^CPF_HMAC_CHAVE=.*#CPF_HMAC_CHAVE=$(openssl rand -base64 32)#" .env
+          CHAVE_JWT=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 | openssl pkcs8 -topk8 -nocrypt -outform DER | base64 -w0)
+          sed -i "s#^JWT_CHAVE_PRIVADA=.*#JWT_CHAVE_PRIVADA=${CHAVE_JWT}#" .env
+          sed -i "s#^DEV_INICIAL_CPF=.*#DEV_INICIAL_CPF=${E2E_DEV_CPF}#" .env
+          sed -i "s#^DEV_INICIAL_NOME=.*#DEV_INICIAL_NOME=Dev Ficticio#" .env
+          sed -i "s#^DEV_INICIAL_EMAIL=.*#DEV_INICIAL_EMAIL=dev.e2e@exemplo.com#" .env
+          sed -i "s#^DEV_INICIAL_SENHA=.*#DEV_INICIAL_SENHA=${E2E_DEV_SENHA}#" .env
+
+      - name: Subir o ambiente completo
+        run: docker compose --profile app up -d --build
+
+      - name: Aguardar backend e frontend
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:8080/actuator/health >/dev/null && curl -fs http://localhost:4200 >/dev/null; then
+              echo "ambiente pronto"; exit 0
+            fi
+            sleep 5
+          done
+          echo "ambiente não subiu a tempo"; docker compose --profile app logs; exit 1
+
+      - name: Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependências e navegador
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Testes E2E
+        working-directory: frontend
+        run: npx playwright test
+
+      - name: Logs do ambiente (em caso de falha)
+        if: failure()
+        run: docker compose --profile app logs --no-color > ambiente.log 2>&1 || true
+
+      - name: Relatório do Playwright e logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorio-e2e
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            ambiente.log
+          if-no-files-found: ignore
+          retention-days: 7

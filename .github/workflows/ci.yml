@@ -82,6 +82,12 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Lint (angular-eslint)
+        run: npm run lint
+
+      - name: Formatação (Prettier)
+        run: npm run format:check
+
       - name: Testes unitários (Vitest)
         run: npm test -- --watch=false
 

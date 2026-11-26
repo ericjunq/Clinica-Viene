@@ -28,7 +28,7 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [x] Gerar frontend Angular 22.3 (`frontend/`, standalone, zoneless, SCSS, Vitest, sem SSR) + casca mínima — branch `frontend-projeto-angular` — testes unitários **executados localmente: 2 passaram** (`npm test -- --watch=false`) e `npm run build` ok (2026-11-26)
 - [~] Dockerfile multi-stage do frontend (Node 24 → nginx sem root, proxy `/api/` → backend) + serviço `frontend` no compose (profile `app`) + proxy do `ng serve` — branch `frontend-projeto-angular` — **implementado — não executado** (sem Docker nesta máquina; roda no job `docker` do CI)
 - [~] CI: job `frontend` (npm ci, Vitest, build) e build da imagem do frontend — branch `frontend-projeto-angular` — aguardando a primeira execução (Q-008)
-- [ ] Lint do frontend (angular-eslint) e Prettier no CI
+- [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
 - [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)
 - [ ] Proteção da branch `main` (PR + CI verde) — configuração no GitHub, feita pelo autor

@@ -47,5 +47,5 @@ Pontos com mais risco de falhar na primeira execução (tudo escrito sem compila
 As branches locais `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (da primeira tentativa, nunca enviadas) foram substituídas pelas 4 da D-054. Posso apagá-las?
 
 **Q-010 — Ordem dos PRs incluindo o frontend** · 2026-11-26
-Além das 4 branches que você definiu, criei `frontend-projeto-angular` (gera o Angular, Dockerfile do frontend, job do frontend no CI). Ordem de merge: `docs-fundacao-projeto` → `backend-estrutura-monorepo` → `docker-compose-base` → `ci-pipeline-inicial` → `frontend-projeto-angular`.
+Além das 4 branches que você definiu, criei `frontend-projeto-angular` (gera o Angular, Dockerfile do frontend, job do frontend no CI). Também criei `frontend-lint` (angular-eslint + Prettier no CI). Ordem de merge: `docs-fundacao-projeto` → `backend-estrutura-monorepo` → `docker-compose-base` → `ci-pipeline-inicial` → `frontend-projeto-angular` → `frontend-lint`.
 Alternativa: se preferir menos PRs, dá para abrir um PR só da última branch para a `main` (contém todos os commits, um por implementação).

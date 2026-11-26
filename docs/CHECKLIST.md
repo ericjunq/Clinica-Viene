@@ -31,7 +31,10 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Atualizar actions do CI para versões com Node 24 (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — branch `ci-atualiza-actions` — **CI verde**, sem avisos de depreciação (2026-11-26)
 - [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
-- [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)
+- [x] Identidade visual Viene (cores, Cormorant Garamond + Montserrat hospedadas localmente, logo, fundos) (D-082)
+- [ ] **Decidir licença do PrimeNG** (Community com chave × trocar para Angular Material) — D-083 A CONFIRMAR; hoje aparece o aviso "Invalid PrimeUI License"
+- [ ] Logo oficial em SVG/PNG para substituir o monograma desenhado (D-082)
+- [ ] FullCalendar na agenda (Fase 3) — atenção: visões por recurso são pagas (D-083)
 - [ ] **Tarefa manual do autor**: ruleset na `main` no GitHub bloqueando force push e exclusão (sem exigir PR — desenvolvimento direto na `main`, D-058/D-065)
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
 - [~] Renomear pacote para `br.com.clinicaviene` (groupId, artifactId `clinica-viene`, fixtures em `fixtures.lombok`) — D-062

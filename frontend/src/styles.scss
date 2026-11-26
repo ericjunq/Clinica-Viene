@@ -1,14 +1,53 @@
-@import 'primeicons/primeicons.css';
+/* Identidade visual Viene Odontologia & Saúde */
+:root {
+  --viene-creme: #f6e9e0;
+  --viene-creme-claro: #fbf4ee;
+  --viene-pessego: #edd3c2;
+  --viene-caramelo: #c69a72;
+  --viene-caramelo-escuro: #8c6240;
+  --viene-marrom: #6b4a2e;
+  --viene-texto: #4a3626;
+  --viene-fonte-titulo: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --viene-fonte-texto: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
 
 html,
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--viene-fonte-texto);
+  color: var(--viene-texto);
+  background: var(--viene-creme-claro);
+}
+
+h1,
+h2,
+h3,
+.p-card-title,
+.p-dialog-title {
+  font-family: var(--viene-fonte-titulo);
+  font-weight: 600;
+  color: var(--viene-marrom);
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: 2.4rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.p-card-title {
+  font-size: 1.9rem;
+}
+
+.p-card-subtitle {
+  font-family: var(--viene-fonte-titulo);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--viene-caramelo);
+}
+
+a {
+  color: var(--viene-caramelo-escuro);
 }
 
 .largura-total {
@@ -28,5 +67,24 @@ body {
 
   label {
     font-weight: 600;
+    color: var(--viene-marrom);
+  }
+}
+
+/* Divisor com estrela, como nas peças da Viene */
+.divisor-viene {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--viene-caramelo);
+  margin: 0.25rem 0 0.75rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--viene-caramelo);
+    opacity: 0.6;
   }
 }

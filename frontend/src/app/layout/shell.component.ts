@@ -4,11 +4,12 @@ import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
 import { AuthService } from '../core/services/auth.service';
+import { LogoComponent } from '../shared/logo/logo.component';
 
 /** Moldura das telas autenticadas: menu (conforme o perfil) e saída. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, ButtonModule, MenubarModule],
+  imports: [RouterOutlet, ButtonModule, MenubarModule, LogoComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })

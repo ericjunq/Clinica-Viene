@@ -7,12 +7,20 @@ import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
+import { LogoComponent } from '../../shared/logo/logo.component';
 import { senhaForteValidator, senhasIguaisValidator } from '../../core/validators/senha.validator';
 
 /** Troca da própria senha (obrigatória no primeiro acesso, com senha provisória). */
 @Component({
   selector: 'app-trocar-senha-page',
-  imports: [ReactiveFormsModule, ButtonModule, CardModule, MessageModule, PasswordModule],
+  imports: [
+    LogoComponent,
+    ReactiveFormsModule,
+    ButtonModule,
+    CardModule,
+    MessageModule,
+    PasswordModule,
+  ],
   templateUrl: './trocar-senha.page.html',
   styleUrl: '../pagina-publica.scss',
 })

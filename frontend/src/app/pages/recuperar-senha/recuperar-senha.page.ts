@@ -9,12 +9,14 @@ import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
+import { LogoComponent } from '../../shared/logo/logo.component';
 import { senhaForteValidator, senhasIguaisValidator } from '../../core/validators/senha.validator';
 
 /** Senha esquecida (1G): CPF → código no e-mail → senha nova. O 2FA continua no próximo login. */
 @Component({
   selector: 'app-recuperar-senha-page',
   imports: [
+    LogoComponent,
     ReactiveFormsModule,
     RouterLink,
     ButtonModule,

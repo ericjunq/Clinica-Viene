@@ -1,14 +1,31 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 45% 35% at 100% 100%, var(--viene-pessego) 0%, transparent 70%),
+    var(--viene-creme-claro);
+}
+
+:host ::ng-deep .menu-viene {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--viene-pessego);
+  background: var(--viene-creme);
+  padding: 0.5rem 1.5rem;
+}
+
 .marca {
-  margin-right: 1rem;
+  margin-right: 1.5rem;
 }
 
 .usuario {
   margin-right: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--viene-marrom);
 }
 
 .conteudo {
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   max-width: 72rem;
   margin: 0 auto;
 }

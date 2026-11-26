@@ -1,5 +1,6 @@
 <main class="pagina-publica">
-  <p-card header="ClinicaViene" subheader="Acesso ao sistema">
+  <app-logo />
+  <p-card header="Bem-vindo(a)" subheader="Acesso restrito à equipe">
     <form [formGroup]="form" (ngSubmit)="entrar()" class="formulario">
       <label for="cpf">CPF</label>
       <p-inputmask

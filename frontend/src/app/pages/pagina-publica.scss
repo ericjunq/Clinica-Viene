@@ -1,14 +1,60 @@
+/* Telas públicas (login, 2FA, senha): fundo creme com formas orgânicas, como nas peças da Viene. */
 .pagina-publica {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background: var(--p-surface-100, #f4f4f5);
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(ellipse 60% 45% at 0% 0%, var(--viene-pessego) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 45% at 100% 100%, var(--viene-pessego) 0%, transparent 70%),
+    var(--viene-creme);
+
+  /* linhas finas brancas */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 70rem;
+    height: 50rem;
+    top: -34rem;
+    left: -30rem;
+  }
+
+  &::after {
+    width: 60rem;
+    height: 45rem;
+    bottom: -32rem;
+    right: -26rem;
+  }
 
   p-card {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 26rem;
+    max-width: 27rem;
+  }
+
+  ::ng-deep .p-card {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(6px);
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 40px rgba(107, 74, 46, 0.12);
+  }
+
+  app-logo {
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -31,6 +77,8 @@
   margin: 0 auto;
   width: 200px;
   height: 200px;
+  border-radius: 0.75rem;
+  border: 1px solid var(--viene-pessego);
 }
 
 .segredo,

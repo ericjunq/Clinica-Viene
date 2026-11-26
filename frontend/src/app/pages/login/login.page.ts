@@ -8,11 +8,13 @@ import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
+import { LogoComponent } from '../../shared/logo/logo.component';
 
 /** Passo 1 do login: CPF + senha. */
 @Component({
   selector: 'app-login-page',
   imports: [
+    LogoComponent,
     ReactiveFormsModule,
     RouterLink,
     ButtonModule,

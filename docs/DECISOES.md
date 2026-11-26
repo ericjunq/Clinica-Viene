@@ -276,6 +276,9 @@ Motivo: segurança contra força bruta e enumeração de CPFs sem travar o usuá
 - Regra de senha repetida no frontend só por usabilidade.
 - **E2E (Playwright) no CI**: job `e2e` sobe o ambiente completo (`docker compose --profile app`) com `.env` descartável (chaves geradas na hora, DEV inicial fictício) e percorre o primeiro acesso no navegador, calculando o código TOTP no teste.
 
+**D-082 — Identidade visual Viene no frontend** · 2026-11-26
+Seguindo as peças enviadas pelo autor (Viene Odontologia & Saúde): fundo creme (`#F6E9E0`) com formas pêssego e linhas brancas finas; caramelo do monograma (`#C69A72`); marrom nos textos (`#6B4A2E`); ação (botões) em caramelo escuro `#8C6240` (contraste AA com texto branco); títulos em serifa clássica (**Cormorant Garamond**) e texto em **Montserrat** — ambas OFL, **hospedadas no próprio sistema** (pacotes `@fontsource`), sem Google Fonts (o navegador não envia o IP do usuário a terceiros — LGPD). Divisor com ✦ e marca "VIENE / ODONTOLOGIA & SAÚDE". O monograma é um SVG que reproduz o logo; substituir pelo arquivo oficial quando houver (ver DUVIDAS).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 
@@ -364,4 +367,7 @@ A imagem oficial `minio/minio` não está mais disponível no Docker Hub nem no 
 - Campos do prontuário por área (ex.: "dente/região" só em odontologia).
 - Prazos de retenção e regras de assinatura que variam por conselho (CFO, CFP, CFM…).
 - **Psicologia**: regras próprias de sigilo e registro documental (Resoluções CFP 01/2009 e 06/2019); avaliar se o acesso de emergência (D-007) pode abrir prontuário psicológico. Validar com advogado.
+
+**D-083 — Licença do PrimeNG (biblioteca de componentes do frontend)** · A CONFIRMAR · 2026-11-26
+Descoberto ao renderizar as telas: o PrimeNG compatível com Angular 22 (e todas as versões desde a 18) está sob a **PrimeUI License**, comercial. Há uma licença **Community gratuita** para organizações com menos de US$ 1 mi de faturamento anual, menos de 10 funcionários e menos de 5 desenvolvedores, que exige **chave de licença** e **renovação anual**; sem chave, aparece o aviso "Invalid PrimeUI License" na tela (inclusive em produção). Afeta a D-043. Opções: (a) obter a licença Community (no nome da clínica, se elegível) e configurar a chave; (b) trocar para **Angular Material** (MIT, Google, sem chave), mantendo a identidade visual da D-082. Relacionado: no FullCalendar, as visões por recurso (agenda lado a lado por consultório/profissional) são pagas; o núcleo (dia/semana/mês) é MIT.
 

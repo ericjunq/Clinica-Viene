@@ -1,6 +1,6 @@
-<p-menubar [model]="itens()">
+<p-menubar [model]="itens()" styleClass="menu-viene">
   <ng-template #start>
-    <strong class="marca">ClinicaViene</strong>
+    <app-logo [compacto]="true" class="marca" />
   </ng-template>
   <ng-template #end>
     <span class="usuario">{{ usuario()?.nomeCompleto }} · {{ usuario()?.perfil }}</span>

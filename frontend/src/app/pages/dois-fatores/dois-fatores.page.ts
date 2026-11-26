@@ -12,6 +12,7 @@ import { interval } from 'rxjs';
 import { CadastroDoisFatoresResponse, MetodoDoisFatores } from '../../core/models/auth.model';
 import { formatarEspera, mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
+import { LogoComponent } from '../../shared/logo/logo.component';
 
 /**
  * Passo 2 do login (D-072):
@@ -22,6 +23,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-dois-fatores-page',
   imports: [
+    LogoComponent,
     FormsModule,
     RouterLink,
     ButtonModule,

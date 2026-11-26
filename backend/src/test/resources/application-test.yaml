@@ -1,0 +1,5 @@
+# Perfil "test": usado pelos testes de integração (@ActiveProfiles("test")).
+spring:
+  flyway:
+    # Dados fictícios só existem nos testes (D-047): db/testdata fica em src/test e nunca vai para o jar.
+    locations: classpath:db/migration,classpath:db/testdata

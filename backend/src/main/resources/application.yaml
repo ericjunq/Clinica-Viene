@@ -1,3 +1,19 @@
 spring:
   application:
-    name: Clinica-Viene
+    name: clinica-viene
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Schema só via Flyway (D-047): o Hibernate apenas valida.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          # Datas sempre em UTC no banco; exibição em America/Bahia fica no frontend/relatórios.
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  docker:
+    compose:
+      # Em dev (rodando pela IDE a partir de backend/), sobe a infraestrutura do compose.yaml da raiz.
+      file: ../compose.yaml

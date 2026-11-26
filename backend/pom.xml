@@ -37,6 +37,7 @@
 		<zxing.version>3.5.4</zxing.version>
 		<awssdk.version>2.59.10</awssdk.version>
 		<bucket4j.version>8.23.0</bucket4j.version>
+		<bouncycastle.version>1.87</bouncycastle.version>
 		<rest-assured.version>6.3.0</rest-assured.version>
 		<archunit.version>1.5.1</archunit.version>
 		<greenmail.version>2.1.15</greenmail.version>
@@ -130,6 +131,12 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
+		</dependency>
+		<!-- Argon2id para hash de senhas (D-074): exigido pelo Argon2PasswordEncoder -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 		<!-- Rate limit (login e links públicos) -->
 		<dependency>

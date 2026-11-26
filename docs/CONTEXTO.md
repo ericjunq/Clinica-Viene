@@ -37,6 +37,7 @@ Regras:
 - Somente DEV e MASTER criam usuários ADMIN/PROFISSIONAL. O primeiro MASTER é criado pelo DEV; depois, MASTER também cria MASTER. **Nenhum endpoint cria DEV** (D-067).
 - **Primeiro acesso (D-048)**: o inicializador cria o usuário DEV a partir de variáveis de ambiente, uma única vez, só com o banco sem usuários (auditado); o DEV cria o MASTER pelo sistema. Senha provisória → troca e cadastro de 2FA obrigatórios no primeiro login.
 - **Status (D-068)**: apenas `ATIVO` e `INATIVO`; usuário nunca é apagado. MASTER ativa/desativa qualquer usuário exceto DEV; DEV ativa/desativa ADMIN e PROFISSIONAL. Desativar revoga todas as sessões na hora, e o status é checado a cada requisição — inativo não acessa nada. Desativar um MASTER: só manualmente no banco, pelo DEV (fora do sistema, registrar o motivo).
+- **Novo usuário**: quem cria define uma senha provisória e a repassa ao usuário; troca obrigatória (e cadastro de 2FA) no primeiro login. Respostas da API mostram o CPF mascarado (`***.018.159-**`).
 - **Senha (D-066)**: mínimo 12 caracteres, com pelo menos 1 letra maiúscula, 1 minúscula e 1 caractere especial. Hash Argon2id (D-074).
 - **Bloqueio por tentativas**: não é status; é bloqueio temporário por rate limit (IP e CPF).
 - Pacientes **não têm login** no sistema interno; interagem apenas por links seguros de uso único (cadastro, anamnese, assinatura, visualização de documento).

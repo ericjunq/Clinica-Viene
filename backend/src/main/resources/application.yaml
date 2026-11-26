@@ -52,6 +52,12 @@ clinicaviene:
     chaves: ${CRIPTO_CHAVES:}
     chave-ativa: ${CRIPTO_CHAVE_ATIVA:}
     cpf-hmac-chave: ${CPF_HMAC_CHAVE:}
+  dev-inicial:
+    # D-048 — só usados com o banco sem usuários; depois remova do ambiente.
+    cpf: ${DEV_INICIAL_CPF:}
+    nome: ${DEV_INICIAL_NOME:}
+    email: ${DEV_INICIAL_EMAIL:}
+    senha: ${DEV_INICIAL_SENHA:}
 
 server:
   # Atrás do nginx: usa X-Forwarded-For/Proto (só de proxies em rede interna) para o IP real na auditoria.

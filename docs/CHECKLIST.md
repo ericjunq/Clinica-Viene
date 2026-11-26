@@ -49,13 +49,14 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] Spring Security base: tudo fechado por padrão, stateless, `@EnableMethodSecurity` (`SegurancaBaseIT`) — **CI verde**
 
 **1B. Auditoria**
-- [~] `audit_log` (V4) + trigger que rejeita `UPDATE`/`DELETE`/`TRUNCATE` (D-076) + `ServicoAuditoria` (`registrar` na transação da operação, `registrarIndependente` em transação própria) + IP real atrás do proxy (`AuditoriaIT`)
+- [x] `audit_log` (V4) + trigger que rejeita `UPDATE`/`DELETE`/`TRUNCATE` (D-076) + `ServicoAuditoria` (`registrar` na transação da operação, `registrarIndependente` em transação própria) + IP real atrás do proxy (`AuditoriaIT`) — **CI verde**
 
 **1C. Usuários**
-- [ ] `Usuario` (CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional, trocarSenha) — D-061, D-068, D-069
-- [ ] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER (D-067)
-- [ ] Política de senha (D-066) + Argon2id (D-074)
-- [ ] Inicializador do DEV (D-048)
+- [~] `Usuario` (V5: CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional único, trocarSenha; CHECKs no banco) — D-061, D-068, D-069
+- [~] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER; ninguém altera o próprio status (D-067) — `RegrasDePerfil` + `ServicoUsuarios`; endpoints `/api/v1/usuarios` (testados via HTTP na 1D)
+- [~] Política de senha (D-066) + Argon2id (D-074) + troca da própria senha
+- [~] Inicializador do DEV (D-048) — `DEV_INICIAL_*`
+- [ ] Edição de dados do usuário (nome, e-mail, telefone, registro) e mudança de perfil — não incluídas na 1C; definir regras
 
 **1D. Autenticação**
 - [ ] Login em 2 passos com desafio; JWT RSA 15 min; refresh opaco em cookie 12 h com rotação e revogação da cadeia; logout; `/auth/eu` (D-071)

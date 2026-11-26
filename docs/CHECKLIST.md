@@ -23,8 +23,8 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [~] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **implementado — não executado** (sem Docker nesta máquina; YAML validado apenas sintaticamente)
   - [ ] Validar: `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
 - [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
-- [ ] CI: testes do backend (`./mvnw verify`) a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial`
-- [ ] CI: testes do frontend, lint (Spotless), cobertura (JaCoCo), scan de dependências, build de imagem Docker (conforme existirem)
+- [~] CI: testes do backend (`./mvnw verify`) + relatórios de teste e cobertura; validação do `compose.yaml` e build da imagem do backend (sem publicar) — a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial` — **implementado — aguardando a primeira execução** (push indisponível nesta máquina, Q-008)
+- [ ] CI: testes do frontend, lint (Spotless — Q-004), metas de cobertura, scan de dependências (conforme existirem)
 - [ ] Gerar frontend Angular (`frontend/`) + Dockerfile multi-stage do frontend
 - [ ] Proteção da branch `main` (PR + CI verde) — configuração no GitHub, feita pelo autor
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`

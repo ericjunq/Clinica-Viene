@@ -1,0 +1,80 @@
+# CI — roda a cada push (qualquer branch) e em PRs para a main. Lugar oficial dos testes (D-046).
+# CD (publicação de imagem / deploy) fica para depois — ver docs/DECISOES.md D-046.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Unitários (*Test, Surefire) + integração (*IT, Failsafe) + relatório JaCoCo.
+      # Testcontainers usa o Docker já disponível no runner ubuntu-latest.
+      - name: Build e testes
+        run: ./mvnw -B -ntp verify
+
+      - name: Relatórios de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-teste-backend
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Relatório de cobertura (JaCoCo)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-backend
+          path: backend/target/site/jacoco/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  docker:
+    name: Docker — compose e imagem
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Valida o compose.yaml com os valores fictícios do .env.example.
+      - name: Validar compose.yaml
+        run: |
+          cp .env.example .env
+          docker compose --profile app config --quiet
+
+      # Só constrói a imagem (não publica — CD adiado).
+      - name: Construir imagem do backend
+        run: docker build --tag clinica-viene-backend:ci backend

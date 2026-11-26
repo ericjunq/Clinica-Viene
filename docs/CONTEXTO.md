@@ -363,7 +363,7 @@ Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modu
 - **Frontend unitário**: Vitest.
 - **E2E navegador**: Playwright contra o ambiente docker-compose.
 - **Cobertura**: JaCoCo (meta inicial 80% em `financeiro`, `prontuario`, `identidade`).
-- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (qualquer branch) e em PR para `main`. Hoje: build + testes do backend (`./mvnw verify`, com Testcontainers). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. Merge só com CI verde.
+- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (qualquer branch) e em PR para `main`. Hoje: job `backend` (build + testes unitários e de integração com `./mvnw verify` + relatórios de teste e JaCoCo como artefatos) e job `docker` (valida `compose.yaml` e constrói a imagem do backend, sem publicar). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. Merge só com CI verde.
 - **CD**: **adiado** (D-046) — sem deploy por enquanto. Quando houver hospedagem: publicação da imagem no GHCR em merge na `main` + deploy.
 
 ---

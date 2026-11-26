@@ -10,13 +10,16 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [x] Gerar projeto no Spring Initializr e subir para o GitHub (commit inicial na `main`)
 - [x] Adicionar `CLAUDE.md`, `docs/`, `.claude/settings.json` ao repositório — branch `docs-fundacao-projeto`
 - [x] Registrar decisões da Fase 0 (D-043, D-044, D-046, D-047, D-049 a D-055) e criar `docs/DUVIDAS.md` — branch `docs-fundacao-projeto`
-- [ ] Mover projeto Spring para `backend/` + `.gitignore` geral na raiz — branch `backend-estrutura-monorepo`
-- [ ] Spring Modulith 2.2.0 GA; remover `thymeleaf-extras-springsecurity6` (D-049, D-051) — branch `backend-estrutura-monorepo`
-- [ ] Dependências manuais no `pom.xml` (springdoc, MapStruct, openhtmltopdf, ZXing, AWS SDK S3, Bucket4j, REST Assured, ArchUnit, GreenMail) — branch `backend-estrutura-monorepo`
-- [ ] Lombok: `lombok.config`, ordem dos annotation processors, teste ArchUnit das regras (D-051) — branch `backend-estrutura-monorepo`
-- [ ] Plugins: JaCoCo, Spotless, Surefire/Failsafe — branch `backend-estrutura-monorepo`
-- [ ] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste — branch `backend-estrutura-monorepo`
-- [ ] Teste de módulos (`ApplicationModules.verify()`) — branch `backend-estrutura-monorepo`
+- [x] Mover projeto Spring para `backend/` + `.gitignore` geral na raiz — branch `backend-estrutura-monorepo`
+- [~] Spring Modulith 2.2.0 GA; remover `thymeleaf-extras-springsecurity6` (D-049, D-051) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+- [~] Dependências manuais no `pom.xml` (Actuator, springdoc, MapStruct, openhtmltopdf, ZXing, AWS SDK S3, Bucket4j, REST Assured, ArchUnit, GreenMail) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+  - Testcontainers MinIO **não** adicionado: imagem indisponível (D-056)
+- [~] Lombok: `lombok.config`, ordem dos annotation processors, teste ArchUnit das regras (`EntidadesLombokArchTest`) (D-051) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+- [~] Plugins: JaCoCo, Spotless, Surefire (`*Test`) / Failsafe (`*IT`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+  - [ ] Rodar `./mvnw spotless:apply` numa máquina com Java e ligar o `spotless:check` no build/CI (Q-004)
+  - [ ] Metas de cobertura JaCoCo por módulo quando os módulos existirem
+- [~] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+- [~] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
 - [ ] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base`
 - [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
 - [ ] CI: testes do backend (`./mvnw verify`) a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial`

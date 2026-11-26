@@ -133,14 +133,18 @@ jobs:
       - name: Gerar .env do ambiente de teste
         run: |
           cp .env.example .env
-          sed -i "s#^CRIPTO_CHAVES=.*#CRIPTO_CHAVES=v1:$(openssl rand -base64 32)#" .env
-          sed -i "s#^CPF_HMAC_CHAVE=.*#CPF_HMAC_CHAVE=$(openssl rand -base64 32)#" .env
-          CHAVE_JWT=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 | openssl pkcs8 -topk8 -nocrypt -outform DER | base64 -w0)
-          sed -i "s#^JWT_CHAVE_PRIVADA=.*#JWT_CHAVE_PRIVADA=${CHAVE_JWT}#" .env
-          sed -i "s#^DEV_INICIAL_CPF=.*#DEV_INICIAL_CPF=${E2E_DEV_CPF}#" .env
-          sed -i "s#^DEV_INICIAL_NOME=.*#DEV_INICIAL_NOME=Dev Ficticio#" .env
-          sed -i "s#^DEV_INICIAL_EMAIL=.*#DEV_INICIAL_EMAIL=dev.e2e@exemplo.com#" .env
-          sed -i "s#^DEV_INICIAL_SENHA=.*#DEV_INICIAL_SENHA=${E2E_DEV_SENHA}#" .env
+          export CRIPTO_CHAVES="v1:$(openssl rand -base64 32)"
+          export CPF_HMAC_CHAVE="$(openssl rand -base64 32)"
+          export JWT_CHAVE_PRIVADA="$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 | openssl pkcs8 -topk8 -nocrypt -outform DER | base64 -w0)"
+          export DEV_INICIAL_CPF="$E2E_DEV_CPF" DEV_INICIAL_NOME="Dev Ficticio" DEV_INICIAL_EMAIL="dev.e2e@exemplo.com" DEV_INICIAL_SENHA="$E2E_DEV_SENHA"
+          python3 - <<'PY'
+          import os, re
+          caminho = ".env"
+          texto = open(caminho).read()
+          for chave in ["CRIPTO_CHAVES", "CPF_HMAC_CHAVE", "JWT_CHAVE_PRIVADA", "DEV_INICIAL_CPF", "DEV_INICIAL_NOME", "DEV_INICIAL_EMAIL", "DEV_INICIAL_SENHA"]:
+              texto = re.sub(rf"^{chave}=.*$", lambda m, c=chave: f"{c}={os.environ[c]}", texto, flags=re.M)
+          open(caminho, "w").write(texto)
+          PY
 
       - name: Subir o ambiente completo
         run: docker compose --profile app up -d --build

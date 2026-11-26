@@ -45,7 +45,7 @@ Regras:
 
 ---
 
-## 3. Módulos (monólito modular — Spring Modulith)
+## 3. Áreas do sistema e arquitetura em camadas
 
 | Módulo | Responsabilidade |
 |---|---|
@@ -60,9 +60,7 @@ Regras:
 | `auditoria` | Log imutável de acessos e alterações |
 | `lgpd` | Termos versionados, aceites, consentimentos opcionais, solicitações do titular |
 
-Módulos só se comunicam por API pública do módulo ou eventos de domínio, no mesmo processo (chamada de método; não é microsserviço). Limites verificados em teste (`ApplicationModules.verify()`).
-
-**Organização interna (D-077)**: dentro de cada módulo, pastas por camada — `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/` (e `auth/`, `config/`, `validation/` quando necessário) — com nomes `XxxController`, `XxxService`, `XxxRepository`, `XxxRequest`/`XxxResponse`/`XxxDto`, `XxxException`. A API pública de um módulo é marcada com `@NamedInterface` (ex.: `auditoria/service`, `auditoria/dto`, `auditoria/enums`).
+As áreas acima são **assuntos de negócio**, não pacotes. O código é organizado **em camadas** na raiz da aplicação (D-078): `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`, `auth/`, `config/`, `util/`, `validation/`, com nomes `XxxController`, `XxxService`, `XxxRepository`, `XxxRequest`/`XxxResponse`/`XxxDto`, `XxxException`. Dados de saúde só são acessados pelo service do assunto, que audita (convenção; ver D-078).
 
 ---
 
@@ -349,10 +347,10 @@ Todos os enums persistidos como STRING.
 
 ## 13. Arquitetura e stack
 
-**Backend**: Java 25, Spring Boot 4.2.x, Maven, Spring Modulith, Spring Web MVC, Spring Security + OAuth2 Resource Server (JWT), Spring Data JPA, PostgreSQL, Flyway, Validation, WebSocket, Mail, Thymeleaf, Actuator, springdoc-openapi, MapStruct, openhtmltopdf, ZXing, SDK S3, Bucket4j.
+**Backend**: Java 25, Spring Boot 4.2.x, Maven, Spring Modulith (só registro de eventos — D-078), Spring Web MVC, Spring Security + OAuth2 Resource Server (JWT), Spring Data JPA, PostgreSQL, Flyway, Validation, WebSocket, Mail, Thymeleaf, Actuator, springdoc-openapi, MapStruct, openhtmltopdf, ZXing, SDK S3, Bucket4j.
 
 Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modulith-bom`), Lombok (gerenciado pelo Boot) + MapStruct.
-Pacote base e `groupId`: **`br.com.clinicaviene`** (D-062); módulos do Modulith são subpacotes (`br.com.clinicaviene.pacientes`, …).
+Pacote base e `groupId`: **`br.com.clinicaviene`** (D-062), com as camadas como subpacotes (D-078).
 
 **Eventos do Modulith (D-059)**: `completion-mode=archive` (concluídos vão para `event_publication_archive`), `republish-outstanding-events-on-restart=true`, tabelas criadas pelo Flyway (inicialização automática desligada). Eventos carregam só ids, nunca dados pessoais.
 
@@ -380,7 +378,7 @@ Pacote base e `groupId`: **`br.com.clinicaviene`** (D-062); módulos do Modulith
 
 - **Backend unitário**: JUnit 5 + Mockito + AssertJ. Foco total nas fórmulas financeiras (tabela de casos, arredondamento, soma das parcelas).
 - **Backend integração**: `@SpringBootTest` + Testcontainers (PostgreSQL; SeaweedFS via `GenericContainer` para storage) + REST Assured + GreenMail. Testes de autorização por perfil.
-- **Arquitetura**: Spring Modulith `verify()` + ArchUnit.
+- **Arquitetura**: ArchUnit (regras do Lombok; regras de acesso a dados de saúde a avaliar — D-078).
 - **Frontend unitário**: Vitest.
 - **E2E navegador**: Playwright contra o ambiente docker-compose.
 - **Cobertura**: JaCoCo (meta inicial 80% em `financeiro`, `prontuario`, `identidade`).

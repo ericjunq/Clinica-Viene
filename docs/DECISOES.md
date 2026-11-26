@@ -14,7 +14,7 @@ Formato: `D-xxx — Título` · Status · Data · Decisão · Motivo.
 Motivo: preferência do autor; Java 25 é LTS e compatível com Boot 4.2. Se a 4.2.0 final não estiver disponível no Initializr, usar a 4.1.x mais recente e subir depois.
 Atualização 2026-11-26: mantido Spring Boot **4.2.0** (GA). Não voltar para 4.1 por causa de dependências (ver D-049).
 
-**D-002 — Monólito modular com Spring Modulith** · 2026-11-26
+**D-002 — Monólito modular com Spring Modulith** · 2026-11-26 · **SUBSTITUÍDA por D-078** (arquitetura em camadas; o Spring Modulith segue só para o registro de eventos — D-059)
 Motivo: um time pequeno não precisa de microsserviços; módulos com limites verificados em teste facilitam crescer e integrar chatbot/gateway depois.
 
 **D-003 — Perfis DEV, MASTER, ADMIN, PROFISSIONAL com menor privilégio** · 2026-11-26
@@ -237,12 +237,19 @@ Motivo: evitar abuso (spam, custo de envio, força bruta) sem travar o usuário 
 **D-076 — `audit_log` append-only garantido por trigger no banco** · 2026-11-26
 Função + trigger (`CREATE FUNCTION`/`CREATE TRIGGER`, compatível com a D-047) que rejeitam `UPDATE` e `DELETE`. Motivo: a garantia não depende só do código da aplicação.
 
-**D-077 — Camadas dentro de cada módulo e nomes com sufixo do papel** · 2026-11-26
+**D-077 — Camadas dentro de cada módulo e nomes com sufixo do papel** · 2026-11-26 · **SUBSTITUÍDA por D-078** no mesmo dia (a parte dos nomes continua valendo)
 Pedido do autor: organizar em `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`, `auth/` etc., com nomes claros (`UsuarioService`, `LoginService`, `UsuarioController`, `ProntuarioRepository`). Discutidas duas opções:
 - (A) camadas no topo do projeto (um `service/` para tudo) — **recusada** (R-015);
 - (B) camadas **dentro de cada módulo** do Spring Modulith — **aceita**.
 Motivo: B mantém a D-002 e a verificação automática de limites entre módulos (`ModulosTest`); com A, qualquer service poderia ler, por exemplo, o repositório da anamnese sem passar pela auditoria — a regra "toda leitura de dado de saúde é auditada" passaria a depender só de disciplina. B também mantém cada assunto junto e as pastas pequenas. Módulos se comunicam por chamada de método no mesmo processo (não é microsserviço; sem HTTP entre módulos).
 O que um módulo expõe aos outros fica marcado com `@NamedInterface` no `package-info.java` do subpacote. Classes da Fase 0/1 renomeadas (ex.: `ServicoUsuarios` → `UsuarioService`, `RepositorioUsuarios` → `UsuarioRepository`, `ControladorUsuarios` → `UsuarioController`, `EntradaAuditoria` → `AuditLog`, `TratadorDeErros` → `GlobalExceptionHandler`, `Cifrador` → `CifradorAesGcm`, `HashCpf` → `CpfHasher`).
+
+**D-078 — Arquitetura em camadas na raiz da aplicação** · 2026-11-26 · Substitui D-002 e D-077
+Decisão do autor, depois de discutir as opções (ver D-077/R-015): pastas `controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/` (não `enum`: palavra reservada do Java), `exceptions/`, `auth/`, `config/`, `util/`, `validation/` diretamente em `br.com.clinicaviene`, com cada arquivo na pasta da sua camada e nomes com o papel no sufixo (`UsuarioService`, `UsuarioController`, `UsuarioRepository`…).
+Consequências registradas:
+- O teste `ModulosTest` (verificação de limites entre módulos do Spring Modulith) foi removido; o Spring Modulith continua no projeto apenas para o registro de eventos (D-059).
+- A regra "dado de saúde só é acessado pelo service que audita" passa a ser convenção (CLAUDE.md), não verificação automática. Pode ser reforçada depois com regras ArchUnit específicas (ex.: só `ProntuarioService` usa `ProntuarioRepository`) — a avaliar quando surgir o primeiro dado de saúde (Fase 2).
+Motivo: preferência do autor por uma estrutura mais conhecida e direta de navegar, também como material de estudo.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
@@ -281,7 +288,7 @@ Motivo: só valeria no container de dev; produção e testes ficariam sem a exte
 
 **R-014 — Imagens Docker com tag `latest`** · 2026-11-26 · Substituída por D-050.
 
-**R-015 — Camadas no topo do projeto (um `controller/`, `service/`, `repository/` para o sistema todo)** · 2026-11-26 · Substituída por D-077.
+**R-015 — Camadas no topo do projeto (um `controller/`, `service/`, `repository/` para o sistema todo)** · 2026-11-26 · Recusada inicialmente em favor da D-077; **revertida pelo autor: passou a ser a D-078**.
 Motivo: perderia a verificação de limites entre módulos (D-002) e a garantia estrutural de que dados de saúde só são acessados pelos serviços que auditam.
 
 ---

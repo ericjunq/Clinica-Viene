@@ -19,7 +19,7 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
   - [ ] Rodar `./mvnw spotless:apply` em máquina com Java, commitar `style: aplica formatação palantir` e ligar `spotless:check` no CI no mesmo push (D-063)
   - [ ] Metas de cobertura JaCoCo por módulo quando os módulos existirem
 - [x] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
-- [x] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
+- [x] ~~Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`)~~ — removido pela D-078 — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
 - [x] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **CI verde**: compose validado e imagem construída (2026-11-26)
   - [ ] Validar localmente (máquina com Docker): `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
 - [~] Storage S3 local no compose: SeaweedFS `4.55` (`server -s3`, porta 8333 só em localhost) — D-056 — compose validado no CI; não executado localmente
@@ -76,7 +76,9 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 **1G. Recuperação de senha por e-mail** (opcional)
 - [ ] Token de uso único e curta duração, com regras de reenvio (D-073)
 
-- [~] Reorganizar backend em camadas dentro dos módulos com nomes `XxxService`/`XxxController`/`XxxRepository` (D-077)
+- [~] Reorganizar backend em camadas na raiz (`controller/`, `service/`, `repository/`, `entity/`, `dto/`, `enums/`, `exceptions/`…) com nomes `XxxService`/`XxxController`/`XxxRepository` (D-078; substitui a D-077); `ModulosTest` removido
+
+- [ ] Avaliar regras ArchUnit de acesso a dados de saúde (só o service do assunto usa o repository) — D-078, na Fase 2
 
 **Testes da fase**
 - [ ] Matriz de autorização (cada perfil × cada endpoint)

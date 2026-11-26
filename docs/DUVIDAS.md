@@ -35,7 +35,5 @@ Sugestão: manter `UPDATE` por ora (não apaga nada — combina com auditoria) e
 **Q-007 — resolvida em 2026-11-26 pela D-058** (desenvolvimento direto na `main`, sem PRs).
 **Q-008 — ~~Push indisponível~~ → resolvido em 2026-11-26** · `gh` autenticado; as 6 branches foram enviadas e o CI ficou verde (run 45860950699: 8 testes unitários + 3 de integração do backend, lint/Prettier/Vitest/build do frontend, compose validado e as duas imagens construídas). Pode sair daqui na próxima limpeza.
 
-**Q-009 — Branches locais antigas** · 2026-11-26
-As branches locais `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (da primeira tentativa, nunca enviadas) foram substituídas pelas 4 da D-054. Posso apagá-las?
-
+**Q-009 — resolvida em 2026-11-26**: todas as branches (locais e remotas) foram apagadas após a integração na `main` (D-058).
 **Q-010 — resolvida em 2026-11-26 pela D-058** (desenvolvimento direto na `main`, sem PRs).

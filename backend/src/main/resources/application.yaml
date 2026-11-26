@@ -12,6 +12,9 @@ spring:
     # Em dev, Mailpit (docker compose); em produção, o provedor de e-mail contratado.
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:1025}
+  thymeleaf:
+    # Templates (PDFs/e-mails) entram nas próximas fases.
+    check-template-location: false
   jpa:
     open-in-view: false
     hibernate:
@@ -91,3 +94,10 @@ clinicaviene:
 server:
   # Atrás do nginx: usa X-Forwarded-For/Proto (só de proxies em rede interna) para o IP real na auditoria.
   forward-headers-strategy: native
+
+management:
+  health:
+    mail:
+      # E-mail fora do ar não torna a aplicação indisponível (o usuário pode pedir reenvio);
+      # sem isto, o /actuator/health ficaria DOWN e o container poderia ser reiniciado à toa.
+      enabled: false

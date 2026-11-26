@@ -20,7 +20,8 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
   - [ ] Metas de cobertura JaCoCo por módulo quando os módulos existirem
 - [~] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
 - [~] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
-- [ ] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base`
+- [~] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **implementado — não executado** (sem Docker nesta máquina; YAML validado apenas sintaticamente)
+  - [ ] Validar: `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
 - [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
 - [ ] CI: testes do backend (`./mvnw verify`) a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial`
 - [ ] CI: testes do frontend, lint (Spotless), cobertura (JaCoCo), scan de dependências, build de imagem Docker (conforme existirem)

@@ -75,7 +75,8 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 **1F. Frontend**
 - [x] Telas (hoje em Angular Material — D-084) de login, 2FA (cadastro com QR, códigos de recuperação, verificação por app/e-mail/recuperação com contagem para reenvio), troca de senha, recuperação de senha, usuários (lista, cadastro, ativar/desativar) (D-081) — **testes unitários executados localmente: 31 passaram**; lint e build ok
 - [x] Interceptor de renovação automática + guards por sessão, troca de senha e perfil (D-081) — testados (Vitest)
-- [~] Playwright + job E2E no CI (compose completo, `.env` descartável): primeiro acesso do DEV, senha errada, rota protegida (D-081) — aguardando a primeira execução
+- [x] Playwright + job E2E no CI (compose completo, `.env` descartável): primeiro acesso do DEV, senha errada, rota protegida (D-081) — **CI verde (3 testes no navegador)**
+- [ ] Build da imagem do backend baixa o Maven pelo `mvnw` a cada build: já falhou uma vez com 429 do repositório central (instabilidade externa); avaliar usar a imagem oficial `maven:*-eclipse-temurin-25` no estágio de build
 
 **1G. Recuperação de senha por e-mail** (opcional)
 - [x] Recuperação de senha: `POST /auth/senha/recuperar` (resposta sempre igual) → código de 6 dígitos por e-mail → `POST /auth/senha/redefinir`; senha validada antes de gastar o código; derruba as sessões; 2FA continua exigido no login (D-073, D-080) — `AuthControllerIT` — **CI verde**; tela no frontend

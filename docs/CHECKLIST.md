@@ -11,23 +11,24 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [x] Adicionar `CLAUDE.md`, `docs/`, `.claude/settings.json` ao repositório — branch `docs-fundacao-projeto`
 - [x] Registrar decisões da Fase 0 (D-043, D-044, D-046, D-047, D-049 a D-055) e criar `docs/DUVIDAS.md` — branch `docs-fundacao-projeto`
 - [x] Mover projeto Spring para `backend/` + `.gitignore` geral na raiz — branch `backend-estrutura-monorepo`
-- [~] Spring Modulith 2.2.0 GA; remover `thymeleaf-extras-springsecurity6` (D-049, D-051) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
-- [~] Dependências manuais no `pom.xml` (Actuator, springdoc, MapStruct, openhtmltopdf, ZXing, AWS SDK S3, Bucket4j, REST Assured, ArchUnit, GreenMail) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+- [x] Spring Modulith 2.2.0 GA; remover `thymeleaf-extras-springsecurity6` (D-049, D-051) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
+- [x] Dependências manuais no `pom.xml` (Actuator, springdoc, MapStruct, openhtmltopdf, ZXing, AWS SDK S3, Bucket4j, REST Assured, ArchUnit, GreenMail) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
   - Testcontainers MinIO **não** adicionado: imagem indisponível (D-056)
-- [~] Lombok: `lombok.config`, ordem dos annotation processors, teste ArchUnit das regras (`EntidadesLombokArchTest`) (D-051) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
-- [~] Plugins: JaCoCo, Spotless, Surefire (`*Test`) / Failsafe (`*IT`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
+- [x] Lombok: `lombok.config`, ordem dos annotation processors, teste ArchUnit das regras (`EntidadesLombokArchTest`) (D-051) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
+- [x] Plugins: JaCoCo, Spotless, Surefire (`*Test`) / Failsafe (`*IT`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
   - [ ] Rodar `./mvnw spotless:apply` numa máquina com Java e ligar o `spotless:check` no build/CI (Q-004)
   - [ ] Metas de cobertura JaCoCo por módulo quando os módulos existirem
-- [~] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
-- [~] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **implementado — testes pendentes de execução** (sem JDK nesta máquina; sem push possível — ver DUVIDAS Q-008)
-- [~] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **implementado — não executado** (sem Docker nesta máquina; YAML validado apenas sintaticamente)
-  - [ ] Validar: `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
+- [x] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
+- [x] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
+- [x] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **CI verde**: compose validado e imagem construída (2026-11-26)
+  - [ ] Validar localmente (máquina com Docker): `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
 - [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
-- [~] CI: testes do backend (`./mvnw verify`) + relatórios de teste e cobertura; validação do `compose.yaml` e build da imagem do backend (sem publicar) — a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial` — **implementado — aguardando a primeira execução** (push indisponível nesta máquina, Q-008)
+- [x] CI: testes do backend (`./mvnw verify`) + relatórios de teste e cobertura; validação do `compose.yaml` e build da imagem do backend (sem publicar) — a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial` — **CI verde**: 8 testes unitários + 3 de integração passaram (2026-11-26)
 - [ ] CI: testes do frontend, lint (Spotless — Q-004), metas de cobertura, scan de dependências (conforme existirem)
 - [x] Gerar frontend Angular 22.3 (`frontend/`, standalone, zoneless, SCSS, Vitest, sem SSR) + casca mínima — branch `frontend-projeto-angular` — testes unitários **executados localmente: 2 passaram** (`npm test -- --watch=false`) e `npm run build` ok (2026-11-26)
-- [~] Dockerfile multi-stage do frontend (Node 24 → nginx sem root, proxy `/api/` → backend) + serviço `frontend` no compose (profile `app`) + proxy do `ng serve` — branch `frontend-projeto-angular` — **implementado — não executado** (sem Docker nesta máquina; roda no job `docker` do CI)
-- [~] CI: job `frontend` (npm ci, Vitest, build) e build da imagem do frontend — branch `frontend-projeto-angular` — aguardando a primeira execução (Q-008)
+- [x] Dockerfile multi-stage do frontend (Node 24 → nginx sem root, proxy `/api/` → backend) + serviço `frontend` no compose (profile `app`) + proxy do `ng serve` — branch `frontend-projeto-angular` — **CI verde**: imagem construída (2026-11-26)
+- [x] CI: job `frontend` (npm ci, Vitest, build) e build da imagem do frontend — branch `frontend-projeto-angular` — **CI verde** (2026-11-26)
+- [~] Atualizar actions do CI para versões com Node 24 (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — branch `ci-atualiza-actions`
 - [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
 - [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)

@@ -35,13 +35,7 @@ Sugestão: manter `UPDATE` por ora (não apaga nada — combina com auditoria) e
 **Q-007 — Proteção da branch `main`** · 2026-11-26
 Precisa ser configurada por você no GitHub (Settings → Branches → regra para `main`: exigir PR, exigir o check "Backend — testes" verde, bloquear push direto). Depois do primeiro run do CI, o nome do check aparece para seleção.
 
-**Q-008 — Push não funciona nesta máquina: os testes ainda não rodaram em lugar nenhum** · 2026-11-26
-Aqui não há `gh` nem credencial do GitHub configurada (`git push` falha pedindo usuário). Por isso **nenhuma branch foi enviada e o CI nunca rodou**: todo o código da Fase 0 está como "implementado — testes pendentes de execução".
-Para enviar: configure a autenticação (`gh auth login`, ou um token em gerenciador de credenciais) e rode `git push -u origin <branch>` para as 4 branches, na ordem do CHECKLIST. A `ci-pipeline-inicial` contém todas as anteriores; o CI roda nela.
-Testes escritos e **não executados**: `EntidadesLombokArchTest` (7 testes), `ModulosTest`, `ClinicaVieneApplicationIT`, `MigracoesIT` (2 testes); build das imagens Docker e validação do compose.
-Executados de verdade nesta máquina: testes unitários do frontend (2 passaram) e `npm run build`.
-A branch `frontend-lint` (topo da pilha) é a mais completa: contém todos os commits. Risco extra no build da imagem do backend: o `mvnw` baixa o Maven dentro do Alpine (depende de wget com HTTPS na imagem).
-Pontos com mais risco de falhar na primeira execução (tudo escrito sem compilar): API do ArchUnit no `EntidadesLombokArchTest`; validação do Hibernate na tabela `event_publication`; versões novas (REST Assured 6.3.0, springdoc 3.2.1) com o Boot 4.2.0.
+**Q-008 — ~~Push indisponível~~ → resolvido em 2026-11-26** · `gh` autenticado; as 6 branches foram enviadas e o CI ficou verde (run 45860950699: 8 testes unitários + 3 de integração do backend, lint/Prettier/Vitest/build do frontend, compose validado e as duas imagens construídas). Pode sair daqui na próxima limpeza.
 
 **Q-009 — Branches locais antigas** · 2026-11-26
 As branches locais `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (da primeira tentativa, nunca enviadas) foram substituídas pelas 4 da D-054. Posso apagá-las?

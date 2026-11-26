@@ -168,6 +168,40 @@ Motivo: stack atual e enxuta; menos superfície de ataque.
 Substitui a parte de branches da D-032 e a D-054. Commits continuam no formato `tipo: descrição`, um por implementação/alteração, sem coautoria; push direto na `main`. O CI roda a cada push e continua sendo o lugar oficial dos testes; CI vermelho na `main` é corrigido antes de qualquer outra implementação. A proteção da `main` (Q-007) deixa de exigir PR.
 Motivo: decisão do autor — projeto de uma pessoa só; branches empilhadas e PRs davam trabalho sem revisor para justificá-los.
 
+**D-056 — SeaweedFS como storage S3 de desenvolvimento e teste** · 2026-11-26 · (saiu de A CONFIRMAR)
+- Substitui o MinIO previsto no planejamento. Motivo da troca: as imagens oficiais do MinIO foram removidas do Docker Hub e do Quay em 2026 (verificado em 26/11/2026: `minio/minio` inexistente nos dois registros).
+- SeaweedFS (Apache-2.0), imagem com versão fixada (`chrislusf/seaweedfs:4.55`), modo S3 (`server -s3`), **apenas em dev e testes**.
+- O código usa **apenas o AWS SDK S3 com endpoint configurável**, para o storage ser intercambiável (dev, teste e produção podem ser diferentes).
+- Testes de integração do storage com `GenericContainer` do Testcontainers (não há módulo Testcontainers dedicado ao SeaweedFS).
+- Em dev, S3 sem autenticação (porta só em `127.0.0.1`); credenciais entram com o módulo `documentos` (Fase 2).
+Motivo: alternativa livre, leve e ativa; o endpoint configurável evita prender o projeto a um fornecedor.
+
+**D-059 — Eventos do Spring Modulith arquivados, reprocessados ao reiniciar, schema só via Flyway** · 2026-11-26
+- `spring.modulith.events.completion-mode=archive`: eventos concluídos vão para `event_publication_archive` (nada é apagado).
+- `spring.modulith.events.republish-outstanding-events-on-restart=true`: eventos pendentes são reprocessados ao reiniciar.
+- Tabelas `event_publication` (V2) e `event_publication_archive` (V3) criadas pelo Flyway; inicialização automática de schema do Modulith desligada (`spring.modulith.events.jdbc.schema-initialization.enabled=false`).
+- Eventos carregam **apenas ids**, nunca dados pessoais (o evento fica serializado no banco).
+- Limpeza periódica do arquivo de eventos: pendente (CHECKLIST).
+Motivo: rastreabilidade (combina com a auditoria) sem perder eventos em queda da aplicação.
+
+**D-061 — CPF do usuário interno com o mesmo tratamento do paciente** · 2026-11-26
+CPF do `Usuario` cifrado com AES-GCM + `cpf_hash` (HMAC-SHA256), reaproveitando o mesmo `AttributeConverter` e o mesmo cálculo de hash da D-052. O login busca o usuário pelo `cpf_hash` do CPF informado (normalizado).
+Motivo: padrão único de proteção do CPF em todo o sistema.
+
+**D-062 — Pacote Java e groupId `br.com.clinicaviene`** · 2026-11-26
+Pacote renomeado de `com.github.ericjunq.Clinica_Viene` para `br.com.clinicaviene` (minúsculas, sem underscore); `groupId` `br.com.clinicaviene`, `artifactId` `clinica-viene`. Classe principal continua `ClinicaVieneApplication`. Fixtures do teste ArchUnit ficam em `fixtures.lombok` (fora do pacote da aplicação, para o Hibernate e o Modulith não as enxergarem).
+Motivo: convenção Java; os módulos do Modulith são subpacotes, então renomear cedo é mais barato.
+
+**D-063 — Spotless com palantir-java-format, `spotless:check` desligado por enquanto** · 2026-11-26
+Formatador palantir-java-format. O `spotless:check` só será ligado no CI depois de rodar `./mvnw spotless:apply` numa máquina com Java e commitar `style: aplica formatação palantir` (no mesmo commit/push em que o check é ligado).
+Motivo: ligar o check antes de formatar quebraria o CI; nesta máquina não há Java.
+
+**D-064 — Sem pasta `docker/`: Dockerfiles em `backend/` e `frontend/`, compose na raiz** · 2026-11-26
+A pasta `docker/` prevista no planejamento não foi criada (não há arquivos de configuração que precisem dela; o `nginx.conf` fica junto do frontend). Criar só se surgir configuração específica de infraestrutura.
+
+**D-065 — Ruleset da `main` configurado pelo autor** · 2026-11-26
+Tarefa manual do autor no GitHub: ruleset na `main` bloqueando **force push** e **exclusão**. Como o desenvolvimento é direto na `main` (D-058, confirmada pelo autor em 2026-11-26), o ruleset **não** exige PR nem checks antes do push (isso bloquearia o próprio push); o CI roda após cada push e falhas são corrigidas antes de seguir.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 
@@ -234,6 +268,9 @@ Critérios: custo por documento, API, assinatura presencial em tablet, pacote de
 
 **D-041 — Hospedagem (provedor, região) e backups** · A CONFIRMAR
 
+**D-060 — Storage de produção (documentos)** · A CONFIRMAR · 2026-11-26 · decidir junto da D-041
+Definido mais para o fim do projeto, após levantamento de custos: volume estimado de documentos, preço de armazenamento e de transferência, backup, e hospedagem no Brasil (LGPD). Qualquer opção precisa ser S3 compatível (o código usa o AWS SDK S3 com endpoint configurável — D-056).
+
 **D-042 — Ações permitidas ao chatbot da recepção** · A CONFIRMAR (discutir quando chegar a fase)
 
 **D-043 — Biblioteca de UI** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: PrimeNG + FullCalendar).
@@ -241,5 +278,5 @@ Critérios: custo por documento, API, assinatura presencial em tablet, pacote de
 **D-048 — Como carregar dados de configuração reais (seeds) em produção** · A CONFIRMAR · 2026-11-26
 A D-047 só permite `INSERT` de dados fictícios em testes, mas o sistema precisa de configurações iniciais reais: taxas (§8.5), repasses (§8.6), modelo de anamnese, termos LGPD e o primeiro usuário MASTER. Opções: (a) migration de `INSERT` específica, aprovada caso a caso; (b) cadastro pela tela de configurações/endpoint administrativo, sem seed no banco; (c) inicializador na aplicação (ex.: `ApplicationRunner`) idempotente. Decidir antes da Fase 1 (primeiro usuário) e da Fase 5 (taxas/repasses).
 
-**D-056 — Storage S3 local (substituto do MinIO)** · A CONFIRMAR · 2026-11-26
+**D-056 — Storage S3 local (substituto do MinIO)** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: SeaweedFS em dev/teste; produção em D-060).
 A imagem oficial `minio/minio` não está mais disponível no Docker Hub nem no Quay (verificado em 26/11/2026). O compose de dev ficou **sem** storage por enquanto (só será necessário na Fase 2 — PDFs). Opções: SeaweedFS, Garage, RustFS, LocalStack (S3), ou fixar uma imagem MinIO antiga de terceiros. O código usará o AWS SDK S3 (compatível com qualquer uma). Ver `docs/DUVIDAS.md`.

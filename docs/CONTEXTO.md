@@ -1,7 +1,7 @@
 # ClinicaViene — Contexto do Projeto
 
 > Fonte da verdade do projeto. Deve ser atualizada a cada implementação ou alteração.
-> Última atualização: 2026-11-26 — decisões da Fase 0: monorepo, CI, migrations, Lombok, CPF criptografado, paciente sem CPF, PrimeNG/FullCalendar.
+> Última atualização: 2026-11-26 — SeaweedFS (dev/teste), eventos do Modulith arquivados, CPF do usuário cifrado, pacote `br.com.clinicaviene`, desenvolvimento direto na `main`.
 
 ---
 
@@ -33,7 +33,7 @@ O sistema será construído **em partes** (ver `docs/CHECKLIST.md`), não de uma
 
 Regras:
 
-- Usuários internos fazem login com **CPF + senha**, com **2FA** (TOTP ou código por e-mail).
+- Usuários internos fazem login com **CPF + senha**, com **2FA** (TOTP ou código por e-mail). O usuário é localizado pelo `cpf_hash` do CPF informado (D-061).
 - Somente DEV e MASTER criam usuários ADMIN/PROFISSIONAL. Só MASTER cria outro MASTER.
 - Pacientes **não têm login** no sistema interno; interagem apenas por links seguros de uso único (cadastro, anamnese, assinatura, visualização de documento).
 - Autorização na camada de serviço (não só no controller), testada por perfil.
@@ -50,7 +50,7 @@ Regras:
 | `prontuario` | Prontuário, vínculos profissional↔paciente, procedimentos, adendos, acesso de emergência |
 | `agenda` | Consultórios, disponibilidade, exceções, bloqueios, agendamentos, check-in |
 | `financeiro` | Orçamentos, descontos, configuração de taxas e repasses, pagamentos, parcelas, relatórios |
-| `documentos` | Geração de PDF, armazenamento (S3/MinIO), hash, integração com plataforma de assinatura |
+| `documentos` | Geração de PDF, armazenamento (S3 compatível — SeaweedFS em dev/teste, produção a definir), hash, integração com plataforma de assinatura |
 | `notificacoes` | Tempo real (WebSocket), e-mail, futuramente SMS/WhatsApp |
 | `auditoria` | Log imutável de acessos e alterações |
 | `lgpd` | Termos versionados, aceites, consentimentos opcionais, solicitações do titular |
@@ -234,7 +234,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 
 ## 9. Documentos e assinaturas
 
-- Documentos gerados em PDF (HTML Thymeleaf → openhtmltopdf), guardados em storage privado (S3/MinIO, criptografado), referenciados por **chave**, nunca URL pública. Hash SHA-256 guardado no banco.
+- Documentos gerados em PDF (HTML Thymeleaf → openhtmltopdf), guardados em storage privado S3 compatível (criptografado; AWS SDK S3 com endpoint configurável — SeaweedFS em dev/teste, produção A CONFIRMAR — D-056/D-060), referenciados por **chave**, nunca URL pública. Hash SHA-256 guardado no banco.
 - Tipos: ficha de cadastro + anamnese, termo de consentimento do procedimento, registro de procedimento, termos LGPD aceitos.
 - **Paciente**: assinatura eletrônica avançada (Lei 14.063/2020) — OTP por e-mail/SMS ou presencial no tablet, desenho da assinatura, IP, dispositivo, data/hora, hash, trilha de evidências.
 - **Profissional**: preferencialmente certificado digital ICP-Brasil (Resolução CFO 91/2009 – NGS2).
@@ -271,7 +271,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 - TLS em tudo; senhas com Argon2/BCrypt; 2FA para internos; rate limit em login e links.
 - Refresh token guardado como hash, com rotação e revogação.
 - Criptografia de campos sensíveis (anamnese, CPF) e de backups; documentos em storage privado.
-- **CPF (D-052)**: cifrado com **AES-256-GCM** via `AttributeConverter` (IV aleatório por valor; o texto cifrado carrega o id da versão da chave). Coluna `cpf_hash` = **HMAC-SHA256** do CPF normalizado com chave secreta separada, para unicidade (índice único parcial `WHERE cpf_hash IS NOT NULL`) e busca. Nunca SHA puro (quebrável por força bruta). Vale para paciente e responsável legal (usuário interno: ver `docs/DUVIDAS.md`).
+- **CPF (D-052)**: cifrado com **AES-256-GCM** via `AttributeConverter` (IV aleatório por valor; o texto cifrado carrega o id da versão da chave). Coluna `cpf_hash` = **HMAC-SHA256** do CPF normalizado com chave secreta separada, para unicidade (índice único parcial `WHERE cpf_hash IS NOT NULL`) e busca. Nunca SHA puro (quebrável por força bruta). Vale para paciente, responsável legal e usuário interno (D-061), com o mesmo converter.
 - **Gestão de chaves**:
   - Chaves vêm do ambiente (`CRIPTO_CHAVES` — mapa versão→chave, `CRIPTO_CHAVE_ATIVA`, `CPF_HMAC_CHAVE`), nunca do repositório.
   - **Chave de criptografia perdida = dado irrecuperável.** Backup das chaves em local separado do backup do banco (ex.: cofre de senhas + cópia offline), com acesso restrito ao MASTER/responsável técnico.
@@ -292,7 +292,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 ## 12. Modelo de dados (resumo)
 
 ```
-Usuario(id, nomeCompleto, cpf UK (cifrar como o do paciente? — ver DUVIDAS), email UK, telefone, cro, perfil, status, senhaHash, totpSecret, createdAt, updatedAt)
+Usuario(id, nomeCompleto, cpf (cifrado), cpfHash UK, email UK, telefone, cro, perfil, status, senhaHash, totpSecret, createdAt, updatedAt)
 RefreshToken(id, tokenHash UK, usuario_id, revoked, createdAt, expiresAt)
 Paciente(id, nomeCompleto, cpf? (cifrado), cpfHash? UK parcial, dataNascimento, telefone, email, endereco, origemCadastro,
          semCpfJustificativa?, semCpfAprovadoPor?, semCpfAprovadoEm?, createdAt, updatedAt)
@@ -334,16 +334,19 @@ Todos os enums persistidos como STRING.
 **Backend**: Java 25, Spring Boot 4.2.x, Maven, Spring Modulith, Spring Web MVC, Spring Security + OAuth2 Resource Server (JWT), Spring Data JPA, PostgreSQL, Flyway, Validation, WebSocket, Mail, Thymeleaf, Actuator, springdoc-openapi, MapStruct, openhtmltopdf, ZXing, SDK S3, Bucket4j.
 
 Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modulith-bom`), Lombok (gerenciado pelo Boot) + MapStruct.
+Pacote base e `groupId`: **`br.com.clinicaviene`** (D-062); módulos do Modulith são subpacotes (`br.com.clinicaviene.pacientes`, …).
+
+**Eventos do Modulith (D-059)**: `completion-mode=archive` (concluídos vão para `event_publication_archive`), `republish-outstanding-events-on-restart=true`, tabelas criadas pelo Flyway (inicialização automática desligada). Eventos carregam só ids, nunca dados pessoais.
 
 **Frontend**: Angular **22.3** (standalone components, zoneless — sem zone.js, SCSS, sem SSR — D-057), **PrimeNG** (componentes) + **FullCalendar** (`@fullcalendar/angular`, agenda) — D-043; `signature_pad`, Vitest, Playwright.
 
-**Infra**: Docker (imagens multi-stage, processos sem root), `compose.yaml` na raiz (Postgres `18.7-alpine`, Mailpit; backend e frontend no profile `app` — frontend em nginx com `/api/` encaminhado ao backend no mesmo domínio; storage S3 local A CONFIRMAR — D-056), credenciais no `.env` (fora do Git) a partir de `.env.example`, GitHub Actions.
+**Infra**: Docker (imagens multi-stage, processos sem root), `compose.yaml` na raiz (Postgres `18.7-alpine`, Mailpit, SeaweedFS `4.55` como S3 de dev — D-056; backend e frontend no profile `app` — frontend em nginx com `/api/` encaminhado ao backend no mesmo domínio). Storage de produção: A CONFIRMAR após análise de custos (D-060), credenciais no `.env` (fora do Git) a partir de `.env.example`, GitHub Actions.
 
-**Estrutura do repositório (D-044)**: `backend/` (Maven), `frontend/` (Angular), `docs/`, `.github/workflows/`, `compose.yaml` e `.env.example` na raiz.
+**Estrutura do repositório (D-044, D-064)**: `backend/` (Maven + `Dockerfile`), `frontend/` (Angular + `Dockerfile` + `nginx.conf`), `docs/`, `.github/workflows/`, `compose.yaml` e `.env.example` na raiz. Não há pasta `docker/` (criar só se surgir configuração de infraestrutura que não pertença a um dos projetos).
 
 **Lombok (D-051)**: permitido `@Getter`, `@Setter` (só onde necessário), `@NoArgsConstructor(access = PROTECTED)` em entidades, `@RequiredArgsConstructor` em services, `@Slf4j`, `@Builder` pontual. Proibido `@Data`, `@EqualsAndHashCode`, `@ToString`, `@AllArgsConstructor` em entidades JPA e `@Value` em geral (usar `record`). `equals`/`hashCode` de entidade à mão, só pelo id. DTOs sempre `record`. `lombok.config` com `config.stopBubbling = true` e `lombok.addLombokGeneratedAnnotation = true`. Verificado por teste ArchUnit.
 
-**Banco e migrations (D-047)**: Flyway com SQL puro em `backend/src/main/resources/db/migration/`; `ddl-auto=validate`. Extensões (`btree_gist`) e a tabela `event_publication` do Modulith também vêm de migrations (D-049/D-050). Em dev, migrations só com `CREATE`. `INSERT` de dados fictícios apenas para testes, em `backend/src/test/resources/db/testdata/` (carregado só no perfil de teste). `ALTER`/`UPDATE`/`DELETE`/`DROP` somente com aprovação do autor. Seeds de configuração real (taxas, repasses, termos, primeiro MASTER): forma A CONFIRMAR (D-048).
+**Banco e migrations (D-047)**: Flyway com SQL puro em `backend/src/main/resources/db/migration/`; `ddl-auto=validate`. Extensões (`btree_gist`) e as tabelas `event_publication`/`event_publication_archive` do Modulith também vêm de migrations (D-049/D-050/D-059). Em dev, migrations só com `CREATE`. `INSERT` de dados fictícios apenas para testes, em `backend/src/test/resources/db/testdata/` (carregado só no perfil de teste). `ALTER`/`UPDATE`/`DELETE`/`DROP` somente com aprovação do autor. Seeds de configuração real (taxas, repasses, termos, primeiro MASTER): forma A CONFIRMAR (D-048).
 
 **Padrões**: DTOs com records; controllers finos; regras no domínio/serviço; erros com Problem Details (RFC 9457); API versionada `/api/v1`; OpenAPI documentado.
 
@@ -358,12 +361,12 @@ Versões: Spring Boot **4.2.0**, Spring Modulith **2.2.0** (GA, via `spring-modu
 ## 14. Testes e CI/CD
 
 - **Backend unitário**: JUnit 5 + Mockito + AssertJ. Foco total nas fórmulas financeiras (tabela de casos, arredondamento, soma das parcelas).
-- **Backend integração**: `@SpringBootTest` + Testcontainers (PostgreSQL, MinIO) + REST Assured + GreenMail. Testes de autorização por perfil.
+- **Backend integração**: `@SpringBootTest` + Testcontainers (PostgreSQL; SeaweedFS via `GenericContainer` para storage) + REST Assured + GreenMail. Testes de autorização por perfil.
 - **Arquitetura**: Spring Modulith `verify()` + ArchUnit.
 - **Frontend unitário**: Vitest.
 - **E2E navegador**: Playwright contra o ambiente docker-compose.
 - **Cobertura**: JaCoCo (meta inicial 80% em `financeiro`, `prontuario`, `identidade`).
-- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (qualquer branch) e em PR para `main`. Hoje: job `backend` (build + testes unitários e de integração com `./mvnw verify` + relatórios de teste e JaCoCo como artefatos), job `frontend` (npm ci, lint com angular-eslint, Prettier, Vitest, build de produção) e job `docker` (valida `compose.yaml` e constrói as imagens do backend e do frontend, sem publicar). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. Merge só com CI verde.
+- **CI (GitHub Actions)** — `.github/workflows/ci.yml`, roda em **todo push** (desenvolvimento direto na `main` — D-058). Hoje: job `backend` (build + testes unitários e de integração com `./mvnw verify` + relatórios de teste e JaCoCo como artefatos), job `frontend` (npm ci, lint com angular-eslint, Prettier, Vitest, build de produção) e job `docker` (valida `compose.yaml` e constrói as imagens do backend e do frontend, sem publicar). Meta: testes front, E2E, cobertura, Spotless/lint, scan de dependências (Dependabot/Trivy), build da imagem Docker, adicionados conforme existirem. CI vermelho na `main` é corrigido antes de qualquer outra implementação. Formatação do backend (Spotless/palantir) com check desligado até a primeira formatação (D-063).
 - **CD**: **adiado** (D-046) — sem deploy por enquanto. Quando houver hospedagem: publicação da imagem no GHCR em merge na `main` + deploy.
 
 ---

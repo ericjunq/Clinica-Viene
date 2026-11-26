@@ -13,18 +13,18 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Mover projeto Spring para `backend/` + `.gitignore` geral na raiz — branch `backend-estrutura-monorepo`
 - [x] Spring Modulith 2.2.0 GA; remover `thymeleaf-extras-springsecurity6` (D-049, D-051) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
 - [x] Dependências manuais no `pom.xml` (Actuator, springdoc, MapStruct, openhtmltopdf, ZXing, AWS SDK S3, Bucket4j, REST Assured, ArchUnit, GreenMail) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
-  - Testcontainers MinIO **não** adicionado: imagem indisponível (D-056)
+  - Testcontainers MinIO **não** adicionado: imagens oficiais removidas (D-056). Storage será testado com SeaweedFS via `GenericContainer`.
 - [x] Lombok: `lombok.config`, ordem dos annotation processors, teste ArchUnit das regras (`EntidadesLombokArchTest`) (D-051) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
 - [x] Plugins: JaCoCo, Spotless, Surefire (`*Test`) / Failsafe (`*IT`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
-  - [ ] Rodar `./mvnw spotless:apply` numa máquina com Java e ligar o `spotless:check` no build/CI (Q-004)
+  - [ ] Rodar `./mvnw spotless:apply` em máquina com Java, commitar `style: aplica formatação palantir` e ligar `spotless:check` no CI no mesmo push (D-063)
   - [ ] Metas de cobertura JaCoCo por módulo quando os módulos existirem
 - [x] Flyway: `ddl-auto=validate`, migration `btree_gist`, tabela `event_publication` do Modulith; `db/testdata` só no perfil de teste (`MigracoesIT`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
 - [x] Teste de módulos (`ModulosTest` — `ApplicationModules.verify()`) — branch `backend-estrutura-monorepo` — **CI verde** (2026-11-26)
 - [x] `compose.yaml` na raiz (Postgres 18.7-alpine, Mailpit, backend no profile `app`), `.env.example`, Dockerfile multi-stage do backend (D-050) — branch `docker-compose-base` — **CI verde**: compose validado e imagem construída (2026-11-26)
   - [ ] Validar localmente (máquina com Docker): `cp .env.example .env && docker compose up -d`, rodar o backend pela IDE, e `docker compose --profile app up -d --build`
-- [ ] Storage S3 local no compose (substituto do MinIO — D-056 A CONFIRMAR)
+- [~] Storage S3 local no compose: SeaweedFS `4.55` (`server -s3`, porta 8333 só em localhost) — D-056 — compose validado no CI; não executado localmente
 - [x] CI: testes do backend (`./mvnw verify`) + relatórios de teste e cobertura; validação do `compose.yaml` e build da imagem do backend (sem publicar) — a cada push e em PR para `main` (D-046) — branch `ci-pipeline-inicial` — **CI verde**: 8 testes unitários + 3 de integração passaram (2026-11-26)
-- [ ] CI: testes do frontend, lint (Spotless — Q-004), metas de cobertura, scan de dependências (conforme existirem)
+- [ ] CI: lint do backend (Spotless — D-063), metas de cobertura, scan de dependências (conforme existirem)
 - [x] Gerar frontend Angular 22.3 (`frontend/`, standalone, zoneless, SCSS, Vitest, sem SSR) + casca mínima — branch `frontend-projeto-angular` — testes unitários **executados localmente: 2 passaram** (`npm test -- --watch=false`) e `npm run build` ok (2026-11-26)
 - [x] Dockerfile multi-stage do frontend (Node 24 → nginx sem root, proxy `/api/` → backend) + serviço `frontend` no compose (profile `app`) + proxy do `ng serve` — branch `frontend-projeto-angular` — **CI verde**: imagem construída (2026-11-26)
 - [x] CI: job `frontend` (npm ci, Vitest, build) e build da imagem do frontend — branch `frontend-projeto-angular` — **CI verde** (2026-11-26)
@@ -32,13 +32,17 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
 - [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)
-- [ ] ~~Proteção da branch `main` (PR + CI verde)~~ — sem PRs desde a D-058; opcional: só bloquear force-push/exclusão da `main`
+- [ ] **Tarefa manual do autor**: ruleset na `main` no GitHub bloqueando force push e exclusão (sem exigir PR — desenvolvimento direto na `main`, D-058/D-065)
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
+- [~] Renomear pacote para `br.com.clinicaviene` (groupId, artifactId `clinica-viene`, fixtures em `fixtures.lombok`) — D-062
+- [~] Eventos do Modulith: `completion-mode=archive`, republicação ao reiniciar, `event_publication_archive` via Flyway (V3), init automático desligado — D-059
+- [ ] Limpeza periódica de `event_publication_archive` (job agendado; definir prazo de retenção junto da D-040)
+- [x] Pasta `docker/` dispensada: Dockerfiles em `backend/` e `frontend/`, compose na raiz (D-064)
 - [ ] Decidir forma de carregar seeds de configuração real (D-048 — A CONFIRMAR)
 
 ## Fase 1 — Identidade, auditoria e base LGPD
-- [ ] Entidade `Usuario` + migração Flyway
-- [ ] Login CPF + senha, JWT + refresh token (hash, rotação, revogação)
+- [ ] Entidade `Usuario` + migração Flyway (CPF cifrado + `cpf_hash`, reaproveitando o converter da D-052 — D-061)
+- [ ] Login CPF + senha (busca pelo `cpf_hash`), JWT + refresh token (hash, rotação, revogação)
 - [ ] 2FA para usuários internos
 - [ ] Criação de usuários por DEV/MASTER; regras de perfil
 - [ ] Rate limit de login
@@ -50,7 +54,7 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 
 ## Fase 2 — Pacientes e anamnese
 - [ ] `Paciente`, `ResponsavelLegal`, histórico de versões
-- [ ] Criptografia do CPF: `AttributeConverter` AES-GCM com chave versionada + `cpf_hash` HMAC-SHA256 + índice único parcial (D-052)
+- [ ] Criptografia do CPF: `AttributeConverter` AES-GCM com chave versionada + `cpf_hash` HMAC-SHA256 + índice único parcial (D-052) — se a Fase 1 vier antes, implementar já no `Usuario` (D-061)
 - [ ] Regras de CPF: opcional para menor (CPF do responsável obrigatório); adulto sem CPF só com aprovação do MASTER + auditoria; alerta de duplicidade (D-053)
 - [ ] Pré-cadastro pela recepção
 - [ ] `ConviteCadastro` (token hash, uso único, 72h) + QR code + e-mail
@@ -58,7 +62,7 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [ ] Modo quiosque (tablet)
 - [ ] Cadastro pela recepção com origem `RECEPCAO`
 - [ ] `ModeloAnamnese` versionado + `FichaAnamnese` + validade
-- [ ] Geração de PDF + hash + storage privado
+- [ ] Geração de PDF + hash + storage privado (AWS SDK S3 com endpoint configurável; testes com SeaweedFS em `GenericContainer` — D-056)
 - [ ] Testes de fluxo completo (E2E)
 
 ## Fase 3 — Agenda
@@ -105,6 +109,7 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 
 ## Fase 8 — CD e deploy (adiado — D-046)
 - [ ] Definir hospedagem e backups (D-041)
+- [ ] Definir storage de produção com análise de custos (volume de documentos, armazenamento, transferência, backup, hospedagem no Brasil — D-060)
 - [ ] Publicar imagem Docker no GHCR em merge na `main`
 - [ ] Pipeline de deploy
 

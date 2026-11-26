@@ -30,6 +30,7 @@ public class ServicoUsuarios {
     private final HashCpf hashCpf;
     private final PasswordEncoder codificador;
     private final ServicoAuditoria auditoria;
+    private final ServicoSessoes sessoes;
     private final Clock relogio;
 
     ServicoUsuarios(
@@ -37,11 +38,13 @@ public class ServicoUsuarios {
             HashCpf hashCpf,
             PasswordEncoder codificador,
             ServicoAuditoria auditoria,
+            ServicoSessoes sessoes,
             Clock relogio) {
         this.repositorio = repositorio;
         this.hashCpf = hashCpf;
         this.codificador = codificador;
         this.auditoria = auditoria;
+        this.sessoes = sessoes;
         this.relogio = relogio;
     }
 
@@ -114,6 +117,10 @@ public class ServicoUsuarios {
             return usuario;
         }
         usuario.alterarStatus(novoStatus, agora());
+        if (novoStatus == StatusUsuario.INATIVO) {
+            // D-068: inativo perde o acesso na hora (o ConversorJwt já barra o JWT; aqui caem as renovações).
+            sessoes.revogarTodas(usuario.getId());
+        }
         AcaoAuditoria acao =
                 novoStatus == StatusUsuario.ATIVO ? AcaoAuditoria.USUARIO_ATIVADO : AcaoAuditoria.USUARIO_DESATIVADO;
         auditoria.registrar(RegistroAuditoria.sobre(ator.id(), acao, ENTIDADE, usuario.getId()));

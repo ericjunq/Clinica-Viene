@@ -7,15 +7,15 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 /** Respostas 401/403 do Spring Security no formato Problem Details (RFC 9457). */
-final class RespostaProblemaSeguranca {
+public final class RespostaProblemaSeguranca {
 
     private RespostaProblemaSeguranca() {}
 
-    static AuthenticationEntryPoint naoAutenticado() {
+    public static AuthenticationEntryPoint naoAutenticado() {
         return (requisicao, resposta, excecao) -> escrever(resposta, 401, "Unauthorized", "Autenticação necessária.");
     }
 
-    static AccessDeniedHandler acessoNegado() {
+    public static AccessDeniedHandler acessoNegado() {
         return (requisicao, resposta, excecao) -> escrever(resposta, 403, "Forbidden", "Acesso negado.");
     }
 

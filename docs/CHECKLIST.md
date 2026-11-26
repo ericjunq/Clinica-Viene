@@ -52,15 +52,16 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] `audit_log` (V4) + trigger que rejeita `UPDATE`/`DELETE`/`TRUNCATE` (D-076) + `ServicoAuditoria` (`registrar` na transação da operação, `registrarIndependente` em transação própria) + IP real atrás do proxy (`AuditoriaIT`) — **CI verde**
 
 **1C. Usuários**
-- [~] `Usuario` (V5: CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional único, trocarSenha; CHECKs no banco) — D-061, D-068, D-069
-- [~] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER; ninguém altera o próprio status (D-067) — `RegrasDePerfil` + `ServicoUsuarios`; endpoints `/api/v1/usuarios` (testados via HTTP na 1D)
-- [~] Política de senha (D-066) + Argon2id (D-074) + troca da própria senha
-- [~] Inicializador do DEV (D-048) — `DEV_INICIAL_*`
+- [x] `Usuario` (V5: CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional único, trocarSenha; CHECKs no banco) — D-061, D-068, D-069
+- [x] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER; ninguém altera o próprio status (D-067) — `RegrasDePerfil` + `ServicoUsuarios`; endpoints `/api/v1/usuarios` (testados via HTTP na 1D)
+- [x] Política de senha (D-066) + Argon2id (D-074) + troca da própria senha — **CI verde**
+- [x] Inicializador do DEV (D-048) — `DEV_INICIAL_*` — **CI verde**
 - [ ] Edição de dados do usuário (nome, e-mail, telefone, registro) e mudança de perfil — não incluídas na 1C; definir regras
 
 **1D. Autenticação**
-- [ ] Login em 2 passos com desafio; JWT RSA 15 min; refresh opaco em cookie 12 h com rotação e revogação da cadeia; logout; `/auth/eu` (D-071)
-- [ ] Status checado a cada requisição; desativar revoga sessões (D-068)
+- [~] Sessões: JWT RS256 15 min (`JWT_CHAVE_PRIVADA`), token de renovação opaco (hash SHA-256) com rotação, fim absoluto de 12 h, reuso → revoga a cadeia (tolerância de 20 s para corrida entre abas → 409), logout (`ServicoSessoesIT`)
+- [ ] Login em 2 passos com desafio + endpoints `/auth/*` + cookie (D-071)
+- [~] Status checado a cada requisição (`ConversorJwt`); desativar revoga sessões (D-068); troca de senha pendente → só rotas de troca de senha
 - [ ] Rate limit de login (Bucket4j, IP + CPF)
 
 **1E. 2FA**

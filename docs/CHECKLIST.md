@@ -40,19 +40,47 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Pasta `docker/` dispensada: Dockerfiles em `backend/` e `frontend/`, compose na raiz (D-064)
 - [ ] Decidir forma de carregar seeds de configuração real (D-048 — A CONFIRMAR)
 
-## Fase 1 — Identidade, auditoria e base LGPD
-- [ ] Entidade `Usuario` + migração Flyway (CPF cifrado + `cpf_hash`, reaproveitando o converter da D-052 — D-061)
-- [ ] Login CPF + senha (busca pelo `cpf_hash`), JWT + refresh token (hash, rotação, revogação)
-- [ ] 2FA para usuários internos
-- [ ] Criação de usuários por DEV/MASTER; regras de perfil
-- [ ] Rate limit de login
-- [ ] `AuditLog` append-only + aspecto/listener de auditoria
-- [ ] `TermoVersao` + `AceiteTermo`
-- [ ] Problem Details padronizado + OpenAPI
-- [ ] Telas: login, 2FA, gestão de usuários
-- [ ] Testes de autorização por perfil
+## Fase 1 — Identidade, auditoria e login
+Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
+
+**1A. Base compartilhada**
+- [ ] Criptografia: `CpfCriptografadoConverter` (AES-256-GCM, chave versionada), `HashCpf` (HMAC-SHA256), validador de CPF; app não sobe sem as chaves
+- [ ] Problem Details (RFC 9457) + OpenAPI em `/api/v1`
+- [ ] Spring Security base: tudo fechado por padrão, stateless, `@PreAuthorize` nos services
+
+**1B. Auditoria**
+- [ ] `audit_log` + trigger que rejeita `UPDATE`/`DELETE` (D-076) + `ServicoAuditoria`
+
+**1C. Usuários**
+- [ ] `Usuario` (CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional, trocarSenha) — D-061, D-068, D-069
+- [ ] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER (D-067)
+- [ ] Política de senha (D-066) + Argon2id (D-074)
+- [ ] Inicializador do DEV (D-048)
+
+**1D. Autenticação**
+- [ ] Login em 2 passos com desafio; JWT RSA 15 min; refresh opaco em cookie 12 h com rotação e revogação da cadeia; logout; `/auth/eu` (D-071)
+- [ ] Status checado a cada requisição; desativar revoga sessões (D-068)
+- [ ] Rate limit de login (Bucket4j, IP + CPF)
+
+**1E. 2FA**
+- [ ] TOTP (RFC 6238) + QR code + 10 códigos de recuperação (D-072)
+- [ ] Código 2FA por e-mail com regras de reenvio (D-073)
+
+**1F. Frontend**
+- [ ] PrimeNG; telas de login, 2FA (cadastro com QR, verificação, recuperação, envio por e-mail), troca de senha, usuários (lista, cadastro, ativar/desativar)
+- [ ] Interceptor de renovação automática + guards por perfil
+- [ ] Playwright + job E2E no CI (compose completo)
+
+**1G. Recuperação de senha por e-mail** (opcional)
+- [ ] Token de uso único e curta duração, com regras de reenvio (D-073)
+
+**Testes da fase**
+- [ ] Matriz de autorização (cada perfil × cada endpoint)
+- [ ] Cobertura JaCoCo ≥ 80% em `identidade`
 
 ## Fase 2 — Pacientes e anamnese
+- [ ] `TermoVersao` + `AceiteTermo` (movidos da Fase 1 — D-075)
+- [ ] Anamnese, prontuário e categorias por área de atuação (D-070 — A CONFIRMAR)
 - [ ] `Paciente`, `ResponsavelLegal`, histórico de versões
 - [ ] Criptografia do CPF: `AttributeConverter` AES-GCM com chave versionada + `cpf_hash` HMAC-SHA256 + índice único parcial (D-052) — se a Fase 1 vier antes, implementar já no `Usuario` (D-061)
 - [ ] Regras de CPF: opcional para menor (CPF do responsável obrigatório); adulto sem CPF só com aprovação do MASTER + auditoria; alerta de duplicidade (D-053)

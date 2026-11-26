@@ -1,13 +1,13 @@
 # ClinicaViene — Contexto do Projeto
 
 > Fonte da verdade do projeto. Deve ser atualizada a cada implementação ou alteração.
-> Última atualização: 2026-11-26 — SeaweedFS (dev/teste), eventos do Modulith arquivados, CPF do usuário cifrado, pacote `br.com.clinicaviene`, desenvolvimento direto na `main`.
+> Última atualização: 2026-11-26 — plano da Fase 1: clínica multiprofissional, DEV independente, status ATIVO/INATIVO, política de senha, autenticação (JWT + refresh em cookie), 2FA (TOTP + e-mail), regras de reenvio.
 
 ---
 
 ## 1. Visão geral e objetivos
 
-Sistema web para uma clínica odontológica de cidade pequena (hoje com **1 consultório**, preparada para N).
+Sistema web para uma clínica de saúde de cidade pequena (hoje com **1 consultório** e atendimento odontológico, preparada para N consultórios e **outras áreas da saúde** — psicologia, medicina, nutrição etc. — D-069).
 
 Objetivos, em ordem de prioridade:
 
@@ -26,15 +26,19 @@ O sistema será construído **em partes** (ver `docs/CHECKLIST.md`), não de uma
 
 | Perfil | Quem é | Pode |
 |---|---|---|
-| **DEV** | Desenvolvedor | Administração técnica, criar usuários ADMIN e PROFISSIONAL. **Não acessa dados de pacientes em produção** (dados clínicos e cadastrais ficam bloqueados; acesso técnico excepcional só com justificativa e auditoria). |
-| **MASTER** | Dono(a) da clínica | Tudo: criar usuários, configurações, relatórios, financeiro, aprovar descontos acima do limite, acesso de emergência a prontuários (com justificativa). |
+| **DEV** | Desenvolvedor (o autor) | Administração técnica; criar o MASTER e usuários ADMIN/PROFISSIONAL; ativar/desativar ADMIN e PROFISSIONAL. **Independente do MASTER** (D-067): criado só pelo inicializador, o MASTER não vê/edita/desativa DEV, e o DEV não desativa MASTER. **Não acessa dados de pacientes em produção** (acesso técnico excepcional só com justificativa e auditoria). |
+| **MASTER** | Dono(a) da clínica | Tudo, exceto gerenciar DEV: criar usuários (ADMIN, PROFISSIONAL, MASTER), ativar/desativar usuários, configurações, relatórios, financeiro, aprovar descontos acima do limite, acesso de emergência a prontuários (com justificativa). |
 | **ADMIN** | Recepção | Cadastro de pacientes, gerar link/QR de cadastro, agenda (marcar/remarcar/cancelar), check-in e aviso ao profissional, orçamentos, pagamentos, configuração de preços/taxas/repasses, transferir vínculo paciente↔profissional. **Não vê conteúdo clínico** (anamnese, procedimentos descritos, documentos clínicos) — só dados cadastrais, agenda e financeiro. |
-| **PROFISSIONAL** | Dentista | Ver e registrar no prontuário **apenas** de pacientes com vínculo ativo com ele; ver a própria agenda; receber aviso de chegada; ver os próprios repasses. |
+| **PROFISSIONAL** | Profissional de saúde (dentista, psicólogo, médico…), com área de atuação e registro no conselho | Ver e registrar no prontuário **apenas** de pacientes com vínculo ativo com ele; ver a própria agenda; receber aviso de chegada; ver os próprios repasses. |
 
 Regras:
 
 - Usuários internos fazem login com **CPF + senha**, com **2FA** (TOTP ou código por e-mail). O usuário é localizado pelo `cpf_hash` do CPF informado (D-061).
-- Somente DEV e MASTER criam usuários ADMIN/PROFISSIONAL. Só MASTER cria outro MASTER.
+- Somente DEV e MASTER criam usuários ADMIN/PROFISSIONAL. O primeiro MASTER é criado pelo DEV; depois, MASTER também cria MASTER. **Nenhum endpoint cria DEV** (D-067).
+- **Primeiro acesso (D-048)**: o inicializador cria o usuário DEV a partir de variáveis de ambiente, uma única vez, só com o banco sem usuários (auditado); o DEV cria o MASTER pelo sistema. Senha provisória → troca e cadastro de 2FA obrigatórios no primeiro login.
+- **Status (D-068)**: apenas `ATIVO` e `INATIVO`; usuário nunca é apagado. MASTER ativa/desativa qualquer usuário exceto DEV; DEV ativa/desativa ADMIN e PROFISSIONAL. Desativar revoga todas as sessões na hora, e o status é checado a cada requisição — inativo não acessa nada. Desativar um MASTER: só manualmente no banco, pelo DEV (fora do sistema, registrar o motivo).
+- **Senha (D-066)**: mínimo 12 caracteres, com pelo menos 1 letra maiúscula, 1 minúscula e 1 caractere especial. Hash Argon2id (D-074).
+- **Bloqueio por tentativas**: não é status; é bloqueio temporário por rate limit (IP e CPF).
 - Pacientes **não têm login** no sistema interno; interagem apenas por links seguros de uso único (cadastro, anamnese, assinatura, visualização de documento).
 - Autorização na camada de serviço (não só no controller), testada por perfil.
 
@@ -268,8 +272,14 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 - Fluxo para pedidos (acesso, correção, portabilidade, informação). Pedido de exclusão responde com a retenção obrigatória do prontuário (art. 16, I).
 
 **Segurança técnica**
-- TLS em tudo; senhas com Argon2/BCrypt; 2FA para internos; rate limit em login e links.
-- Refresh token guardado como hash, com rotação e revogação.
+- TLS em tudo; senhas com Argon2id (D-074); 2FA para internos (D-072); rate limit em login e links.
+- **Autenticação (D-071)**:
+  - Login em 2 passos: CPF + senha → **desafio** (token interno de uso único, 5 min, máx. 5 códigos errados) → código 2FA → sessão.
+  - **Token de acesso**: JWT assinado (RSA, chave do ambiente), 15 min, só na memória do frontend, enviado no header `Authorization`.
+  - **Token de renovação**: valor aleatório opaco (hash no banco), 12 h, cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`, rotação a cada uso; reuso de token já trocado revoga toda a cadeia (sessão).
+  - Status do usuário checado a cada requisição (inativo perde acesso na hora).
+- **2FA (D-072)**: TOTP (app autenticador, RFC 6238) + 10 códigos de recuperação de uso único (guardados como hash); alternativa: código de 6 dígitos por e-mail. Segredo TOTP guardado cifrado.
+- **Reenvio de e-mails e códigos (D-073)**: vale para código 2FA por e-mail, recuperação de senha, convites de cadastro e códigos de assinatura. Espera crescente entre envios (1, 2, 5, 10 min); máximo **5 envios** por destinatário e finalidade, depois só após **1 hora**; código/link errado 5 vezes é invalidado. Tudo configurável e auditado; respostas sempre genéricas (não revelam se CPF/e-mail existe).
 - Criptografia de campos sensíveis (anamnese, CPF) e de backups; documentos em storage privado.
 - **CPF (D-052)**: cifrado com **AES-256-GCM** via `AttributeConverter` (IV aleatório por valor; o texto cifrado carrega o id da versão da chave). Coluna `cpf_hash` = **HMAC-SHA256** do CPF normalizado com chave secreta separada, para unicidade (índice único parcial `WHERE cpf_hash IS NOT NULL`) e busca. Nunca SHA puro (quebrável por força bruta). Vale para paciente, responsável legal e usuário interno (D-061), com o mesmo converter.
 - **Gestão de chaves**:
@@ -279,7 +289,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
   - A chave do HMAC não é rotacionável sem recalcular todos os `cpf_hash` (exige job dedicado e aprovação).
   - Procedimento detalhado: documento operacional a escrever antes de produção (CHECKLIST).
 - Princípio do menor privilégio (§2); DEV sem acesso a dados de pacientes em produção.
-- `AuditLog` append-only: usuário, ação, entidade, id, data, IP, justificativa (quando houver).
+- `AuditLog` append-only: usuário, ação, entidade, id, data, IP, justificativa (quando houver). Garantido no banco por trigger que rejeita `UPDATE`/`DELETE` (D-076).
 - Ambientes de dev/teste apenas com dados fictícios.
 - Logs sem dados pessoais/sensíveis.
 
@@ -292,8 +302,13 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 ## 12. Modelo de dados (resumo)
 
 ```
-Usuario(id, nomeCompleto, cpf (cifrado), cpfHash UK, email UK, telefone, cro, perfil, status, senhaHash, totpSecret, createdAt, updatedAt)
-RefreshToken(id, tokenHash UK, usuario_id, revoked, createdAt, expiresAt)
+Usuario(id, nomeCompleto, cpf (cifrado), cpfHash UK, email UK, telefone, perfil, status ATIVO|INATIVO,
+        areaAtuacao?, conselho?, numeroRegistro?, ufRegistro?   (obrigatórios para PROFISSIONAL — D-069),
+        senhaHash, trocarSenha, totpSegredo (cifrado)?, totpAtivo, createdAt, updatedAt)
+RefreshToken(id, tokenHash UK, usuario_id, cadeia_id, substituidoPor?, revogadoEm?, createdAt, expiresAt)
+DesafioLogin(id, tokenHash UK, usuario_id, tentativas, usadoEm?, expiraEm)
+CodigoRecuperacao2fa(id, usuario_id, codigoHash, usadoEm?)
+EnvioCodigo(id, destinatarioHash, finalidade, codigoHash, tentativas, enviadoEm, expiraEm, usadoEm?)   (reenvio/cooldown — D-073)
 Paciente(id, nomeCompleto, cpf? (cifrado), cpfHash? UK parcial, dataNascimento, telefone, email, endereco, origemCadastro,
          semCpfJustificativa?, semCpfAprovadoPor?, semCpfAprovadoEm?, createdAt, updatedAt)
 ResponsavelLegal(id, paciente_id, nome, cpf (cifrado, obrigatório), cpfHash, parentesco, telefone, email)

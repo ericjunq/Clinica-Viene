@@ -202,6 +202,41 @@ A pasta `docker/` prevista no planejamento não foi criada (não há arquivos de
 **D-065 — Ruleset da `main` configurado pelo autor** · 2026-11-26
 Tarefa manual do autor no GitHub: ruleset na `main` bloqueando **force push** e **exclusão**. Como o desenvolvimento é direto na `main` (D-058, confirmada pelo autor em 2026-11-26), o ruleset **não** exige PR nem checks antes do push (isso bloquearia o próprio push); o CI roda após cada push e falhas são corrigidas antes de seguir.
 
+**D-048 — Primeiro acesso: inicializador cria o DEV; DEV cria o MASTER** · 2026-11-26 · (saiu de A CONFIRMAR)
+Um inicializador na aplicação, ativo só com o banco **sem nenhum usuário**, cria o usuário DEV a partir de variáveis de ambiente (CPF, nome, e-mail, senha provisória) e registra em auditoria; com o banco populado, não faz nada. O DEV cria o MASTER pelo sistema. Senha provisória obriga troca de senha e cadastro de 2FA no primeiro login. Seeds de configuração (taxas, repasses, termos, anamnese) continuam A CONFIRMAR (ver D-048 em A confirmar). Recusada a migration de `INSERT` para usuários (poria dado real no repositório).
+
+**D-066 — Política de senha** · 2026-11-26
+Mínimo 12 caracteres, com pelo menos 1 letra maiúscula, 1 minúscula e 1 caractere especial. Validada no backend (e repetida no frontend só por usabilidade).
+
+**D-067 — DEV independente do MASTER** · 2026-11-26
+O DEV é o autor do sistema. Criado apenas pelo inicializador (nenhum endpoint cria DEV). O MASTER não vê, não edita e não desativa DEV; o DEV não desativa MASTER (se necessário, o DEV faz manualmente no banco, registrando o motivo fora do sistema). DEV continua sem acesso a dados de pacientes (D-003).
+Motivo: o desenvolvedor precisa de acesso técnico que não dependa da clínica, e a clínica de controle que não dependa do desenvolvedor.
+
+**D-068 — Status do usuário: só ATIVO e INATIVO, com efeito imediato** · 2026-11-26
+Sem status `BLOQUEADO` (bloqueio por tentativas é temporário, via rate limit). MASTER ativa/desativa qualquer usuário exceto DEV; DEV ativa/desativa ADMIN e PROFISSIONAL. Desativar revoga todas as sessões; o status é checado a cada requisição.
+Motivo: simplicidade; inativo não pode acessar nem pelos 15 min restantes do JWT.
+
+**D-069 — Clínica multiprofissional: área de atuação e registro profissional** · 2026-11-26
+A dona planeja atender outras áreas (psicologia, medicina etc.). O `Usuario` PROFISSIONAL tem **área de atuação** (`ODONTOLOGIA`, `PSICOLOGIA`, `MEDICINA`, `NUTRICAO`, `FISIOTERAPIA`, `FONOAUDIOLOGIA`, `ENFERMAGEM`, `OUTRA`) e **registro profissional** (conselho — CRO, CRP, CRM, CRN, CREFITO, CRFa, COREN, OUTRO —, número e UF). Substitui o campo `cro`. Impactos nas fases seguintes em D-070.
+
+**D-071 — Autenticação: JWT de acesso + token de renovação em cookie HttpOnly** · 2026-11-26
+Login em 2 passos (senha → desafio de 5 min/5 tentativas → 2FA). JWT de acesso 15 min, só em memória no frontend, header `Authorization`; assinado com RSA (chave do ambiente, validado pelo OAuth2 Resource Server). Token de renovação opaco de 12 h em cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`, guardado como hash, rotacionado a cada uso; reuso revoga a cadeia.
+Motivo: XSS não consegue roubar o token de longa duração; sem estado de sessão no servidor; CSRF neutralizado por `SameSite=Strict`, path restrito e resposta no corpo. Alternativa considerada: sessão no servidor com cookie (mais simples, revogação imediata) — não adotada para manter o desenho já documentado; a revogação imediata é obtida checando o status a cada requisição.
+
+**D-072 — 2FA: TOTP + códigos de recuperação, com alternativa por e-mail** · 2026-11-26
+TOTP (RFC 6238, implementado com `javax.crypto`) obrigatório no primeiro acesso, com 10 códigos de recuperação de uso único. O usuário também pode pedir um código de 6 dígitos por e-mail na tela do 2FA (sujeito à D-073). Observação registrada: e-mail é um segundo fator mais fraco que o app (quem invade o e-mail recebe o código); aceito pelo autor por praticidade.
+
+**D-073 — Reenvio de e-mails e códigos com espera e limite** · 2026-11-26
+Para todo envio de código/link (2FA por e-mail, recuperação de senha, convite de cadastro, códigos de assinatura): espera crescente entre envios (1, 2, 5, 10 min); máximo **5 envios** por destinatário e finalidade, depois só após **1 hora**; 5 tentativas erradas invalidam o código. Configurável no `application.yaml`, auditado, respostas genéricas.
+Motivo: evitar abuso (spam, custo de envio, força bruta) sem travar o usuário legítimo.
+
+**D-074 — Hash de senha com Argon2id** · 2026-11-26 · Adiciona a dependência BouncyCastle (`bcprov`), exigida pelo `Argon2PasswordEncoder` do Spring Security.
+
+**D-075 — Termos LGPD (`TermoVersao`/`AceiteTermo`) movidos para a Fase 2** · 2026-11-26 · O aceite pertence ao paciente, que só existe na Fase 2.
+
+**D-076 — `audit_log` append-only garantido por trigger no banco** · 2026-11-26
+Função + trigger (`CREATE FUNCTION`/`CREATE TRIGGER`, compatível com a D-047) que rejeitam `UPDATE` e `DELETE`. Motivo: a garantia não depende só do código da aplicação.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 
@@ -275,8 +310,16 @@ Definido mais para o fim do projeto, após levantamento de custos: volume estima
 
 **D-043 — Biblioteca de UI** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: PrimeNG + FullCalendar).
 
-**D-048 — Como carregar dados de configuração reais (seeds) em produção** · A CONFIRMAR · 2026-11-26
+**D-048 — Como carregar dados de configuração reais (seeds) em produção** · A CONFIRMAR · 2026-11-26 · **Parte do primeiro usuário decidida em 2026-11-26** (ver Aceitas: inicializador cria o DEV). Continua A CONFIRMAR para taxas, repasses, anamnese e termos.
 A D-047 só permite `INSERT` de dados fictícios em testes, mas o sistema precisa de configurações iniciais reais: taxas (§8.5), repasses (§8.6), modelo de anamnese, termos LGPD e o primeiro usuário MASTER. Opções: (a) migration de `INSERT` específica, aprovada caso a caso; (b) cadastro pela tela de configurações/endpoint administrativo, sem seed no banco; (c) inicializador na aplicação (ex.: `ApplicationRunner`) idempotente. Decidir antes da Fase 1 (primeiro usuário) e da Fase 5 (taxas/repasses).
 
 **D-056 — Storage S3 local (substituto do MinIO)** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: SeaweedFS em dev/teste; produção em D-060).
 A imagem oficial `minio/minio` não está mais disponível no Docker Hub nem no Quay (verificado em 26/11/2026). O compose de dev ficou **sem** storage por enquanto (só será necessário na Fase 2 — PDFs). Opções: SeaweedFS, Garage, RustFS, LocalStack (S3), ou fixar uma imagem MinIO antiga de terceiros. O código usará o AWS SDK S3 (compatível com qualquer uma). Ver `docs/DUVIDAS.md`.
+
+**D-070 — Impactos da clínica multiprofissional nas próximas fases** · A CONFIRMAR · 2026-11-26
+- Categorias de procedimento e percentuais de repasse por área (a lista atual da §8.6 é só de odontologia).
+- Modelos de anamnese por área.
+- Campos do prontuário por área (ex.: "dente/região" só em odontologia).
+- Prazos de retenção e regras de assinatura que variam por conselho (CFO, CFP, CFM…).
+- **Psicologia**: regras próprias de sigilo e registro documental (Resoluções CFP 01/2009 e 06/2019); avaliar se o acesso de emergência (D-007) pode abrir prontuário psicológico. Validar com advogado.
+

@@ -1,6 +1,6 @@
 # CLAUDE.md — ClinicaViene
 
-Sistema de gestão para clínica odontológica (agenda, pacientes, prontuário, financeiro, documentos assinados).
+Sistema de gestão para clínica de saúde multiprofissional — hoje odontologia, preparada para psicologia, medicina etc. (agenda, pacientes, prontuário, financeiro, documentos assinados).
 Stack: **Java 25 + Spring Boot 4.2.x** (backend) · **Angular** (frontend) · **PostgreSQL** · **Docker** · **GitHub Actions**.
 
 ## Leitura obrigatória ao iniciar QUALQUER sessão

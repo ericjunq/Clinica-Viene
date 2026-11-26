@@ -1,15 +1,29 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
-import { MenuItem } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { MenubarModule } from 'primeng/menubar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { LogoComponent } from '../shared/logo/logo.component';
+
+interface ItemMenu {
+  rotulo: string;
+  icone: string;
+  rota: string;
+}
 
 /** Moldura das telas autenticadas: menu (conforme o perfil) e saída. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, ButtonModule, MenubarModule, LogoComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    LogoComponent,
+  ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
@@ -18,13 +32,13 @@ export class ShellComponent {
   private readonly router = inject(Router);
 
   protected readonly usuario = this.auth.usuario;
-  protected readonly itens = computed<MenuItem[]>(() => {
+  protected readonly itens = computed<ItemMenu[]>(() => {
     const perfil = this.usuario()?.perfil;
-    const itens: MenuItem[] = [{ label: 'Início', icon: 'pi pi-home', routerLink: '/' }];
+    const itens: ItemMenu[] = [{ rotulo: 'Início', icone: 'home', rota: '/' }];
     if (perfil === 'DEV' || perfil === 'MASTER') {
-      itens.push({ label: 'Usuários', icon: 'pi pi-users', routerLink: '/usuarios' });
+      itens.push({ rotulo: 'Usuários', icone: 'group', rota: '/usuarios' });
     }
-    itens.push({ label: 'Trocar senha', icon: 'pi pi-key', routerLink: '/trocar-senha' });
+    itens.push({ rotulo: 'Trocar senha', icone: 'key', rota: '/trocar-senha' });
     return itens;
   });
 

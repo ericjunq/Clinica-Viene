@@ -1,8 +1,12 @@
 <main class="pagina-publica">
   <app-logo />
   @if (codigosRecuperacao(); as codigos) {
-    <p-card header="Guarde seus códigos de recuperação">
-      <div class="formulario">
+    <mat-card appearance="raised">
+      <mat-card-header>
+        <mat-card-title>Guarde seus códigos</mat-card-title>
+        <mat-card-subtitle>Códigos de recuperação</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="formulario">
         <p>
           Use um destes códigos se ficar sem o celular. Cada código vale
           <strong>uma única vez</strong> e eles <strong>não serão mostrados de novo</strong>. Anote
@@ -13,12 +17,18 @@
             <li>{{ c }}</li>
           }
         </ul>
-        <p-button label="Já guardei os códigos" (onClick)="concluir()" styleClass="largura-total" />
-      </div>
-    </p-card>
+        <button mat-flat-button class="largura-total botao-principal" (click)="concluir()">
+          Já guardei os códigos
+        </button>
+      </mat-card-content>
+    </mat-card>
   } @else if (etapa() === 'CADASTRAR_2FA') {
-    <p-card header="Configure a verificação em duas etapas">
-      <div class="formulario">
+    <mat-card appearance="raised">
+      <mat-card-header>
+        <mat-card-title>Verificação em duas etapas</mat-card-title>
+        <mat-card-subtitle>Configure o app autenticador</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="formulario">
         <p>
           1. Instale um app autenticador no celular (Google Authenticator, Microsoft
           Authenticator…).<br />
@@ -30,95 +40,118 @@
           <small>Não consegue escanear? Digite esta chave no app:</small>
           <code class="segredo" data-testid="segredo-2fa">{{ c.segredo }}</code>
         }
-        <label for="codigo-cadastro">Código do app</label>
-        <p-inputotp
-          inputId="codigo-cadastro"
-          [(ngModel)]="codigo"
-          [length]="6"
-          [integerOnly]="true"
-        />
+        <mat-form-field appearance="outline">
+          <mat-label>Código do app</mat-label>
+          <input
+            matInput
+            id="codigo-cadastro"
+            [(ngModel)]="codigo"
+            maxlength="6"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+          />
+        </mat-form-field>
         @if (erro(); as mensagem) {
-          <p-message severity="error">{{ mensagem }}</p-message>
+          <div class="alerta erro" role="alert">{{ mensagem }}</div>
         }
-        <p-button
-          label="Confirmar"
-          (onClick)="confirmarCadastro()"
-          [loading]="enviando()"
-          [disabled]="codigo.length !== 6"
-          styleClass="largura-total"
-        />
+        <button
+          mat-flat-button
+          class="largura-total botao-principal"
+          (click)="confirmarCadastro()"
+          [disabled]="enviando() || codigo.length !== 6"
+        >
+          Confirmar
+        </button>
         <a routerLink="/login">Voltar</a>
-      </div>
-    </p-card>
+      </mat-card-content>
+    </mat-card>
   } @else {
-    <p-card header="Verificação em duas etapas">
-      <div class="formulario">
-        <p-selectbutton
-          [options]="metodos"
+    <mat-card appearance="raised">
+      <mat-card-header>
+        <mat-card-title>Verificação em duas etapas</mat-card-title>
+        <mat-card-subtitle>Confirme que é você</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="formulario">
+        <mat-button-toggle-group
           [(ngModel)]="metodo"
-          optionLabel="label"
-          optionValue="value"
-          [allowEmpty]="false"
-          (onChange)="trocarMetodo()"
-        />
+          (change)="trocarMetodo()"
+          class="metodos"
+          aria-label="Forma de verificação"
+        >
+          <mat-button-toggle value="TOTP">App</mat-button-toggle>
+          <mat-button-toggle value="EMAIL">E-mail</mat-button-toggle>
+          <mat-button-toggle value="RECUPERACAO">Recuperação</mat-button-toggle>
+        </mat-button-toggle-group>
 
         @switch (metodo) {
           @case ('TOTP') {
-            <label for="codigo-app">Código do app autenticador</label>
-            <p-inputotp
-              inputId="codigo-app"
-              [(ngModel)]="codigo"
-              [length]="6"
-              [integerOnly]="true"
-            />
+            <mat-form-field appearance="outline">
+              <mat-label>Código do app autenticador</mat-label>
+              <input
+                matInput
+                id="codigo-app"
+                [(ngModel)]="codigo"
+                maxlength="6"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+              />
+            </mat-form-field>
           }
           @case ('EMAIL') {
-            <p-button
-              [label]="
+            <button
+              mat-stroked-button
+              class="largura-total"
+              [disabled]="esperaReenvio() > 0"
+              (click)="enviarEmail()"
+            >
+              {{
                 esperaReenvio() > 0
                   ? 'Reenviar em ' + formatarEspera(esperaReenvio())
                   : 'Enviar código por e-mail'
-              "
-              [disabled]="esperaReenvio() > 0"
-              severity="secondary"
-              (onClick)="enviarEmail()"
-              styleClass="largura-total"
-            />
+              }}
+            </button>
             @if (info(); as texto) {
-              <p-message severity="info">{{ texto }}</p-message>
+              <div class="alerta info">{{ texto }}</div>
             }
-            <label for="codigo-email">Código recebido por e-mail</label>
-            <p-inputotp
-              inputId="codigo-email"
-              [(ngModel)]="codigo"
-              [length]="6"
-              [integerOnly]="true"
-            />
+            <mat-form-field appearance="outline">
+              <mat-label>Código recebido por e-mail</mat-label>
+              <input
+                matInput
+                id="codigo-email"
+                [(ngModel)]="codigo"
+                maxlength="6"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+              />
+            </mat-form-field>
           }
           @case ('RECUPERACAO') {
-            <label for="codigo-recuperacao">Código de recuperação</label>
-            <input
-              pInputText
-              id="codigo-recuperacao"
-              [(ngModel)]="codigo"
-              placeholder="XXXX-XXXX-XXXX-XXXX"
-              autocomplete="off"
-            />
+            <mat-form-field appearance="outline">
+              <mat-label>Código de recuperação</mat-label>
+              <input
+                matInput
+                id="codigo-recuperacao"
+                [(ngModel)]="codigo"
+                placeholder="XXXX-XXXX-XXXX-XXXX"
+                autocomplete="off"
+              />
+            </mat-form-field>
           }
         }
 
         @if (erro(); as mensagem) {
-          <p-message severity="error">{{ mensagem }}</p-message>
+          <div class="alerta erro" role="alert">{{ mensagem }}</div>
         }
-        <p-button
-          label="Entrar"
-          (onClick)="verificar()"
-          [loading]="enviando()"
-          [disabled]="!codigo.trim()"
-          styleClass="largura-total"
-        />
+        <button
+          mat-flat-button
+          class="largura-total botao-principal"
+          (click)="verificar()"
+          [disabled]="enviando() || !codigo.trim()"
+        >
+          Entrar
+        </button>
         <a routerLink="/login">Voltar</a>
-      </div>
-    </p-card>
+      </mat-card-content>
+    </mat-card>
   }
 </main>

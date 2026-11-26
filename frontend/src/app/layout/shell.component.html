@@ -1,18 +1,25 @@
-<p-menubar [model]="itens()" styleClass="menu-viene">
-  <ng-template #start>
-    <app-logo [compacto]="true" class="marca" />
-  </ng-template>
-  <ng-template #end>
-    <span class="usuario">{{ usuario()?.nomeCompleto }} · {{ usuario()?.perfil }}</span>
-    <p-button
-      label="Sair"
-      icon="pi pi-sign-out"
-      severity="secondary"
-      [text]="true"
-      (onClick)="sair()"
-    />
-  </ng-template>
-</p-menubar>
+<mat-toolbar class="menu-viene">
+  <app-logo [compacto]="true" class="marca" />
+  <nav class="links">
+    @for (item of itens(); track item.rota) {
+      <a
+        mat-button
+        [routerLink]="item.rota"
+        routerLinkActive="ativo"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon fontSet="material-symbols-outlined">{{ item.icone }}</mat-icon>
+        {{ item.rotulo }}
+      </a>
+    }
+  </nav>
+  <span class="espaco"></span>
+  <span class="usuario">{{ usuario()?.nomeCompleto }} · {{ usuario()?.perfil }}</span>
+  <button mat-button (click)="sair()">
+    <mat-icon fontSet="material-symbols-outlined">logout</mat-icon>
+    Sair
+  </button>
+</mat-toolbar>
 <main class="conteudo">
   <router-outlet />
 </main>

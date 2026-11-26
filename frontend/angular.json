@@ -39,7 +39,7 @@
               "@fontsource/montserrat/400.css",
               "@fontsource/montserrat/500.css",
               "@fontsource/montserrat/600.css",
-              "primeicons/primeicons.css",
+              "material-symbols/outlined.css",
               "src/styles.scss"
             ]
           },
@@ -48,8 +48,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "800kB",
-                  "maximumError": "1.5MB"
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",

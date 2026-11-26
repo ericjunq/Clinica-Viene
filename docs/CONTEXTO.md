@@ -355,7 +355,7 @@ Pacote base e `groupId`: **`br.com.clinicaviene`** (D-062), com as camadas como 
 
 **Eventos do Modulith (D-059)**: `completion-mode=archive` (concluídos vão para `event_publication_archive`), `republish-outstanding-events-on-restart=true`, tabelas criadas pelo Flyway (inicialização automática desligada). Eventos carregam só ids, nunca dados pessoais.
 
-**Frontend** (estrutura e sessão: D-081): Angular **22.3** (standalone components, zoneless — sem zone.js, SCSS, sem SSR — D-057), **PrimeNG** (componentes) + **FullCalendar** (`@fullcalendar/angular`, agenda) — D-043; `signature_pad`, Vitest, Playwright.
+**Frontend** (estrutura e sessão: D-081): Angular **22.3** (standalone components, zoneless — sem zone.js, SCSS, sem SSR — D-057), **Angular Material** (componentes, MIT — D-084) + **FullCalendar** (`@fullcalendar/angular`, agenda — D-043); identidade visual Viene (D-082); `signature_pad`, Vitest, Playwright.
 
 **Infra**: Docker (imagens multi-stage, processos sem root), `compose.yaml` na raiz (Postgres `18.7-alpine`, Mailpit, SeaweedFS `4.55` como S3 de dev — D-056; backend e frontend no profile `app` — frontend em nginx com `/api/` encaminhado ao backend no mesmo domínio). Storage de produção: A CONFIRMAR após análise de custos (D-060), credenciais no `.env` (fora do Git) a partir de `.env.example`, GitHub Actions.
 

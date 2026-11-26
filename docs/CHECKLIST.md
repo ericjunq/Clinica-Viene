@@ -32,9 +32,9 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
 - [x] Identidade visual Viene (cores, Cormorant Garamond + Montserrat hospedadas localmente, logo, fundos) (D-082)
-- [ ] **Decidir licença do PrimeNG** (Community com chave × trocar para Angular Material) — D-083 A CONFIRMAR; hoje aparece o aviso "Invalid PrimeUI License"
+- [x] Licença do PrimeNG: trocado por **Angular Material** (MIT) — D-084; telas refeitas mantendo o visual (32 testes unitários passaram localmente)
 - [ ] Logo oficial em SVG/PNG para substituir o monograma desenhado (D-082)
-- [ ] FullCalendar na agenda (Fase 3) — atenção: visões por recurso são pagas (D-083)
+- [ ] FullCalendar na agenda (Fase 3) — atenção: visões por recurso são pagas (D-084)
 - [ ] **Tarefa manual do autor**: ruleset na `main` no GitHub bloqueando force push e exclusão (sem exigir PR — desenvolvimento direto na `main`, D-058/D-065)
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
 - [~] Renomear pacote para `br.com.clinicaviene` (groupId, artifactId `clinica-viene`, fixtures em `fixtures.lombok`) — D-062
@@ -73,7 +73,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] Código 2FA por e-mail (`POST /auth/2fa/email`, método `EMAIL`) com regras de reenvio genéricas em `EnvioCodigoService` (espera 1/2/5/10 min, 5 envios, depois 1 h; 10 min de validade; 5 erros) (D-072, D-073) — `EnvioCodigoServiceIT`, `AuthControllerIT` — **CI verde**
 
 **1F. Frontend**
-- [x] PrimeNG 22; telas de login, 2FA (cadastro com QR, códigos de recuperação, verificação por app/e-mail/recuperação com contagem para reenvio), troca de senha, recuperação de senha, usuários (lista, cadastro, ativar/desativar) (D-081) — **testes unitários executados localmente: 31 passaram**; lint e build ok
+- [x] Telas (hoje em Angular Material — D-084) de login, 2FA (cadastro com QR, códigos de recuperação, verificação por app/e-mail/recuperação com contagem para reenvio), troca de senha, recuperação de senha, usuários (lista, cadastro, ativar/desativar) (D-081) — **testes unitários executados localmente: 31 passaram**; lint e build ok
 - [x] Interceptor de renovação automática + guards por sessão, troca de senha e perfil (D-081) — testados (Vitest)
 - [~] Playwright + job E2E no CI (compose completo, `.env` descartável): primeiro acesso do DEV, senha errada, rota protegida (D-081) — aguardando a primeira execução
 

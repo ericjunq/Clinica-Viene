@@ -25,8 +25,7 @@ test('primeiro acesso do DEV: 2FA, troca de senha e criação de usuário', asyn
   await expect(page.getByAltText('QR code para o app autenticador')).toBeVisible();
   const segredo = (await page.getByTestId('segredo-2fa').textContent())?.trim() ?? '';
   expect(segredo).toMatch(/^[A-Z2-7]{32}$/);
-  await page.locator('p-inputotp input').first().click();
-  await page.keyboard.type(codigoTotp(segredo));
+  await page.locator('#codigo-cadastro').fill(codigoTotp(segredo));
   await page.getByRole('button', { name: 'Confirmar' }).click();
 
   // códigos de recuperação: mostrados uma única vez
@@ -42,7 +41,7 @@ test('primeiro acesso do DEV: 2FA, troca de senha e criação de usuário', asyn
   await expect(page.getByRole('heading', { name: /Olá,/ })).toBeVisible();
 
   // gestão de usuários: cria uma recepcionista (perfil padrão ADMIN)
-  await page.getByRole('menuitem', { name: 'Usuários' }).click();
+  await page.getByRole('link', { name: 'Usuários' }).click();
   await expect(page.getByRole('heading', { name: 'Usuários' })).toBeVisible();
   await page.getByRole('button', { name: 'Novo usuário' }).click();
   await page.locator('#nome').fill('Recepcionista Fictícia');

@@ -1,15 +1,13 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, TemplateRef, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputMaskModule } from 'primeng/inputmask';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
-import { SelectModule } from 'primeng/select';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import {
   AreaAtuacao,
@@ -21,6 +19,7 @@ import {
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { senhaForteValidator } from '../../core/validators/senha.validator';
+import { CpfMaskDirective } from '../../shared/cpf-mask/cpf-mask.directive';
 
 const UFS = [
   'AC',
@@ -57,34 +56,37 @@ const UFS = [
   selector: 'app-usuarios-page',
   imports: [
     ReactiveFormsModule,
-    ButtonModule,
-    DialogModule,
-    InputMaskModule,
-    InputTextModule,
-    MessageModule,
-    PasswordModule,
-    SelectModule,
-    TableModule,
-    TagModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule,
+    CpfMaskDirective,
   ],
   templateUrl: './usuarios.page.html',
+  styleUrl: './usuarios.page.scss',
 })
 export class UsuariosPage implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
-  private readonly mensagens = inject(MessageService);
+  private readonly avisos = inject(MatSnackBar);
+  private readonly dialogo = inject(MatDialog);
   private readonly eu = inject(AuthService).usuario;
+  private readonly formularioTpl = viewChild.required<TemplateRef<unknown>>('formulario');
+  private dialogoAberto: MatDialogRef<unknown> | null = null;
 
+  protected readonly colunas = ['nome', 'cpf', 'email', 'perfil', 'registro', 'status', 'acoes'];
   protected readonly usuarios = signal<Usuario[]>([]);
   protected readonly carregando = signal(false);
-  protected readonly dialogoAberto = signal(false);
   protected readonly salvando = signal(false);
   protected readonly erroFormulario = signal<string | null>(null);
 
-  protected readonly perfisDisponiveis = computed<{ label: string; value: Perfil }[]>(() => [
-    { label: 'Dono(a) da clínica (MASTER)', value: 'MASTER' },
-    { label: 'Recepção (ADMIN)', value: 'ADMIN' },
-    { label: 'Profissional de saúde', value: 'PROFISSIONAL' },
-  ]);
+  protected readonly perfis: { rotulo: string; valor: Perfil }[] = [
+    { rotulo: 'Dono(a) da clínica (MASTER)', valor: 'MASTER' },
+    { rotulo: 'Recepção (ADMIN)', valor: 'ADMIN' },
+    { rotulo: 'Profissional de saúde', valor: 'PROFISSIONAL' },
+  ];
   protected readonly areas: AreaAtuacao[] = [
     'ODONTOLOGIA',
     'PSICOLOGIA',
@@ -140,7 +142,10 @@ export class UsuariosPage implements OnInit {
   protected abrirCadastro(): void {
     this.form.reset({ perfil: 'ADMIN' });
     this.erroFormulario.set(null);
-    this.dialogoAberto.set(true);
+    this.dialogoAberto = this.dialogo.open(this.formularioTpl(), {
+      width: '34rem',
+      maxWidth: '95vw',
+    });
   }
 
   protected salvar(): void {
@@ -167,12 +172,10 @@ export class UsuariosPage implements OnInit {
     this.usuarioService.criar(novo).subscribe({
       next: (criado) => {
         this.salvando.set(false);
-        this.dialogoAberto.set(false);
-        this.mensagens.add({
-          severity: 'success',
-          summary: 'Usuário criado',
-          detail: `${criado.nomeCompleto}: informe a senha provisória; a troca é obrigatória no primeiro acesso.`,
-        });
+        this.dialogoAberto?.close();
+        this.avisar(
+          `${criado.nomeCompleto} criado(a). Informe a senha provisória: a troca é obrigatória no primeiro acesso.`,
+        );
         this.carregar();
       },
       error: (e: unknown) => {
@@ -186,19 +189,12 @@ export class UsuariosPage implements OnInit {
     const novoStatus = usuario.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
     this.usuarioService.alterarStatus(usuario.id, novoStatus).subscribe({
       next: () => {
-        this.mensagens.add({
-          severity: 'success',
-          summary: novoStatus === 'ATIVO' ? 'Usuário ativado' : 'Usuário desativado',
-          detail: usuario.nomeCompleto,
-        });
+        this.avisar(
+          `${usuario.nomeCompleto}: ${novoStatus === 'ATIVO' ? 'ativado(a)' : 'desativado(a)'}.`,
+        );
         this.carregar();
       },
-      error: (e: unknown) =>
-        this.mensagens.add({
-          severity: 'error',
-          summary: 'Não foi possível',
-          detail: mensagemDeErro(e),
-        }),
+      error: (e: unknown) => this.avisar(mensagemDeErro(e)),
     });
   }
 
@@ -211,12 +207,12 @@ export class UsuariosPage implements OnInit {
       },
       error: (e: unknown) => {
         this.carregando.set(false);
-        this.mensagens.add({
-          severity: 'error',
-          summary: 'Erro ao carregar',
-          detail: mensagemDeErro(e),
-        });
+        this.avisar(mensagemDeErro(e));
       },
     });
+  }
+
+  private avisar(texto: string): void {
+    this.avisos.open(texto, 'OK', { duration: 6000 });
   }
 }

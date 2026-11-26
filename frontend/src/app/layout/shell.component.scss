@@ -6,21 +6,30 @@
     var(--viene-creme-claro);
 }
 
-:host ::ng-deep .menu-viene {
-  border: none;
-  border-radius: 0;
-  border-bottom: 1px solid var(--viene-pessego);
+.menu-viene {
   background: var(--viene-creme);
-  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--viene-pessego);
+  height: 4.5rem;
+  padding: 0 1.5rem;
+  gap: 0.25rem;
 }
 
 .marca {
   margin-right: 1.5rem;
 }
 
+.links a.ativo {
+  background: var(--viene-pessego);
+}
+
+.espaco {
+  flex: 1;
+}
+
 .usuario {
   margin-right: 0.5rem;
   font-size: 0.85rem;
+  font-weight: 400;
   color: var(--viene-marrom);
 }
 
@@ -28,4 +37,10 @@
   padding: 1.5rem 1rem;
   max-width: 72rem;
   margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .usuario {
+    display: none;
+  }
 }

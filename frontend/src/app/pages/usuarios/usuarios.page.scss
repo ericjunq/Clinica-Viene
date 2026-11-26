@@ -1,0 +1,29 @@
+.tabela {
+  overflow-x: auto;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
+  background: #fff;
+
+  table {
+    width: 100%;
+    min-width: 50rem;
+  }
+}
+
+.vazio {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.linha {
+  display: flex;
+  gap: 0.5rem;
+
+  mat-form-field {
+    flex: 1;
+  }
+
+  .uf {
+    flex: 0 0 6rem;
+  }
+}

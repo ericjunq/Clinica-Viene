@@ -1,44 +1,68 @@
 <main class="pagina-publica">
   <app-logo />
-  <p-card
-    header="Trocar senha"
-    [subheader]="obrigatoria ? 'Sua senha é provisória: defina uma senha nova para continuar.' : ''"
-  >
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
-      <label for="senha-atual">Senha atual</label>
-      <p-password
-        inputId="senha-atual"
-        formControlName="senhaAtual"
-        [feedback]="false"
-        [toggleMask]="true"
-      />
-
-      <label for="nova-senha">Nova senha</label>
-      <p-password
-        inputId="nova-senha"
-        formControlName="novaSenha"
-        [feedback]="false"
-        [toggleMask]="true"
-      />
-      @if (form.controls.novaSenha.touched && regrasFaltando().length) {
-        <small class="p-error">A senha precisa ter: {{ regrasFaltando().join(', ') }}.</small>
+  <mat-card appearance="raised">
+    <mat-card-header>
+      <mat-card-title>Trocar senha</mat-card-title>
+      @if (obrigatoria) {
+        <mat-card-subtitle
+          >Sua senha é provisória: defina uma nova para continuar</mat-card-subtitle
+        >
       }
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
+        <mat-form-field appearance="outline">
+          <mat-label>Senha atual</mat-label>
+          <input
+            matInput
+            id="senha-atual"
+            type="password"
+            formControlName="senhaAtual"
+            autocomplete="current-password"
+          />
+        </mat-form-field>
 
-      <label for="confirmacao">Confirme a nova senha</label>
-      <p-password
-        inputId="confirmacao"
-        formControlName="confirmacao"
-        [feedback]="false"
-        [toggleMask]="true"
-      />
-      @if (form.touched && form.errors?.['senhasDiferentes']) {
-        <small class="p-error">As senhas não conferem.</small>
-      }
+        <mat-form-field appearance="outline">
+          <mat-label>Nova senha</mat-label>
+          <input
+            matInput
+            id="nova-senha"
+            type="password"
+            formControlName="novaSenha"
+            autocomplete="new-password"
+          />
+          <mat-hint>12+ caracteres, maiúscula, minúscula e caractere especial</mat-hint>
+          @if (regrasFaltando().length) {
+            <mat-error>Falta: {{ regrasFaltando().join(', ') }}</mat-error>
+          }
+        </mat-form-field>
 
-      @if (erro(); as mensagem) {
-        <p-message severity="error">{{ mensagem }}</p-message>
-      }
-      <p-button type="submit" label="Salvar" [loading]="enviando()" styleClass="largura-total" />
-    </form>
-  </p-card>
+        <mat-form-field appearance="outline">
+          <mat-label>Confirme a nova senha</mat-label>
+          <input
+            matInput
+            id="confirmacao"
+            type="password"
+            formControlName="confirmacao"
+            autocomplete="new-password"
+          />
+        </mat-form-field>
+        @if (form.controls.confirmacao.touched && form.errors?.['senhasDiferentes']) {
+          <div class="alerta erro" role="alert">As senhas não conferem.</div>
+        }
+
+        @if (erro(); as mensagem) {
+          <div class="alerta erro" role="alert">{{ mensagem }}</div>
+        }
+        <button
+          mat-flat-button
+          type="submit"
+          class="largura-total botao-principal"
+          [disabled]="enviando()"
+        >
+          Salvar
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </main>

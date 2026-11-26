@@ -1,133 +1,151 @@
 <div class="cabecalho">
   <h1>Usuários</h1>
-  <p-button label="Novo usuário" icon="pi pi-plus" (onClick)="abrirCadastro()" />
+  <button mat-flat-button (click)="abrirCadastro()">
+    <mat-icon fontSet="material-symbols-outlined">person_add</mat-icon>
+    Novo usuário
+  </button>
 </div>
 
-<p-table
-  [value]="usuarios()"
-  [loading]="carregando()"
-  dataKey="id"
-  [tableStyle]="{ 'min-width': '50rem' }"
->
-  <ng-template #header>
-    <tr>
-      <th>Nome</th>
-      <th>CPF</th>
-      <th>E-mail</th>
-      <th>Perfil</th>
-      <th>Registro</th>
-      <th>Status</th>
-      <th></th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-u>
-    <tr>
-      <td>{{ u.nomeCompleto }}</td>
-      <td>{{ u.cpfMascarado }}</td>
-      <td>{{ u.email }}</td>
-      <td>{{ u.perfil }}</td>
-      <td>
+<div class="tabela">
+  <table mat-table [dataSource]="usuarios()">
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let u">{{ u.nomeCompleto }}</td>
+    </ng-container>
+    <ng-container matColumnDef="cpf">
+      <th mat-header-cell *matHeaderCellDef>CPF</th>
+      <td mat-cell *matCellDef="let u">{{ u.cpfMascarado }}</td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>E-mail</th>
+      <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+    </ng-container>
+    <ng-container matColumnDef="perfil">
+      <th mat-header-cell *matHeaderCellDef>Perfil</th>
+      <td mat-cell *matCellDef="let u">{{ u.perfil }}</td>
+    </ng-container>
+    <ng-container matColumnDef="registro">
+      <th mat-header-cell *matHeaderCellDef>Registro</th>
+      <td mat-cell *matCellDef="let u">
         @if (u.conselho) {
           {{ u.conselho }} {{ u.numeroRegistro }}/{{ u.ufRegistro }}
         }
       </td>
-      <td>
-        <p-tag [value]="u.status" [severity]="u.status === 'ATIVO' ? 'success' : 'danger'" />
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let u">
+        <span
+          class="etiqueta"
+          [class.ativo]="u.status === 'ATIVO'"
+          [class.inativo]="u.status !== 'ATIVO'"
+          >{{ u.status }}</span
+        >
       </td>
-      <td>
+    </ng-container>
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let u">
         @if (podeAlterarStatus(u)) {
-          <p-button
-            [label]="u.status === 'ATIVO' ? 'Desativar' : 'Ativar'"
-            [severity]="u.status === 'ATIVO' ? 'danger' : 'success'"
-            [text]="true"
-            (onClick)="alternarStatus(u)"
-          />
+          <button mat-button (click)="alternarStatus(u)">
+            {{ u.status === 'ATIVO' ? 'Desativar' : 'Ativar' }}
+          </button>
         }
       </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+    <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell vazio" [attr.colspan]="colunas.length">
+        {{ carregando() ? 'Carregando…' : 'Nenhum usuário.' }}
+      </td>
     </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="7">Nenhum usuário.</td>
-    </tr>
-  </ng-template>
-</p-table>
+  </table>
+</div>
 
-<p-dialog
-  header="Novo usuário"
-  [modal]="true"
-  [visible]="dialogoAberto()"
-  (visibleChange)="dialogoAberto.set($event)"
-  [style]="{ width: '32rem' }"
->
-  <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
-    <label for="nome">Nome completo</label>
-    <input pInputText id="nome" formControlName="nomeCompleto" />
+<ng-template #formulario>
+  <h2 mat-dialog-title>Novo usuário</h2>
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-dialog-content class="formulario">
+      <mat-form-field appearance="outline">
+        <mat-label>Nome completo</mat-label>
+        <input matInput id="nome" formControlName="nomeCompleto" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>CPF</mat-label>
+        <input matInput id="cpf-novo" appCpfMask formControlName="cpf" inputmode="numeric" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>E-mail</mat-label>
+        <input matInput id="email" type="email" formControlName="email" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Telefone</mat-label>
+        <input matInput id="telefone" formControlName="telefone" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Perfil</mat-label>
+        <mat-select id="perfil" formControlName="perfil">
+          @for (p of perfis; track p.valor) {
+            <mat-option [value]="p.valor">{{ p.rotulo }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    <label for="cpf-novo">CPF</label>
-    <p-inputmask
-      inputId="cpf-novo"
-      formControlName="cpf"
-      mask="999.999.999-99"
-      [autoClear]="false"
-    />
+      @if (ehProfissional()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Área de atuação</mat-label>
+          <mat-select formControlName="areaAtuacao">
+            @for (a of areas; track a) {
+              <mat-option [value]="a">{{ a }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <div class="linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Conselho</mat-label>
+            <mat-select formControlName="conselho">
+              @for (c of conselhos; track c) {
+                <mat-option [value]="c">{{ c }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Número</mat-label>
+            <input matInput id="numero" formControlName="numeroRegistro" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="uf">
+            <mat-label>UF</mat-label>
+            <mat-select formControlName="ufRegistro">
+              @for (uf of ufs; track uf) {
+                <mat-option [value]="uf">{{ uf }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
 
-    <label for="email">E-mail</label>
-    <input pInputText id="email" type="email" formControlName="email" />
+      <mat-form-field appearance="outline">
+        <mat-label>Senha provisória</mat-label>
+        <input
+          matInput
+          id="senha-provisoria"
+          type="password"
+          formControlName="senhaProvisoria"
+          autocomplete="new-password"
+        />
+        <mat-hint
+          >12+ caracteres, maiúscula, minúscula e especial. Trocada no primeiro acesso.</mat-hint
+        >
+      </mat-form-field>
 
-    <label for="telefone">Telefone</label>
-    <input pInputText id="telefone" formControlName="telefone" />
-
-    <label for="perfil">Perfil</label>
-    <p-select
-      inputId="perfil"
-      [options]="perfisDisponiveis()"
-      optionLabel="label"
-      optionValue="value"
-      formControlName="perfil"
-    />
-
-    @if (ehProfissional()) {
-      <label for="area">Área de atuação</label>
-      <p-select
-        inputId="area"
-        [options]="areas"
-        formControlName="areaAtuacao"
-        placeholder="Selecione"
-      />
-      <label for="conselho">Conselho</label>
-      <p-select
-        inputId="conselho"
-        [options]="conselhos"
-        formControlName="conselho"
-        placeholder="Selecione"
-      />
-      <label for="numero">Número do registro</label>
-      <input pInputText id="numero" formControlName="numeroRegistro" />
-      <label for="uf">UF do registro</label>
-      <p-select inputId="uf" [options]="ufs" formControlName="ufRegistro" placeholder="UF" />
-    }
-
-    <label for="senha-provisoria">Senha provisória</label>
-    <p-password
-      inputId="senha-provisoria"
-      formControlName="senhaProvisoria"
-      [feedback]="false"
-      [toggleMask]="true"
-    />
-    <small
-      >Mínimo 12 caracteres, com maiúscula, minúscula e caractere especial. O usuário troca no
-      primeiro acesso.</small
-    >
-
-    @if (erroFormulario(); as mensagem) {
-      <p-message severity="error">{{ mensagem }}</p-message>
-    }
-    <p-button
-      type="submit"
-      label="Criar usuário"
-      [loading]="salvando()"
-      styleClass="largura-total"
-    />
+      @if (erroFormulario(); as mensagem) {
+        <div class="alerta erro" role="alert">{{ mensagem }}</div>
+      }
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" mat-dialog-close>Cancelar</button>
+      <button mat-flat-button type="submit" [disabled]="salvando()">Criar usuário</button>
+    </mat-dialog-actions>
   </form>
-</p-dialog>
+</ng-template>

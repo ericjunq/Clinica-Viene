@@ -1,4 +1,6 @@
-/* Identidade visual Viene Odontologia & Saúde */
+@use '@angular/material' as mat;
+
+/* Identidade visual Viene Odontologia & Saúde (D-082) */
 :root {
   --viene-creme: #f6e9e0;
   --viene-creme-claro: #fbf4ee;
@@ -7,13 +9,54 @@
   --viene-caramelo-escuro: #8c6240;
   --viene-marrom: #6b4a2e;
   --viene-texto: #4a3626;
+  --viene-erro: #a3362b;
+  --viene-sucesso: #3f7a4a;
   --viene-fonte-titulo: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --viene-fonte-texto: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Tema do Angular Material (M3) com as cores e fontes da Viene */
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$orange-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: 'Montserrat',
+        brand-family: 'Cormorant Garamond',
+      ),
+      density: 0,
+    )
+  );
+
+  /* Ajuste fino para os tons exatos da marca */
+  --mat-sys-primary: #8c6240;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #f4e6d9;
+  --mat-sys-on-primary-container: #4f361f;
+  --mat-sys-secondary: #a87a52;
+  --mat-sys-secondary-container: #f4e6d9;
+  --mat-sys-on-secondary-container: #4f361f;
+  --mat-sys-surface: #fbf6f1;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fbf6f1;
+  --mat-sys-surface-container: #f6ece3;
+  --mat-sys-surface-container-high: #f1e3d7;
+  --mat-sys-surface-container-highest: #eedfd2;
+  --mat-sys-on-surface: #4a3626;
+  --mat-sys-on-surface-variant: #6b4a2e;
+  --mat-sys-outline: #c9b19c;
+  --mat-sys-outline-variant: #e2cdbb;
+  --mat-sys-error: #a3362b;
 }
 
 html,
 body {
   margin: 0;
+  min-height: 100%;
   font-family: var(--viene-fonte-texto);
   color: var(--viene-texto);
   background: var(--viene-creme-claro);
@@ -22,10 +65,10 @@ body {
 h1,
 h2,
 h3,
-.p-card-title,
-.p-dialog-title {
-  font-family: var(--viene-fonte-titulo);
-  font-weight: 600;
+.mat-mdc-card-title,
+.mat-mdc-dialog-title {
+  font-family: var(--viene-fonte-titulo) !important;
+  font-weight: 600 !important;
   color: var(--viene-marrom);
   letter-spacing: 0.01em;
 }
@@ -35,15 +78,16 @@ h1 {
   margin: 0.5rem 0 1rem;
 }
 
-.p-card-title {
-  font-size: 1.9rem;
+.mat-mdc-card-title {
+  font-size: 1.9rem !important;
+  line-height: 1.2 !important;
 }
 
-.p-card-subtitle {
-  font-family: var(--viene-fonte-titulo);
+.mat-mdc-card-subtitle {
+  font-family: var(--viene-fonte-titulo) !important;
   font-style: italic;
-  font-size: 1.2rem;
-  color: var(--viene-caramelo);
+  font-size: 1.2rem !important;
+  color: var(--viene-caramelo) !important;
 }
 
 a {
@@ -63,11 +107,10 @@ a {
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
 
-  label {
-    font-weight: 600;
-    color: var(--viene-marrom);
+  mat-form-field {
+    width: 100%;
   }
 }
 
@@ -87,4 +130,49 @@ a {
     background: var(--viene-caramelo);
     opacity: 0.6;
   }
+}
+
+/* Mensagens (erro, aviso, sucesso) */
+.alerta {
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  &.erro {
+    background: #f8e3df;
+    color: var(--viene-erro);
+  }
+
+  &.info {
+    background: #f4e6d9;
+    color: var(--viene-marrom);
+  }
+
+  &.sucesso {
+    background: #e3efe3;
+    color: var(--viene-sucesso);
+  }
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.ativo {
+    background: #e3efe3;
+    color: var(--viene-sucesso);
+  }
+
+  &.inativo {
+    background: #f8e3df;
+    color: var(--viene-erro);
+  }
+}
+
+.botao-principal {
+  height: 2.75rem !important;
 }

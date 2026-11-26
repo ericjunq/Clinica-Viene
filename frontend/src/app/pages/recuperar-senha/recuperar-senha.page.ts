@@ -1,30 +1,28 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputMaskModule } from 'primeng/inputmask';
-import { InputOtpModule } from 'primeng/inputotp';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
-import { LogoComponent } from '../../shared/logo/logo.component';
 import { senhaForteValidator, senhasIguaisValidator } from '../../core/validators/senha.validator';
+import { CpfMaskDirective } from '../../shared/cpf-mask/cpf-mask.directive';
+import { LogoComponent } from '../../shared/logo/logo.component';
 
 /** Senha esquecida (1G): CPF → código no e-mail → senha nova. O 2FA continua no próximo login. */
 @Component({
   selector: 'app-recuperar-senha-page',
   imports: [
-    LogoComponent,
     ReactiveFormsModule,
     RouterLink,
-    ButtonModule,
-    CardModule,
-    InputMaskModule,
-    InputOtpModule,
-    MessageModule,
-    PasswordModule,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    CpfMaskDirective,
+    LogoComponent,
   ],
   templateUrl: './recuperar-senha.page.html',
   styleUrl: '../pagina-publica.scss',

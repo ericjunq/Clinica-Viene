@@ -116,7 +116,7 @@ Motivo: controle total do autor sobre o schema; dados fictícios nunca chegam a 
 
 ---
 
-**D-043 — UI: PrimeNG + FullCalendar** · 2026-11-26 · (saiu de A CONFIRMAR)
+**D-043 — UI: PrimeNG + FullCalendar** · 2026-11-26 · (saiu de A CONFIRMAR) · **Parte do PrimeNG SUBSTITUÍDA por D-083** (Angular Material)
 PrimeNG (versão compatível com o Angular instalado) como biblioteca de componentes e FullCalendar (`@fullcalendar/angular`) para a agenda. Não bloqueia o `ng new`; as bibliotecas entram quando começarem as telas. Motivo: PrimeNG tem tabelas, formulários e componentes de calendário prontos para sistema administrativo; FullCalendar resolve visões de agenda por dia/semana/recurso (consultório/profissional).
 
 **D-049 — Spring Modulith 2.2.0 (GA) via `spring-modulith-bom`** · 2026-11-26
@@ -272,12 +272,16 @@ Motivo: segurança contra força bruta e enumeração de CPFs sem travar o usuá
 - Estrutura: `core/` (`models`, `services`, `interceptors`, `guards`, `validators`), `layout/` (`ShellComponent`), `pages/` (uma pasta por tela: `login`, `dois-fatores`, `trocar-senha`, `recuperar-senha`, `inicio`, `usuarios`). Nomes claros (`AuthService`, `UsuarioService`, `LoginPage`…), em linha com a D-078.
 - Token de acesso **só em memória** no `AuthService` (nunca `localStorage`); ao abrir/recarregar a página, a sessão é restaurada chamando `/auth/renovar` (cookie HttpOnly). O `authInterceptor` põe o token nas chamadas e, com 401, renova uma vez e repete; renovações simultâneas são compartilhadas e o 409 (outra aba renovou) é tentado de novo.
 - Guards só escondem telas (a regra de verdade está no backend): sessão, troca de senha pendente → `/trocar-senha`, perfil (`Usuários` só para DEV/MASTER).
-- PrimeNG 22 com tema Aura; telas carregadas sob demanda (lazy loading). Orçamento do pacote inicial ajustado para 800 kB (aviso) / 1,5 MB (erro): o tema do PrimeNG ocupa a maior parte e o sistema é interno.
+- Componentes: inicialmente PrimeNG, trocado por Angular Material (D-084); telas carregadas sob demanda (lazy loading); orçamento padrão do Angular (500 kB / 1 MB).
 - Regra de senha repetida no frontend só por usabilidade.
 - **E2E (Playwright) no CI**: job `e2e` sobe o ambiente completo (`docker compose --profile app`) com `.env` descartável (chaves geradas na hora, DEV inicial fictício) e percorre o primeiro acesso no navegador, calculando o código TOTP no teste.
 
 **D-082 — Identidade visual Viene no frontend** · 2026-11-26
 Seguindo as peças enviadas pelo autor (Viene Odontologia & Saúde): fundo creme (`#F6E9E0`) com formas pêssego e linhas brancas finas; caramelo do monograma (`#C69A72`); marrom nos textos (`#6B4A2E`); ação (botões) em caramelo escuro `#8C6240` (contraste AA com texto branco); títulos em serifa clássica (**Cormorant Garamond**) e texto em **Montserrat** — ambas OFL, **hospedadas no próprio sistema** (pacotes `@fontsource`), sem Google Fonts (o navegador não envia o IP do usuário a terceiros — LGPD). Divisor com ✦ e marca "VIENE / ODONTOLOGIA & SAÚDE". O monograma é um SVG que reproduz o logo; substituir pelo arquivo oficial quando houver (ver DUVIDAS).
+
+**D-084 — Angular Material no lugar do PrimeNG** · 2026-11-26 · Substitui a parte de PrimeNG da D-043
+Ao renderizar as telas apareceu o aviso "Invalid PrimeUI License": o PrimeNG compatível com Angular 22 (e desde a v18) está sob a **PrimeUI License**, comercial — a licença Community gratuita exige chave, renovação anual e limites (menos de US$ 1 mi/ano, menos de 10 funcionários, menos de 5 devs). Decisão do autor: trocar para **Angular Material 22** (MIT, Google), sem chave nem renovação e sem risco de mudar de faixa se a clínica crescer. Ícones: `material-symbols` (Apache-2.0), hospedado localmente. A identidade visual da D-082 foi mantida (tema M3 com os tons da Viene). Efeito colateral: pacote inicial caiu de ~660 kB para ~327 kB.
+FullCalendar continua previsto para a agenda (núcleo MIT); visões por recurso (lado a lado por consultório/profissional) são pagas — decidir na Fase 3.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
@@ -368,6 +372,4 @@ A imagem oficial `minio/minio` não está mais disponível no Docker Hub nem no 
 - Prazos de retenção e regras de assinatura que variam por conselho (CFO, CFP, CFM…).
 - **Psicologia**: regras próprias de sigilo e registro documental (Resoluções CFP 01/2009 e 06/2019); avaliar se o acesso de emergência (D-007) pode abrir prontuário psicológico. Validar com advogado.
 
-**D-083 — Licença do PrimeNG (biblioteca de componentes do frontend)** · A CONFIRMAR · 2026-11-26
-Descoberto ao renderizar as telas: o PrimeNG compatível com Angular 22 (e todas as versões desde a 18) está sob a **PrimeUI License**, comercial. Há uma licença **Community gratuita** para organizações com menos de US$ 1 mi de faturamento anual, menos de 10 funcionários e menos de 5 desenvolvedores, que exige **chave de licença** e **renovação anual**; sem chave, aparece o aviso "Invalid PrimeUI License" na tela (inclusive em produção). Afeta a D-043. Opções: (a) obter a licença Community (no nome da clínica, se elegível) e configurar a chave; (b) trocar para **Angular Material** (MIT, Google, sem chave), mantendo a identidade visual da D-082. Relacionado: no FullCalendar, as visões por recurso (agenda lado a lado por consultório/profissional) são pagas; o núcleo (dia/semana/mês) é MIT.
-
+**D-083 — Licença do PrimeNG** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: D-084).

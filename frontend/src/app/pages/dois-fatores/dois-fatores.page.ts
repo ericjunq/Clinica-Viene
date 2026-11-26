@@ -1,15 +1,18 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputOtpModule } from 'primeng/inputotp';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { interval } from 'rxjs';
-import { CadastroDoisFatoresResponse, MetodoDoisFatores } from '../../core/models/auth.model';
+import { Observable, interval } from 'rxjs';
+import {
+  CadastroDoisFatoresResponse,
+  MetodoDoisFatores,
+  SessaoResponse,
+} from '../../core/models/auth.model';
 import { formatarEspera, mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
 import { LogoComponent } from '../../shared/logo/logo.component';
@@ -23,15 +26,14 @@ import { LogoComponent } from '../../shared/logo/logo.component';
 @Component({
   selector: 'app-dois-fatores-page',
   imports: [
-    LogoComponent,
     FormsModule,
     RouterLink,
-    ButtonModule,
-    CardModule,
-    InputOtpModule,
-    InputTextModule,
-    MessageModule,
-    SelectButtonModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    LogoComponent,
   ],
   templateUrl: './dois-fatores.page.html',
   styleUrl: '../pagina-publica.scss',
@@ -48,11 +50,6 @@ export class DoisFatoresPage implements OnInit {
   protected readonly info = signal<string | null>(null);
   protected readonly enviando = signal(false);
 
-  protected readonly metodos: { label: string; value: MetodoDoisFatores }[] = [
-    { label: 'App autenticador', value: 'TOTP' },
-    { label: 'E-mail', value: 'EMAIL' },
-    { label: 'Código de recuperação', value: 'RECUPERACAO' },
-  ];
   protected metodo: MetodoDoisFatores = 'TOTP';
   protected codigo = '';
 
@@ -77,11 +74,11 @@ export class DoisFatoresPage implements OnInit {
   }
 
   protected confirmarCadastro(): void {
-    this.executar(() => this.auth.confirmarCadastroDoisFatores(this.codigo.trim()), false);
+    this.executar(this.auth.confirmarCadastroDoisFatores(this.codigo.trim()), false);
   }
 
   protected verificar(): void {
-    this.executar(() => this.auth.verificarDoisFatores(this.metodo, this.codigo.trim()), true);
+    this.executar(this.auth.verificarDoisFatores(this.metodo, this.codigo.trim()), true);
   }
 
   protected enviarEmail(): void {
@@ -107,16 +104,13 @@ export class DoisFatoresPage implements OnInit {
     void this.router.navigate(['/']);
   }
 
-  private executar(
-    acao: () => ReturnType<AuthService['verificarDoisFatores']>,
-    entrarDireto: boolean,
-  ): void {
+  private executar(acao: Observable<SessaoResponse>, entrarDireto: boolean): void {
     if (!this.codigo.trim() || this.enviando()) {
       return;
     }
     this.enviando.set(true);
     this.erro.set(null);
-    acao().subscribe({
+    acao.subscribe({
       next: () => {
         this.enviando.set(false);
         if (entrarDireto) {

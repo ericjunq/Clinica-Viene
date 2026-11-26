@@ -1,25 +1,25 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
-import { LogoComponent } from '../../shared/logo/logo.component';
 import { senhaForteValidator, senhasIguaisValidator } from '../../core/validators/senha.validator';
+import { LogoComponent } from '../../shared/logo/logo.component';
 
 /** Troca da própria senha (obrigatória no primeiro acesso, com senha provisória). */
 @Component({
   selector: 'app-trocar-senha-page',
   imports: [
-    LogoComponent,
     ReactiveFormsModule,
-    ButtonModule,
-    CardModule,
-    MessageModule,
-    PasswordModule,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    LogoComponent,
   ],
   templateUrl: './trocar-senha.page.html',
   styleUrl: '../pagina-publica.scss',

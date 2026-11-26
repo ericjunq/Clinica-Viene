@@ -1,25 +1,61 @@
 <main class="pagina-publica">
   <app-logo />
-  <p-card header="Bem-vindo(a)" subheader="Acesso restrito à equipe">
-    <form [formGroup]="form" (ngSubmit)="entrar()" class="formulario">
-      <label for="cpf">CPF</label>
-      <p-inputmask
-        inputId="cpf"
-        formControlName="cpf"
-        mask="999.999.999-99"
-        placeholder="000.000.000-00"
-        [autoClear]="false"
-      />
+  <mat-card appearance="raised">
+    <mat-card-header>
+      <mat-card-title>Bem-vindo(a)</mat-card-title>
+      <mat-card-subtitle>Acesso restrito à equipe</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="entrar()" class="formulario">
+        <mat-form-field appearance="outline">
+          <mat-label>CPF</mat-label>
+          <input
+            matInput
+            id="cpf"
+            appCpfMask
+            formControlName="cpf"
+            placeholder="000.000.000-00"
+            inputmode="numeric"
+            autocomplete="username"
+          />
+        </mat-form-field>
 
-      <label for="senha">Senha</label>
-      <p-password inputId="senha" formControlName="senha" [feedback]="false" [toggleMask]="true" />
+        <mat-form-field appearance="outline">
+          <mat-label>Senha</mat-label>
+          <input
+            matInput
+            id="senha"
+            [type]="mostrarSenha() ? 'text' : 'password'"
+            formControlName="senha"
+            autocomplete="current-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="mostrarSenha.set(!mostrarSenha())"
+            [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'"
+          >
+            <mat-icon fontSet="material-symbols-outlined">{{
+              mostrarSenha() ? 'visibility_off' : 'visibility'
+            }}</mat-icon>
+          </button>
+        </mat-form-field>
 
-      @if (erro(); as mensagem) {
-        <p-message severity="error">{{ mensagem }}</p-message>
-      }
+        @if (erro(); as mensagem) {
+          <div class="alerta erro" role="alert">{{ mensagem }}</div>
+        }
 
-      <p-button type="submit" label="Entrar" [loading]="enviando()" styleClass="largura-total" />
-      <a routerLink="/recuperar-senha">Esqueci minha senha</a>
-    </form>
-  </p-card>
+        <button
+          mat-flat-button
+          type="submit"
+          class="largura-total botao-principal"
+          [disabled]="enviando()"
+        >
+          Entrar
+        </button>
+        <a routerLink="/recuperar-senha">Esqueci minha senha</a>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </main>

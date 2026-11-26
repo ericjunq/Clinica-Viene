@@ -13,6 +13,17 @@ spring:
           time_zone: UTC
   flyway:
     locations: classpath:db/migration
+  modulith:
+    events:
+      # Eventos concluídos vão para event_publication_archive (nada é apagado) — D-059.
+      completion-mode: archive
+      # Eventos não concluídos (ex.: app caiu no meio) são reprocessados ao reiniciar.
+      republish-outstanding-events-on-restart: true
+      jdbc:
+        # Schema dos eventos só via Flyway (V2, V3). Usamos o starter JPA; isto garante que,
+        # se o starter JDBC entrar um dia, ele não crie tabelas por conta própria.
+        schema-initialization:
+          enabled: false
   docker:
     compose:
       # Em dev (rodando pela IDE a partir de backend/), sobe a infraestrutura do compose.yaml da raiz.

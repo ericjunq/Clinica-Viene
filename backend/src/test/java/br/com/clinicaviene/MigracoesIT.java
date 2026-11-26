@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-/** Confere que as migrations da Fase 0 foram aplicadas pelo Flyway (D-049, D-050). */
+/** Confere que as migrations da Fase 0 foram aplicadas pelo Flyway (D-049, D-050, D-059). */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
@@ -29,6 +29,14 @@ class MigracoesIT {
     void criaTabelaDeEventosDoModulith() {
         Integer total = jdbc.queryForObject(
                 "SELECT count(*) FROM information_schema.tables WHERE table_name = 'event_publication'",
+                Integer.class);
+        assertThat(total).isEqualTo(1);
+    }
+
+    @Test
+    void criaTabelaDeArquivoDeEventosDoModulith() {
+        Integer total = jdbc.queryForObject(
+                "SELECT count(*) FROM information_schema.tables WHERE table_name = 'event_publication_archive'",
                 Integer.class);
         assertThat(total).isEqualTo(1);
     }

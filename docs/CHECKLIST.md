@@ -44,12 +44,12 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 
 **1A. Base compartilhada**
-- [ ] Criptografia: `CpfCriptografadoConverter` (AES-256-GCM, chave versionada), `HashCpf` (HMAC-SHA256), validador de CPF; app não sobe sem as chaves
-- [ ] Problem Details (RFC 9457) + OpenAPI em `/api/v1`
-- [ ] Spring Security base: tudo fechado por padrão, stateless, `@PreAuthorize` nos services
+- [x] Criptografia: `CampoCifradoConverter` + `Cifrador` (AES-256-GCM, chave versionada na AAD), `HashCpf` (HMAC-SHA256), validador `Cpf`; app não sobe sem as chaves; `.env` da raiz lido em dev — **CI verde** (26 testes unitários)
+- [x] Problem Details (RFC 9457, inclusive 401/403 do Spring Security) + OpenAPI em `/api/v1` (desligado por padrão; `OPENAPI_HABILITADO=true` em dev) — **CI verde**
+- [x] Spring Security base: tudo fechado por padrão, stateless, `@EnableMethodSecurity` (`SegurancaBaseIT`) — **CI verde**
 
 **1B. Auditoria**
-- [ ] `audit_log` + trigger que rejeita `UPDATE`/`DELETE` (D-076) + `ServicoAuditoria`
+- [~] `audit_log` (V4) + trigger que rejeita `UPDATE`/`DELETE`/`TRUNCATE` (D-076) + `ServicoAuditoria` (`registrar` na transação da operação, `registrarIndependente` em transação própria) + IP real atrás do proxy (`AuditoriaIT`)
 
 **1C. Usuários**
 - [ ] `Usuario` (CPF cifrado + `cpf_hash`, perfil, status ATIVO/INATIVO, área de atuação + registro profissional, trocarSenha) — D-061, D-068, D-069

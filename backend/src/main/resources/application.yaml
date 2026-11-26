@@ -52,3 +52,7 @@ clinicaviene:
     chaves: ${CRIPTO_CHAVES:}
     chave-ativa: ${CRIPTO_CHAVE_ATIVA:}
     cpf-hmac-chave: ${CPF_HMAC_CHAVE:}
+
+server:
+  # Atrás do nginx: usa X-Forwarded-For/Proto (só de proxies em rede interna) para o IP real na auditoria.
+  forward-headers-strategy: native

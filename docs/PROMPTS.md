@@ -15,12 +15,13 @@ Regras de trabalho (permanentes, valem para todas as sessões):
 
 1. LGPD à risca e máxima integridade e segurança jurídica para a clínica em toda decisão.
    Se uma solução for mais simples mas mais fraca juridicamente, aponte o trade-off e pergunte.
-2. Trabalhamos em fases e em partes pequenas (docs/CHECKLIST.md). Uma implementação por vez, cada uma numa branch:
+2. Trabalhamos em fases e em partes pequenas (docs/CHECKLIST.md). Uma implementação por vez, com commits direto na main (D-058).
+   (Texto original, substituído: "cada uma numa branch:
    backend-nome-da-implementacao, frontend-nome-da-implementacao, docker-nome-da-implementacao,
    ci-nome-da-implementacao, docs-nome-da-implementacao — sempre a partir da main atualizada.
 3. Commits no formato "tipo: descrição" (feat, fix, refactor, test, docs, chore, ci, build, perf, style), em português.
    NUNCA adicione Co-Authored-By, "Generated with Claude Code" ou qualquer atribuição de IA em commits ou PRs.
-4. A cada implementação, na mesma branch, atualize obrigatoriamente:
+4. A cada implementação, junto com o código, atualize obrigatoriamente:
    - docs/DECISOES.md: toda ideia que discutirmos, aceita, recusada ou a confirmar, com data e motivo
      (nunca apague; marque como substituída);
    - docs/CHECKLIST.md: marque o que foi feito e adicione o que surgiu;
@@ -34,7 +35,7 @@ Regras de trabalho (permanentes, valem para todas as sessões):
    implemente configurável ou me pergunte.
 7. Antes de implementar algo grande, apresente um plano curto (arquivos, entidades, endpoints, testes)
    e espere meu ok. Para coisas pequenas e claras, siga direto.
-8. Ao terminar cada implementação: rode os testes, faça o commit, faça o push da branch e me diga
+8. Ao terminar cada implementação: rode os testes, faça o commit, faça o push na main, acompanhe o CI e me diga
    o que foi feito, o que foi testado (com resultado real) e o próximo passo sugerido do checklist.
 
 Tarefa desta sessão — Fase 0 (fundação):
@@ -44,7 +45,7 @@ Tarefa desta sessão — Fase 0 (fundação):
 - Crie docker-compose.yml (PostgreSQL, MinIO, Mailpit, backend, frontend), Dockerfiles multi-stage e .env.example.
 - Crie o workflow de CI do GitHub Actions (build, testes back, testes front, lint, build de imagem).
 - Crie o teste de verificação de módulos do Spring Modulith.
-- Uma branch por item (ex.: docker-compose-base, ci-pipeline-inicial).
+- Um commit por item, direto na main (D-058).
 - Atualize docs/CHECKLIST.md e docs/DECISOES.md ao final.
 ```
 
@@ -53,7 +54,7 @@ Tarefa desta sessão — Fase 0 (fundação):
 ```
 Vamos continuar o projeto ClinicaViene.
 Leia CLAUDE.md, docs/CONTEXTO.md, docs/DECISOES.md e docs/CHECKLIST.md na íntegra.
-Rode git status e git log --oneline -15 e verifique se há branches não mergeadas.
+Rode git status e git log --oneline -15 e verifique o status do último CI da main (gh run list --branch main --limit 3).
 Depois me diga: (1) onde paramos, (2) itens em andamento ou com testes pendentes de execução,
 (3) itens A CONFIRMAR que bloqueiam o próximo passo, (4) o próximo passo que você sugere.
 Siga todas as regras do CLAUDE.md, incluindo commits sem coautoria e atualização dos docs a cada implementação.

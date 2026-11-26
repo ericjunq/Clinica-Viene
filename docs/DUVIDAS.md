@@ -32,14 +32,10 @@ Sugestão: só criar `docker/` se surgir algo específico (ex.: config do Nginx,
 Por padrão, eventos processados ficam na tabela `event_publication` marcados como concluídos (modo `UPDATE`). Há os modos `DELETE` (apaga) e `ARCHIVE` (move para `event_publication_archive`).
 Sugestão: manter `UPDATE` por ora (não apaga nada — combina com auditoria) e definir política de limpeza depois. Atenção: eventos serializados podem conter dados pessoais — os eventos devem carregar só ids, nunca dados de paciente.
 
-**Q-007 — Proteção da branch `main`** · 2026-11-26
-Precisa ser configurada por você no GitHub (Settings → Branches → regra para `main`: exigir PR, exigir o check "Backend — testes" verde, bloquear push direto). Depois do primeiro run do CI, o nome do check aparece para seleção.
-
+**Q-007 — resolvida em 2026-11-26 pela D-058** (desenvolvimento direto na `main`, sem PRs).
 **Q-008 — ~~Push indisponível~~ → resolvido em 2026-11-26** · `gh` autenticado; as 6 branches foram enviadas e o CI ficou verde (run 45860950699: 8 testes unitários + 3 de integração do backend, lint/Prettier/Vitest/build do frontend, compose validado e as duas imagens construídas). Pode sair daqui na próxima limpeza.
 
 **Q-009 — Branches locais antigas** · 2026-11-26
 As branches locais `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (da primeira tentativa, nunca enviadas) foram substituídas pelas 4 da D-054. Posso apagá-las?
 
-**Q-010 — Ordem dos PRs incluindo o frontend** · 2026-11-26
-Além das 4 branches que você definiu, criei `frontend-projeto-angular` (gera o Angular, Dockerfile do frontend, job do frontend no CI). Também criei `frontend-lint` (angular-eslint + Prettier no CI). Ordem de merge: `docs-fundacao-projeto` → `backend-estrutura-monorepo` → `docker-compose-base` → `ci-pipeline-inicial` → `frontend-projeto-angular` → `frontend-lint`.
-Alternativa: se preferir menos PRs, dá para abrir um PR só da última branch para a `main` (contém todos os commits, um por implementação).
+**Q-010 — resolvida em 2026-11-26 pela D-058** (desenvolvimento direto na `main`, sem PRs).

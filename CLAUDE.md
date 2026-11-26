@@ -22,7 +22,7 @@ Itens marcados **A CONFIRMAR** não devem ser implementados de forma definitiva:
 
 ## Atualização obrigatória a cada implementação
 
-Toda implementação ou alteração deve, **na mesma branch/PR**:
+Toda implementação ou alteração deve, **no mesmo commit ou nos commits da mesma implementação**:
 
 - atualizar `docs/CONTEXTO.md` se mudou regra, entidade, fluxo ou arquitetura;
 - registrar em `docs/DECISOES.md` toda ideia nova discutida (aceita, recusada ou a confirmar) com data e motivo;
@@ -63,7 +63,8 @@ Documentação desatualizada é considerada bug.
 - Toda funcionalidade nova vem com testes: unitários, integração (Testcontainers) e, quando houver tela, E2E (Playwright).
 - **O CI (GitHub Actions) é o lugar oficial dos testes** (D-046). Testes só contam como aprovados com o CI verde.
 - Após cada push, acompanhe a execução (`gh run watch` / `gh run view --log-failed`; sem `gh`, pela API pública:
-  `curl -s https://api.github.com/repos/ericjunq/Clinica-Viene/actions/runs?branch=<branch>`), leia as falhas, corrija e reenvie.
+  `curl -s https://api.github.com/repos/ericjunq/Clinica-Viene/actions/runs?branch=main`), leia as falhas, corrija e reenvie.
+- CI vermelho na `main` é prioridade: corrija antes de seguir para a próxima implementação.
 - Nomes: testes unitários terminam em `Test` (Surefire, `./mvnw test`); de integração em `IT` (Failsafe, `./mvnw verify`).
 
 Comandos:
@@ -86,15 +87,10 @@ docker compose --profile app up -d --build
 
 ## Git
 
-- **Branches**: uma por implementação, a partir de `main` atualizada:
-  - `backend-nome-da-implementacao`
-  - `frontend-nome-da-implementacao`
-  - `docker-nome-da-implementacao`
-  - `ci-nome-da-implementacao`
-  - `docs-nome-da-implementacao`
+- **Trabalho direto na `main`** (D-058): sem branches de implementação e sem PRs. Commits pequenos, um por implementação/alteração, com push na `main`.
 - **Commits**: `tipo: descrição` em português, no imperativo, minúsculo.
   Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `build`, `perf`, `style`.
   Ex.: `feat: adiciona cadastro de consultórios`
-- **SEM COAUTORIA**: nunca adicionar `Co-Authored-By`, `Generated with Claude Code` ou qualquer atribuição a IA em commits ou PRs. (Reforçado em `.claude/settings.json`.)
-- Nunca fazer push direto na `main`; merge só via PR com CI verde.
+- **SEM COAUTORIA**: nunca adicionar `Co-Authored-By`, `Generated with Claude Code` ou qualquer atribuição a IA em commits. (Reforçado em `.claude/settings.json`.)
+- Antes do push, rode o que der para rodar localmente (conforme o ambiente da sessão); depois do push, acompanhe o CI da `main`.
 - Nunca commitar `.env`, credenciais, dumps de banco ou documentos de pacientes.

@@ -90,7 +90,7 @@ Profissional preferencialmente com ICP-Brasil (Resolução CFO 91/2009 – NGS2)
 
 **D-031 — Testes reais: unitário, integração (Testcontainers), E2E (Playwright), CI no GitHub Actions** · 2026-11-26
 
-**D-032 — Git: branch por implementação (`backend-…`, `frontend-…`, `docker-…`, `ci-…`, `docs-…`), commits `tipo: descrição`, SEM coautoria de IA** · 2026-11-26
+**D-032 — Git: branch por implementação (`backend-…`, `frontend-…`, `docker-…`, `ci-…`, `docs-…`), commits `tipo: descrição`, SEM coautoria de IA** · 2026-11-26 · Parte das branches **SUBSTITUÍDA por D-058** (commits e sem coautoria continuam valendo)
 Reforçado por `.claude/settings.json` (`attribution` vazio) e `CLAUDE.md`.
 
 **D-033 — Contexto entre máquinas via `CLAUDE.md` + `docs/CONTEXTO.md` + `docs/DECISOES.md` + `docs/CHECKLIST.md` versionados no repositório** · 2026-11-26
@@ -154,7 +154,7 @@ Motivo: CPF é identificador forte; criptografia em repouso limita o dano de vaz
 - Sem CPF: alerta de possível duplicidade quando nome + data de nascimento + responsável coincidirem.
 Motivo: bebês e crianças frequentemente não têm CPF; o alerta reduz cadastros duplicados sem bloquear o atendimento.
 
-**D-054 — Branches da Fase 0 empilhadas, na ordem definida pelo autor** · 2026-11-26
+**D-054 — Branches da Fase 0 empilhadas, na ordem definida pelo autor** · 2026-11-26 · **SUBSTITUÍDA por D-058** (as 7 branches foram integradas na `main` por fast-forward, com CI verde)
 Ordem: 1) `docs-fundacao-projeto` → 2) `backend-estrutura-monorepo` → 3) `docker-compose-base` → 4) `ci-pipeline-inicial`. Cada uma criada a partir da anterior (a `main` ainda não tem nada disso); PRs devem ser mergeados nessa ordem. Substitui as branches locais provisórias `backend-estrutura-pasta-backend`, `ci-testes-backend` e `docs-politica-migrations` (nunca publicadas).
 Motivo: o autor não está presente para mergear entre uma e outra; empilhar mantém uma branch por implementação sem bloquear o trabalho.
 
@@ -163,6 +163,10 @@ Motivo: o autor não está presente para mergear entre uma e outra; empilhar man
 - Produção/compose: imagem `nginxinc/nginx-unprivileged` (sem root); o nginx encaminha `/api/` para o backend → mesmo domínio, sem CORS, cookies/tokens mais simples de proteger. Em dev, `ng serve` usa `proxy.conf.json` com o mesmo efeito.
 - Branch `frontend-projeto-angular`, empilhada sobre `ci-pipeline-inicial` (D-054).
 Motivo: stack atual e enxuta; menos superfície de ataque.
+
+**D-058 — Desenvolvimento direto na `main`, sem branches e sem PRs** · 2026-11-26
+Substitui a parte de branches da D-032 e a D-054. Commits continuam no formato `tipo: descrição`, um por implementação/alteração, sem coautoria; push direto na `main`. O CI roda a cada push e continua sendo o lugar oficial dos testes; CI vermelho na `main` é corrigido antes de qualquer outra implementação. A proteção da `main` (Q-007) deixa de exigir PR.
+Motivo: decisão do autor — projeto de uma pessoa só; branches empilhadas e PRs davam trabalho sem revisor para justificá-los.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.

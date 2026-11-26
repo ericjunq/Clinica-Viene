@@ -2,10 +2,10 @@
 
 > Atualizar a cada alteração. Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` concluído
 > Item concluído sem testes executados: marcar `[~]` e anotar **"testes pendentes de execução"**.
-> Cada item deve indicar a branch onde foi feito.
+> Desenvolvimento direto na `main` (D-058). Itens antigos citam a branch em que foram feitos.
 
 ## Fase 0 — Fundação do repositório
-Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `backend-estrutura-monorepo` → `docker-compose-base` → `ci-pipeline-inicial`.
+Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast-forward em 2026-11-26. Daqui em diante, tudo direto na `main` (D-058).
 
 - [x] Gerar projeto no Spring Initializr e subir para o GitHub (commit inicial na `main`)
 - [x] Adicionar `CLAUDE.md`, `docs/`, `.claude/settings.json` ao repositório — branch `docs-fundacao-projeto`
@@ -32,7 +32,7 @@ Branches empilhadas, mergear nesta ordem (D-054): `docs-fundacao-projeto` → `b
 - [x] Lint do frontend (angular-eslint 22.8.0) + Prettier (`npm run lint`, `npm run format:check`) no job `frontend` do CI — branch `frontend-lint` — **executados localmente: lint ok, formatação ok, 2 testes passaram** (2026-11-26)
 - [ ] Playwright (E2E) — configurar junto com a primeira tela real (login, Fase 1)
 - [ ] Instalar PrimeNG + FullCalendar quando começarem as telas (D-043)
-- [ ] Proteção da branch `main` (PR + CI verde) — configuração no GitHub, feita pelo autor
+- [ ] ~~Proteção da branch `main` (PR + CI verde)~~ — sem PRs desde a D-058; opcional: só bloquear force-push/exclusão da `main`
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
 - [ ] Decidir forma de carregar seeds de configuração real (D-048 — A CONFIRMAR)
 

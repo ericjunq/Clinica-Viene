@@ -60,13 +60,13 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 
 **1D. Autenticação**
 - [x] Sessões: JWT RS256 15 min (`JWT_CHAVE_PRIVADA`), token de renovação opaco (hash SHA-256) com rotação, fim absoluto de 12 h, reuso → revoga a cadeia (tolerância de 20 s para corrida entre abas → 409), logout (`ServicoSessoesIT`)
-- [~] Login em 2 passos: `LoginService` (desafio), `DoisFatoresService`, `AuthController` (`/login`, `/2fa/cadastro`, `/2fa/confirmar`, `/2fa/verificar`, `/renovar`, `/logout`, `/eu`) + cookie `cv_renovacao` (D-071, D-079) — `AuthControllerIT`
-- [~] Status checado a cada requisição (`UsuarioJwtConverter`); desativar revoga sessões (D-068); troca de senha pendente → só rotas de troca de senha
-- [~] Rate limit de login (Bucket4j: 20/IP, 5 falhas/CPF em 15 min → 429 + `Retry-After`) (D-079)
+- [x] Login em 2 passos: `LoginService` (desafio), `DoisFatoresService`, `AuthController` (`/login`, `/2fa/cadastro`, `/2fa/confirmar`, `/2fa/verificar`, `/renovar`, `/logout`, `/eu`) + cookie `cv_renovacao` (D-071, D-079) — `AuthControllerIT` — **CI verde**
+- [x] Status checado a cada requisição (`UsuarioJwtConverter`); desativar revoga sessões (D-068); troca de senha pendente → só rotas de troca de senha
+- [x] Rate limit de login (Bucket4j: 20/IP, 5 falhas/CPF em 15 min → 429 + `Retry-After`) (D-079)
 - [ ] Limpeza periódica dos buckets em memória do rate limit (hoje o mapa cresce com IPs/CPFs distintos)
 
 **1E. 2FA**
-- [~] TOTP (RFC 6238, janela ±1, anti-replay) + QR code (ZXing) + 10 códigos de recuperação (D-072, D-079)
+- [x] TOTP (RFC 6238, janela ±1, anti-replay) + QR code (ZXing) + 10 códigos de recuperação (D-072, D-079)
 - [ ] Código 2FA por e-mail com regras de reenvio (D-073)
 
 **1F. Frontend**
@@ -83,7 +83,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [ ] Avaliar regras ArchUnit de acesso a dados de saúde (só o service do assunto usa o repository) — D-078, na Fase 2
 
 **Testes da fase**
-- [~] Matriz de autorização (cada perfil × cada endpoint) — `UsuarioControllerIT` para `/api/v1/usuarios`
+- [x] Matriz de autorização (cada perfil × cada endpoint) — `UsuarioControllerIT` para `/api/v1/usuarios` — **CI verde** (repetir para cada endpoint novo)
 - [ ] Cobertura JaCoCo ≥ 80% em `identidade`
 
 ## Fase 2 — Pacientes e anamnese

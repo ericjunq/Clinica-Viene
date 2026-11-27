@@ -42,6 +42,8 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Pasta `docker/` dispensada: Dockerfiles em `backend/` e `frontend/`, compose na raiz (D-064)
 - [ ] Decidir forma de carregar seeds de configuração real (D-048 — A CONFIRMAR)
 
+- [x] README do projeto (raiz) e do frontend: visão geral, pré-requisitos, clonar, `.env`, como rodar, portas, testes, estrutura, segurança
+
 ## Fase 1 — Identidade, auditoria e login
 Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 

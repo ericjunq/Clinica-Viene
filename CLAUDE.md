@@ -27,6 +27,7 @@ Toda implementação ou alteração deve, **no mesmo commit ou nos commits da me
 - atualizar `docs/CONTEXTO.md` se mudou regra, entidade, fluxo ou arquitetura;
 - registrar em `docs/DECISOES.md` toda ideia nova discutida (aceita, recusada ou a confirmar) com data e motivo;
 - marcar/adicionar itens em `docs/CHECKLIST.md`.
+- atualizar o `README.md` (raiz e/ou `frontend/README.md`) se mudou como instalar/rodar/testar, variável de ambiente, porta, serviço ou a situação de um módulo (tabela de funcionalidades e roadmap) — D-099.
 
 Documentação desatualizada é considerada bug.
 

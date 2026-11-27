@@ -352,6 +352,9 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 - E-mail vai para o e-mail do paciente ou, se ele não tiver (menor), para o do responsável; não leva dado de saúde; a resposta mostra o e-mail mascarado. Reenvios seguem a D-073 por paciente (espera 1/2/5/10 min, 5 envios, depois 1 h); gerar só o QR, sem e-mail, não tem espera.
 - Só ADMIN e MASTER geram, listam e cancelam convites; tudo auditado (`CONVITE_CRIADO`, `CONVITE_ENVIADO_EMAIL`, `CONVITE_CANCELADO`). Validades e endereço público (`APP_URL_PUBLICA`) configuráveis.
 
+**D-099 — README profissional mantido junto com o código** · 2026-11-27
+`README.md` na raiz no padrão de projetos profissionais (badges, sumário, sobre, funcionalidades com situação, tecnologias, arquitetura, pré-requisitos, clonar, `.env` com geração das chaves, rodar em containers ou em modo dev, primeiro acesso, portas, testes, estrutura, segurança/LGPD, documentação, contribuição, roadmap, licença). O `frontend/README.md` gerado pelo Angular CLI foi trocado por um específico. O README é atualizado a cada implementação que mude como rodar/testar, variáveis, portas ou a situação dos módulos (regra no `CLAUDE.md`). Licença declarada como **proprietária, todos os direitos reservados** (o repositório não concede licença de uso).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

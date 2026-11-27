@@ -1,59 +1,36 @@
-# ClinicaViene
+# ClinicaViene — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.3.0.
+Aplicação Angular 22 (standalone, zoneless) com Angular Material. Visão geral do projeto, configuração do `.env` e formas de rodar tudo: veja o [README da raiz](../README.md).
 
-## Development server
+## Rodando em desenvolvimento
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Com o backend no ar em `http://localhost:8080` (veja o README da raiz):
 
 ```bash
-ng generate component component-name
+npm ci
+npm start          # http://localhost:4200 — /api é encaminhado ao backend (proxy.conf.json)
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Scripts
 
-```bash
-ng generate --help
+| Comando | O que faz |
+| --- | --- |
+| `npm start` | Servidor de desenvolvimento com recarga automática |
+| `npm run build` | Build de produção em `dist/` |
+| `npm test` | Testes unitários (Vitest) |
+| `npm run lint` | ESLint (angular-eslint) |
+| `npm run format` / `format:check` | Prettier |
+| `npm run e2e` | Testes E2E (Playwright), com o ambiente completo no ar e `E2E_DEV_CPF`/`E2E_DEV_SENHA` definidos |
+
+## Organização
+
+```
+src/app/
+├── core/       modelos, serviços de API, interceptors, guards e validadores
+├── layout/     estrutura da área logada (barra superior, navegação)
+├── pages/      telas (login, 2FA, usuários…), carregadas sob demanda
+└── shared/     componentes reutilizáveis (logo, máscara de CPF)
+e2e/            testes Playwright
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+O token de acesso fica só em memória; a renovação usa um cookie `HttpOnly` definido pelo backend. Em container, o frontend é servido pelo Nginx (`nginx.conf`), que também encaminha `/api` ao backend.

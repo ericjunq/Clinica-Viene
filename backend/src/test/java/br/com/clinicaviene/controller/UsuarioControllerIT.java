@@ -102,7 +102,8 @@ class UsuarioControllerIT {
         String tokenAntigo = sessaoService.iniciar(master).tokenAcesso();
         given().port(porta).auth().oauth2(tokenAntigo).get("/api/v1/usuarios").then().statusCode(200);
 
-        comoUsuario(Perfil.DEV)
+        // outro MASTER rebaixa (DEV não gerencia MASTER — D-067)
+        comoUsuario(Perfil.MASTER)
                 .contentType(ContentType.JSON)
                 .body(Map.of("perfil", "ADMIN"))
                 .patch("/api/v1/usuarios/" + master.getId() + "/perfil")

@@ -7,9 +7,12 @@
 # que já falhou com 429 do repositório central.
 FROM maven:3.10.2-eclipse-temurin-25-alpine AS build
 WORKDIR /build
+# Dependências numa camada própria: só é refeita quando o pom.xml muda (e fica no cache do CI),
+# evitando baixar tudo do Maven Central a cada build (já falhou com 429 — limite de requisições).
 COPY pom.xml lombok.config ./
+RUN mvn -B -ntp dependency:go-offline
 COPY src/ src/
-RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp package -DskipTests
+RUN mvn -B -ntp package -DskipTests
 
 # ---- runtime ----
 FROM eclipse-temurin:25.0.5.1_2-jre-alpine

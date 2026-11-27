@@ -342,6 +342,9 @@ Ids continuam UUID (não enumeráveis em URLs, gerados no construtor, sem colis�
 - **Exemplos** (D-089) ficam em `backend/src/main/resources/exemplos/` e viram rascunhos por ação do MASTER (`POST /api/v1/termos/exemplos`, `POST /api/v1/modelos-anamnese/exemplos/odontologia`) — sem migration de `INSERT`. Ficha odontológica de exemplo: 46 perguntas, 19 de alerta clínico (alergias, anticoagulantes, bisfosfonatos, cardiopatias, coagulação, gravidez etc.). Termos de exemplo com campos `[ENTRE COLCHETES]` e aviso de revisão jurídica.
 - Só o MASTER configura termos e modelos; ele cuida das perguntas, mas nunca vê respostas (D-088).
 
+**D-097 — Cache de dependências na montagem das imagens (CI)** · 2026-11-27
+O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Maven Central: cada execução montava a imagem do backend do zero e baixava todas as dependências. Correção: o Dockerfile do backend baixa as dependências numa **camada própria** (`mvn dependency:go-offline`, refeita só quando o `pom.xml` muda) e os jobs `docker` e `e2e` montam as imagens com `docker/build-push-action` e **cache do GitHub Actions** (`type=gha`); o E2E reaproveita as imagens (`docker compose up --no-build`, imagens `clinica-viene-backend:local`/`clinica-viene-frontend:local`). Complementa a D-087 (imagem oficial do Maven).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

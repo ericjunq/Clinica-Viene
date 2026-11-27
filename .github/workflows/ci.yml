@@ -109,12 +109,28 @@ jobs:
           cp .env.example .env
           docker compose --profile app config --quiet
 
-      # Só constrói as imagens (não publica — CD adiado).
+      # Só constrói as imagens (não publica — CD adiado). Cache das camadas no GitHub Actions:
+      # dependências do Maven/npm só são baixadas de novo quando o pom.xml/package-lock.json muda.
+      - name: Buildx
+        uses: docker/setup-buildx-action@v4
+
       - name: Construir imagem do backend
-        run: docker build --tag clinica-viene-backend:ci backend
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          push: false
+          tags: clinica-viene-backend:local
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
 
       - name: Construir imagem do frontend
-        run: docker build --tag clinica-viene-frontend:ci frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          push: false
+          tags: clinica-viene-frontend:local
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
 
   e2e:
     name: E2E — navegador (Playwright)
@@ -146,8 +162,30 @@ jobs:
           open(caminho, "w").write(texto)
           PY
 
+      # Mesmas imagens do job "docker", reaproveitando o cache (sem baixar tudo do Maven Central de novo).
+      - name: Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Construir imagem do backend
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          load: true
+          tags: clinica-viene-backend:local
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Construir imagem do frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          load: true
+          tags: clinica-viene-frontend:local
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
       - name: Subir o ambiente completo
-        run: docker compose --profile app up -d --build
+        run: docker compose --profile app up -d --no-build
 
       - name: Aguardar backend e frontend
         run: |

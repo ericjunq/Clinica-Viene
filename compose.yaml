@@ -45,6 +45,7 @@ services:
 
   backend:
     profiles: [app]
+    image: clinica-viene-backend:local
     build:
       context: ./backend
     environment:
@@ -72,6 +73,7 @@ services:
 
   frontend:
     profiles: [app]
+    image: clinica-viene-frontend:local
     build:
       context: ./frontend
     ports:

@@ -120,6 +120,8 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 **2G. Telas internas**
 - [ ] Pacientes (lista, busca, ficha cadastral com histórico, convite/QR, abrir quiosque), configurações do MASTER (modelos, termos)
 
+- [~] CI: cache de dependências na montagem das imagens (camada `dependency:go-offline` + cache do GitHub Actions) contra 429 do Maven Central (D-097) — aguardando CI
+
 **Testes da fase**
 - [ ] Regra ArchUnit: só o service da anamnese usa o repository da anamnese (D-078)
 - [ ] E2E: pré-cadastro → link → anamnese → termos → assinatura → ficha concluída

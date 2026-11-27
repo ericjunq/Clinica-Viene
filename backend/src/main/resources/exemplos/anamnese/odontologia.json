@@ -1,0 +1,447 @@
+{
+  "titulo": "Ficha de anamnese odontológica — EXEMPLO (revisar com a dentista antes de publicar)",
+  "perguntas": [
+    {
+      "codigo": "queixa_principal",
+      "secao": "Motivo da consulta",
+      "texto": "O que o(a) traz à clínica? Qual o motivo da consulta?",
+      "tipo": "TEXTO_LONGO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "dor_atual",
+      "secao": "Motivo da consulta",
+      "texto": "Está sentindo dor agora?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true,
+      "ajuda": "Se sim, onde e há quanto tempo."
+    },
+    {
+      "codigo": "intensidade_dor",
+      "secao": "Motivo da consulta",
+      "texto": "Se sente dor, qual a intensidade (0 = nenhuma, 10 = insuportável)?",
+      "tipo": "NUMERO",
+      "obrigatoria": false,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "em_tratamento_medico",
+      "secao": "Saúde geral",
+      "texto": "Está em tratamento médico atualmente?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true,
+      "ajuda": "Qual tratamento e para quê."
+    },
+    {
+      "codigo": "medico_responsavel",
+      "secao": "Saúde geral",
+      "texto": "Nome e telefone do seu médico (se tiver)",
+      "tipo": "TEXTO_CURTO",
+      "obrigatoria": false,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "internacao_cirurgia",
+      "secao": "Saúde geral",
+      "texto": "Já foi internado(a) ou fez alguma cirurgia?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true,
+      "ajuda": "Qual e quando."
+    },
+    {
+      "codigo": "transfusao",
+      "secao": "Saúde geral",
+      "texto": "Já recebeu transfusão de sangue?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "usa_medicamentos",
+      "secao": "Medicamentos e alergias",
+      "texto": "Usa algum medicamento atualmente (inclusive anticoncepcional, vitaminas, fitoterápicos)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true,
+      "ajuda": "Quais e as doses."
+    },
+    {
+      "codigo": "anticoagulante",
+      "secao": "Medicamentos e alergias",
+      "texto": "Usa anticoagulante ou antiplaquetário (ex.: AAS, varfarina, clopidogrel, rivaroxabana)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "bisfosfonato",
+      "secao": "Medicamentos e alergias",
+      "texto": "Usa ou já usou medicamento para osteoporose ou para os ossos (bisfosfonatos, ex.: alendronato, zoledronato, denosumabe)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true,
+      "ajuda": "Importante antes de extrações e implantes."
+    },
+    {
+      "codigo": "corticoide_imunossupressor",
+      "secao": "Medicamentos e alergias",
+      "texto": "Usa corticoide ou imunossupressor?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "alergia_medicamento",
+      "secao": "Medicamentos e alergias",
+      "texto": "Tem alergia a algum medicamento (ex.: penicilina, dipirona, anti-inflamatórios)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "alergia_anestesico",
+      "secao": "Medicamentos e alergias",
+      "texto": "Já teve reação a anestesia (no dentista ou em outra situação)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "alergia_latex",
+      "secao": "Medicamentos e alergias",
+      "texto": "Tem alergia a látex (luvas, balões)?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": true
+    },
+    {
+      "codigo": "outras_alergias",
+      "secao": "Medicamentos e alergias",
+      "texto": "Tem outras alergias (alimentos, metais, produtos)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "problema_cardiaco",
+      "secao": "Condições de saúde",
+      "texto": "Tem ou já teve problema no coração (infarto, sopro, arritmia, válvula, marca-passo)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "endocardite",
+      "secao": "Condições de saúde",
+      "texto": "Já teve endocardite ou tem prótese de válvula cardíaca?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "ajuda": "Pode exigir antibiótico antes de alguns procedimentos."
+    },
+    {
+      "codigo": "pressao_alta",
+      "secao": "Condições de saúde",
+      "texto": "Tem pressão alta?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": true
+    },
+    {
+      "codigo": "pressao_baixa",
+      "secao": "Condições de saúde",
+      "texto": "Tem pressão baixa ou costuma desmaiar?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "diabetes",
+      "secao": "Condições de saúde",
+      "texto": "Tem diabetes?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "ajuda": "Tipo e se está controlada."
+    },
+    {
+      "codigo": "problema_sangramento",
+      "secao": "Condições de saúde",
+      "texto": "Tem problema de coagulação, sangra muito após cortes ou extrações, ou tem anemia?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "problema_respiratorio",
+      "secao": "Condições de saúde",
+      "texto": "Tem asma, bronquite ou outro problema respiratório?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "convulsao",
+      "secao": "Condições de saúde",
+      "texto": "Tem epilepsia ou já teve convulsões?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": true
+    },
+    {
+      "codigo": "problema_figado_rim",
+      "secao": "Condições de saúde",
+      "texto": "Tem ou teve problema no fígado (hepatite) ou nos rins?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "problema_tireoide",
+      "secao": "Condições de saúde",
+      "texto": "Tem problema de tireoide?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "doenca_infecciosa",
+      "secao": "Condições de saúde",
+      "texto": "Tem alguma doença infecciosa que a equipe precise saber (ex.: hepatite B/C, HIV, tuberculose)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "ajuda": "Informação sigilosa, usada apenas para o seu cuidado."
+    },
+    {
+      "codigo": "cancer_radioterapia",
+      "secao": "Condições de saúde",
+      "texto": "Já teve câncer ou fez radioterapia/quimioterapia (especialmente na cabeça ou pescoço)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "problema_articulacao",
+      "secao": "Condições de saúde",
+      "texto": "Tem prótese nas articulações (quadril, joelho) ou problema nas articulações?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "ansiedade_tratamento",
+      "secao": "Condições de saúde",
+      "texto": "Sente muita ansiedade ou medo de tratamento odontológico?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": false,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "outras_doencas",
+      "secao": "Condições de saúde",
+      "texto": "Tem alguma outra doença ou condição de saúde não citada?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "gravidez",
+      "secao": "Somente para mulheres",
+      "texto": "Está grávida ou há possibilidade de estar?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": false,
+      "alertaClinico": true,
+      "opcoes": [
+        "Não",
+        "Sim",
+        "Não sei"
+      ]
+    },
+    {
+      "codigo": "semanas_gestacao",
+      "secao": "Somente para mulheres",
+      "texto": "Se grávida, de quantas semanas?",
+      "tipo": "NUMERO",
+      "obrigatoria": false,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "amamentando",
+      "secao": "Somente para mulheres",
+      "texto": "Está amamentando?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": false,
+      "alertaClinico": true
+    },
+    {
+      "codigo": "tabagismo",
+      "secao": "Hábitos",
+      "texto": "Fuma ou usa cigarro eletrônico?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "Nunca",
+        "Parei de fumar",
+        "Sim, ocasionalmente",
+        "Sim, diariamente"
+      ]
+    },
+    {
+      "codigo": "alcool",
+      "secao": "Hábitos",
+      "texto": "Consome bebida alcoólica?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "Não",
+        "Socialmente",
+        "Frequentemente"
+      ]
+    },
+    {
+      "codigo": "bruxismo",
+      "secao": "Hábitos",
+      "texto": "Range ou aperta os dentes (de dia ou dormindo)?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "Não",
+        "Sim",
+        "Não sei"
+      ]
+    },
+    {
+      "codigo": "habitos_orais",
+      "secao": "Hábitos",
+      "texto": "Tem algum destes hábitos?",
+      "tipo": "MULTIPLA_ESCOLHA",
+      "obrigatoria": false,
+      "alertaClinico": false,
+      "opcoes": [
+        "Roer unhas",
+        "Morder objetos (canetas, tampas)",
+        "Chupar dedo ou chupeta",
+        "Respirar pela boca",
+        "Nenhum"
+      ]
+    },
+    {
+      "codigo": "ultima_consulta",
+      "secao": "Histórico odontológico",
+      "texto": "Quando foi sua última consulta ao dentista?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "Menos de 6 meses",
+        "De 6 meses a 1 ano",
+        "De 1 a 2 anos",
+        "Mais de 2 anos",
+        "Nunca fui"
+      ]
+    },
+    {
+      "codigo": "sangramento_gengival",
+      "secao": "Histórico odontológico",
+      "texto": "Sua gengiva sangra ao escovar ou usar fio dental?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "sensibilidade",
+      "secao": "Histórico odontológico",
+      "texto": "Tem sensibilidade nos dentes (frio, quente, doce)?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "dor_atm",
+      "secao": "Histórico odontológico",
+      "texto": "Sente dor ou estalos na articulação da mandíbula (perto do ouvido) ao abrir a boca ou mastigar?",
+      "tipo": "SIM_NAO",
+      "obrigatoria": true,
+      "alertaClinico": false
+    },
+    {
+      "codigo": "complicacao_extracao",
+      "secao": "Histórico odontológico",
+      "texto": "Já teve alguma complicação após extração ou tratamento odontológico (sangramento, infecção)?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": true,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "usa_protese_aparelho",
+      "secao": "Histórico odontológico",
+      "texto": "Usa prótese, aparelho ortodôntico ou placa?",
+      "tipo": "SIM_NAO_DETALHE",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "detalheObrigatorioQuandoSim": true
+    },
+    {
+      "codigo": "frequencia_escovacao",
+      "secao": "Histórico odontológico",
+      "texto": "Quantas vezes por dia escova os dentes?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "1",
+        "2",
+        "3 ou mais",
+        "Menos de 1"
+      ]
+    },
+    {
+      "codigo": "fio_dental",
+      "secao": "Histórico odontológico",
+      "texto": "Usa fio dental?",
+      "tipo": "ESCOLHA_UNICA",
+      "obrigatoria": true,
+      "alertaClinico": false,
+      "opcoes": [
+        "Diariamente",
+        "Às vezes",
+        "Não uso"
+      ]
+    },
+    {
+      "codigo": "observacoes",
+      "secao": "Observações",
+      "texto": "Há algo mais sobre sua saúde que a equipe deva saber?",
+      "tipo": "TEXTO_LONGO",
+      "obrigatoria": false,
+      "alertaClinico": false
+    }
+  ]
+}

@@ -101,7 +101,7 @@ A recepção **não preenche a anamnese** pelo paciente (D-088, D-091): faz só 
 - `ModeloAnamnese` versionado (perguntas, tipos, obrigatoriedade). Respostas sempre ligadas à versão do modelo usada.
 - Cada `FichaAnamnese` tem: origem (§4.1), data, hash do PDF, assinatura do paciente/responsável. Respostas **cifradas** no banco.
 - **Quem preenche**: sempre o paciente (ou acompanhante com ele). **Quem lê**: só os profissionais de saúde vinculados ao paciente (Fase 4) — **ADMIN, MASTER e DEV nunca leem** (D-088). Toda leitura auditada.
-- Modelos **configuráveis** pelo MASTER, versionados por área de atuação, com exemplo completo de ficha odontológica como rascunho (D-089).
+- Modelos **configuráveis** pelo MASTER, versionados por área de atuação, com exemplo completo de ficha odontológica como rascunho (D-089). Rascunho editável → publicado imutável (garantido no banco); tipos de pergunta: Sim/Não, Sim/Não com detalhe, texto curto/longo, escolha única/múltipla, data, número; perguntas de **alerta clínico** (nas de escolha, a primeira opção é a "normal") — D-096. API: `/api/v1/modelos-anamnese`.
 - **Imutável.** Paciente atualiza → nova ficha; as anteriores permanecem.
 - **Validade**: nova ficha exigida a cada novo tratamento, antes de qualquer `CIRURGIA`/`IMPLANTE`, e quando a última tiver mais de 12 meses (configurável — D-092).
 - O profissional registra que **revisou** a ficha com o paciente antes do procedimento (data/hora + usuário).
@@ -271,7 +271,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 - Consentimento específico, opcional e revogável apenas para usos extras (ex.: lembretes por WhatsApp, marketing).
 
 **Termos**
-- `TermoVersao` (tipo, versão, texto, vigência). `AceiteTermo` registra versão, data/hora, IP, dispositivo, origem.
+- `TermoVersao` (tipo, versão, título, texto, rascunho/publicado; vigente = publicada mais recente). `AceiteTermo` (somente inclusão) registra cada decisão — `ACEITO`, `RECUSADO` (oferecido desmarcado) ou `REVOGADO` — com versão, data/hora, IP, dispositivo, origem e se foi o responsável legal (D-096). API: `/api/v1/termos` (MASTER) e `/api/v1/pacientes/{id}/consentimentos` (recepção).
 - Aceite da política de privacidade/termos de uso obrigatório para concluir cadastro; consentimentos opcionais em separado e desmarcados por padrão (D-093): lembretes por WhatsApp/SMS, promoções e novidades, fotos de antes/depois em divulgação, pesquisas de satisfação — cada um revogável, e o sistema impede o uso sem consentimento ativo.
 
 **Direitos do titular**

@@ -334,6 +334,14 @@ E-mail só com o link (uso limitado, expira em alguns dias); a página pede o **
 **D-095 — Ids UUID v7** · 2026-11-27
 Ids continuam UUID (não enumeráveis em URLs, gerados no construtor, sem colisão entre sistemas), agora na versão **7** (ordenados pelo tempo: inserção eficiente no índice, como uma sequence). Gerador único `IdUtils.novoId()`. Tabelas existentes não mudam (a coluna continua `UUID`). Exceção mantida: `audit_log` com identity (interno, só inclusão).
 
+**D-096 — Termos, consentimentos e modelos de anamnese: como funcionam** · 2026-11-27
+- **Rascunho → publicado**: termos e modelos de anamnese nascem como rascunho editável; publicados ficam imutáveis (o banco rejeita `UPDATE`/`DELETE` de linha publicada). Para mudar, cria-se nova versão (no modelo, "duplicar"). A vigente é a publicada mais recente de cada tipo/área.
+- **Decisões do paciente** (`aceite_termo`, somente inclusão): ao concluir o cadastro, cada termo vigente recebe `ACEITO` (marcado) ou `RECUSADO` (oferecido desmarcado — prova de que não houve consentimento). Revogação = novo registro `REVOGADO`. O estado atual é a decisão mais recente. A **política de privacidade não se revoga** (é ciência; atendimento e prontuário seguem base legal de saúde/obrigação legal).
+- Antes de qualquer uso opcional (lembretes, promoções, imagem, pesquisa), o sistema consulta `temConsentimentoAtivo`.
+- **Alerta clínico**: Sim nas perguntas Sim/Não; nas de escolha, **a primeira opção é a resposta "normal"** e as demais acionam o alerta; nas demais, qualquer resposta.
+- **Exemplos** (D-089) ficam em `backend/src/main/resources/exemplos/` e viram rascunhos por ação do MASTER (`POST /api/v1/termos/exemplos`, `POST /api/v1/modelos-anamnese/exemplos/odontologia`) — sem migration de `INSERT`. Ficha odontológica de exemplo: 46 perguntas, 19 de alerta clínico (alergias, anticoagulantes, bisfosfonatos, cardiopatias, coagulação, gravidez etc.). Termos de exemplo com campos `[ENTRE COLCHETES]` e aviso de revisão jurídica.
+- Só o MASTER configura termos e modelos; ele cuida das perguntas, mas nunca vê respostas (D-088).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

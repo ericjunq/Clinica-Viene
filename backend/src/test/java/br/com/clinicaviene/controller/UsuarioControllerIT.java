@@ -72,6 +72,48 @@ class UsuarioControllerIT {
                 .statusCode(status);
     }
 
+    @ParameterizedTest(name = "{0} edita ADMIN → {1}")
+    @CsvSource({"DEV, 200", "MASTER, 200", "ADMIN, 403", "PROFISSIONAL, 403"})
+    void editar(Perfil perfil, int status) {
+        Usuario alvo = criar(Perfil.ADMIN);
+        comoUsuario(perfil)
+                .contentType(ContentType.JSON)
+                .body(Map.of("nomeCompleto", "Nome Editado", "email", "editado." + UUID.randomUUID() + "@exemplo.com"))
+                .put("/api/v1/usuarios/" + alvo.getId())
+                .then()
+                .statusCode(status);
+    }
+
+    @ParameterizedTest(name = "{0} muda ADMIN para MASTER → {1}")
+    @CsvSource({"DEV, 200", "MASTER, 200", "ADMIN, 403", "PROFISSIONAL, 403"})
+    void mudarPerfil(Perfil perfil, int status) {
+        Usuario alvo = criar(Perfil.ADMIN);
+        comoUsuario(perfil)
+                .contentType(ContentType.JSON)
+                .body(Map.of("perfil", "MASTER"))
+                .patch("/api/v1/usuarios/" + alvo.getId() + "/perfil")
+                .then()
+                .statusCode(status);
+    }
+
+    @Test
+    void mudancaDePerfilValeNaHoraMesmoComTokenAntigo() {
+        Usuario master = criar(Perfil.MASTER);
+        String tokenAntigo = sessaoService.iniciar(master).tokenAcesso();
+        given().port(porta).auth().oauth2(tokenAntigo).get("/api/v1/usuarios").then().statusCode(200);
+
+        comoUsuario(Perfil.DEV)
+                .contentType(ContentType.JSON)
+                .body(Map.of("perfil", "ADMIN"))
+                .patch("/api/v1/usuarios/" + master.getId() + "/perfil")
+                .then()
+                .statusCode(200)
+                .body("perfil", equalTo("ADMIN"));
+
+        // o JWT ainda diz MASTER, mas o perfil vem do banco: já não lista usuários
+        given().port(porta).auth().oauth2(tokenAntigo).get("/api/v1/usuarios").then().statusCode(403);
+    }
+
     @Test
     void anonimoNaoAcessaNada() {
         given().port(porta).get("/api/v1/usuarios").then().statusCode(401);

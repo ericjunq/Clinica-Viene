@@ -5,10 +5,14 @@ import br.com.clinicaviene.exceptions.MuitasTentativasException;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.TimeMeter;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,12 +22,16 @@ import org.springframework.stereotype.Service;
  *   <li>por IP: toda tentativa conta;
  *   <li>por CPF: só as falhas contam (protege uma conta específica de força bruta vinda de vários IPs).
  * </ul>
+ *
+ * <p>Baldes cheios (sem tentativas recentes) são removidos periodicamente, para a memória não crescer com
+ * IPs/CPFs que já não estão tentando.
  */
 @Service
 @RequiredArgsConstructor
 public class LimiteTentativasService {
 
     private final AuthProperties propriedades;
+    private final Clock clock;
     private final Map<String, Bucket> porIp = new ConcurrentHashMap<>();
     private final Map<String, Bucket> falhasPorCpf = new ConcurrentHashMap<>();
 
@@ -47,12 +55,40 @@ public class LimiteTentativasService {
         }
     }
 
+    /** Remove os baldes já recarregados por completo (ninguém tentando por ali na última janela). */
+    @Scheduled(fixedDelayString = "${clinicaviene.auth.limpeza-limite-tentativas:PT15M}")
+    public void limparOciosos() {
+        porIp.values().removeIf(balde -> balde.getAvailableTokens() >= propriedades.limiteLoginPorIp());
+        falhasPorCpf.values().removeIf(balde -> balde.getAvailableTokens() >= propriedades.limiteFalhasPorCpf());
+    }
+
+    /** Quantos IPs/CPFs estão sendo acompanhados agora (para testes e monitoramento). */
+    int emAcompanhamento() {
+        return porIp.size() + falhasPorCpf.size();
+    }
+
     private Bucket novo(int limite) {
         return Bucket.builder()
                 .addLimit(Bandwidth.builder()
                         .capacity(limite)
                         .refillIntervally(limite, propriedades.janelaLimiteTentativas())
                         .build())
+                .withCustomTimePrecision(new RelogioDoBucket(clock))
                 .build();
+    }
+
+    /** Faz o Bucket4j usar o relógio da aplicação (os testes conseguem avançar o tempo). */
+    private record RelogioDoBucket(Clock clock) implements TimeMeter {
+
+        @Override
+        public long currentTimeNanos() {
+            Instant agora = clock.instant();
+            return TimeUnit.SECONDS.toNanos(agora.getEpochSecond()) + agora.getNano();
+        }
+
+        @Override
+        public boolean isWallClockBased() {
+            return true;
+        }
     }
 }

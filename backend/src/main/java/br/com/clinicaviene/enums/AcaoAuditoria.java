@@ -5,6 +5,7 @@ public enum AcaoAuditoria {
     // Usuários (Fase 1)
     USUARIO_INICIAL_CRIADO,
     USUARIO_CRIADO,
+    USUARIO_ALTERADO,
     USUARIO_ATIVADO,
     USUARIO_DESATIVADO,
     USUARIO_PERFIL_ALTERADO,

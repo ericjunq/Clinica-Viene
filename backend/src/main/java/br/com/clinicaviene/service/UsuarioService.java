@@ -3,6 +3,7 @@ package br.com.clinicaviene.service;
 import br.com.clinicaviene.auth.PerfilPermissoes;
 import br.com.clinicaviene.auth.UsuarioJwtConverter;
 import br.com.clinicaviene.dto.NovoUsuarioDto;
+import br.com.clinicaviene.dto.RegistroProfissionalDto;
 import br.com.clinicaviene.dto.RegistroAuditoria;
 import br.com.clinicaviene.dto.UsuarioAutenticado;
 import br.com.clinicaviene.entity.Usuario;
@@ -135,6 +136,124 @@ public class UsuarioService {
         exigirSenhaValida(novaSenha);
         usuario.definirSenha(codificador.encode(novaSenha), false, agora());
         auditoria.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.SENHA_ALTERADA, ENTIDADE, usuario.getId()));
+    }
+
+    /**
+     * Edita os dados do usuário (D-086): nome, e-mail, telefone e registro profissional. O CPF não muda. Pode
+     * editar quem pode alterar o status do usuário (MASTER: todos menos DEV; DEV: ADMIN e PROFISSIONAL) e o
+     * próprio usuário gestor nos próprios dados.
+     */
+    @Transactional
+    public Usuario atualizarDados(
+            UUID id,
+            String nomeCompleto,
+            String email,
+            String telefone,
+            RegistroProfissionalDto registro,
+            UsuarioAutenticado ator) {
+        Usuario usuario = buscarParaGerenciar(id, ator, true);
+        String nome = semEspacos(nomeCompleto);
+        String emailNormalizado = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+        RegistroProfissionalDto reg = normalizarRegistro(registro);
+        if (nome == null || nome.isBlank()) {
+            throw new RegraNegocioException("Informe o nome completo.");
+        }
+        validarEmail(emailNormalizado);
+        if (repositorio.existsByEmailIgnoreCaseAndIdNot(emailNormalizado, id)) {
+            throw new RegraNegocioException("Já existe um usuário com este e-mail.");
+        }
+        validarRegistro(usuario.getPerfil(), reg, id);
+        usuario.atualizarDados(
+                nome, emailNormalizado, vazioComoNulo(telefone), reg.areaAtuacao(), reg.conselho(),
+                reg.numeroRegistro(), reg.ufRegistro(), agora());
+        auditoria.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.USUARIO_ALTERADO, ENTIDADE, usuario.getId()));
+        return usuario;
+    }
+
+    /**
+     * Muda o perfil (D-086): nunca para DEV nem de DEV; ninguém muda o próprio perfil; o ator precisa poder
+     * gerenciar o usuário e poder criar o perfil novo. As sessões do usuário caem (ele entra de novo).
+     */
+    @Transactional
+    public Usuario alterarPerfil(UUID id, Perfil novoPerfil, RegistroProfissionalDto registro, UsuarioAutenticado ator) {
+        if (novoPerfil == Perfil.DEV) {
+            throw new RegraNegocioException("Usuários DEV não podem ser criados pelo sistema.");
+        }
+        Usuario usuario = buscarParaGerenciar(id, ator, false);
+        if (usuario.getPerfil() == Perfil.DEV) {
+            throw new RegraNegocioException("O perfil de um usuário DEV não pode ser alterado.");
+        }
+        if (!PerfilPermissoes.podeCriar(ator.perfil(), novoPerfil)) {
+            throw new AccessDeniedException("Sem permissão para atribuir este perfil");
+        }
+        RegistroProfissionalDto reg = novoPerfil == Perfil.PROFISSIONAL
+                ? normalizarRegistro(registro)
+                : new RegistroProfissionalDto(null, null, null, null);
+        validarRegistro(novoPerfil, reg, id);
+        if (usuario.getPerfil() == novoPerfil && novoPerfil != Perfil.PROFISSIONAL) {
+            return usuario;
+        }
+        usuario.alterarPerfil(
+                novoPerfil, reg.areaAtuacao(), reg.conselho(), reg.numeroRegistro(), reg.ufRegistro(), agora());
+        sessoes.revogarTodas(usuario.getId());
+        auditoria.registrar(
+                RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.USUARIO_PERFIL_ALTERADO, ENTIDADE, usuario.getId()));
+        return usuario;
+    }
+
+    /** Carrega o usuário aplicando as regras de quem pode gerenciar quem (as mesmas do status). */
+    private Usuario buscarParaGerenciar(UUID id, UsuarioAutenticado ator, boolean permitirASiMesmo) {
+        if (!PerfilPermissoes.gerenciaUsuarios(ator.perfil())) {
+            throw new AccessDeniedException("Sem permissão para alterar usuários");
+        }
+        boolean aSiMesmo = ator.id().equals(id);
+        if (aSiMesmo && !permitirASiMesmo) {
+            throw new RegraNegocioException("Não é possível alterar o próprio perfil.");
+        }
+        Usuario usuario = repositorio.findById(id).orElseThrow(UsuarioNaoEncontradoException::new);
+        if (!aSiMesmo && !PerfilPermissoes.podeVer(ator.perfil(), usuario.getPerfil())) {
+            throw new UsuarioNaoEncontradoException();
+        }
+        if (!aSiMesmo && !PerfilPermissoes.podeAlterarStatus(ator.perfil(), usuario.getPerfil())) {
+            throw new AccessDeniedException("Sem permissão para alterar este usuário");
+        }
+        return usuario;
+    }
+
+    /** Registro obrigatório e único para PROFISSIONAL; ausente para os demais perfis. */
+    private void validarRegistro(Perfil perfil, RegistroProfissionalDto reg, UUID idAtual) {
+        if (perfil == Perfil.PROFISSIONAL) {
+            if (!reg.completo()) {
+                throw new RegraNegocioException(
+                        "Profissional precisa de área de atuação e registro profissional (conselho, número e UF).");
+            }
+            if (!UfValidator.valida(reg.ufRegistro())) {
+                throw new RegraNegocioException("UF do registro profissional inválida.");
+            }
+            if (repositorio.existsByConselhoAndNumeroRegistroAndUfRegistroAndIdNot(
+                    reg.conselho(), reg.numeroRegistro(), reg.ufRegistro(), idAtual)) {
+                throw new RegraNegocioException("Já existe um usuário com este registro profissional.");
+            }
+        } else if (!reg.vazio()) {
+            throw new RegraNegocioException("Área de atuação e registro profissional são só para o perfil PROFISSIONAL.");
+        }
+    }
+
+    private static void validarEmail(String email) {
+        if (email == null || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new RegraNegocioException("E-mail inválido.");
+        }
+    }
+
+    private static RegistroProfissionalDto normalizarRegistro(RegistroProfissionalDto r) {
+        if (r == null) {
+            return new RegistroProfissionalDto(null, null, null, null);
+        }
+        return new RegistroProfissionalDto(
+                r.areaAtuacao(),
+                r.conselho(),
+                vazioComoNulo(r.numeroRegistro()),
+                r.ufRegistro() == null ? null : vazioComoNulo(r.ufRegistro().toUpperCase(Locale.ROOT)));
     }
 
     private Usuario salvarNovo(NovoUsuarioDto dados, UUID criadoPor) {

@@ -290,6 +290,18 @@ O FullCalendar tem núcleo gratuito (MIT), mas as visões por recurso — agenda
 - Ordem de construção (Fase 3): (1) visão do dia por consultório/profissional; (2) semana de um profissional; (3) lista do dia para o check-in; (4) arrastar para remarcar (com confirmação e motivo); (5) mês só se fizer falta.
 Motivo: nenhuma licença (nem se a clínica crescer), encaixe exato nas regras de agenda e no visual da Viene, pacote mais leve. Custo: mais trabalho de construção e testes (posições, sobreposição, E2E de agendamento), e a manutenção é nossa.
 
+**D-086 — Edição de usuário e mudança de perfil** · 2026-11-27
+- **Editar dados** (`PUT /api/v1/usuarios/{id}`): nome, e-mail, telefone e registro profissional. Pode quem pode alterar o status do usuário (MASTER: todos menos DEV; DEV: ADMIN e PROFISSIONAL) e o próprio gestor nos próprios dados. E-mail e registro continuam únicos. Auditoria `USUARIO_ALTERADO`.
+- **CPF não se edita**: identifica a pessoa e é a base do login (`cpf_hash`). CPF errado → inativar e cadastrar de novo.
+- **Mudar perfil** (`PATCH /api/v1/usuarios/{id}/perfil`): nunca para DEV nem de DEV; ninguém muda o próprio perfil; o ator precisa poder gerenciar o usuário **e** poder criar o perfil novo; para PROFISSIONAL o registro é obrigatório, saindo de PROFISSIONAL o registro é apagado. As sessões do usuário caem (ele entra de novo). Auditoria `USUARIO_PERFIL_ALTERADO`.
+- **Correção de segurança encontrada no caminho**: o perfil usado nas regras vinha do claim do JWT (válido por até 15 min) — um MASTER rebaixado continuaria agindo como MASTER até o token expirar. Agora o perfil vem do banco a cada requisição (autoridade `ROLE_<perfil>` montada pelo `UsuarioJwtConverter`); o claim do token é só informativo.
+Regras propostas pelo Claude com base nas já existentes; o autor pode ajustar.
+
+**D-087 — Itens finais da Fase 1 (infra)** · 2026-11-27
+- Cobertura mínima verificada no build (JaCoCo, unitários + integração): **85% das linhas no total** e **80% em `service` e `auth`** (meta da Fase 1). Cobertura medida antes de ligar: 90,9% no total, 95,5% em `service`, 93,1% em `auth`.
+- Rate limit: baldes ociosos (já recarregados) removidos a cada 15 min (`@Scheduled`); o Bucket4j usa o `Clock` da aplicação (testável).
+- Imagem do backend: estágio de build com a imagem oficial `maven:3.10.2-eclipse-temurin-25-alpine` (antes o `mvnw` baixava o Maven a cada build e falhou uma vez com 429 do repositório central).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

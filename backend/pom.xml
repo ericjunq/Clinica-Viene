@@ -377,8 +377,8 @@
 				</configuration>
 			</plugin>
 
-			<!-- Cobertura: agente nos testes unitários e de integração; relatório em target/site/jacoco no verify.
-			     Metas por módulo (80% em financeiro, prontuario, identidade) entram quando os módulos existirem. -->
+			<!-- Cobertura: agente nos testes unitários e de integração; relatório em target/site/jacoco e
+			     verificação de mínimos no verify. -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -396,6 +396,43 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+					</execution>
+					<!-- Cobertura mínima (unitários + integração): o build falha abaixo disso. -->
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.85</minimum>
+										</limit>
+									</limits>
+								</rule>
+								<!-- Regras de negócio e de acesso: meta da Fase 1 (80%). -->
+								<rule>
+									<element>PACKAGE</element>
+									<includes>
+										<include>br.com.clinicaviene.service</include>
+										<include>br.com.clinicaviene.auth</include>
+									</includes>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

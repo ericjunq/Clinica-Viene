@@ -49,7 +49,7 @@ public class Usuario {
     private String telefone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, updatable = false)
+    @Column(nullable = false, length = 20)
     private Perfil perfil;
 
     @Enumerated(EnumType.STRING)
@@ -135,6 +135,42 @@ public class Usuario {
 
     public void alterarStatus(StatusUsuario novoStatus, Instant agora) {
         this.status = novoStatus;
+        this.atualizadoEm = agora;
+    }
+
+    /** Dados editáveis (D-086). CPF não muda: identifica a pessoa e é a base do login. */
+    public void atualizarDados(
+            String nomeCompleto,
+            String email,
+            String telefone,
+            AreaAtuacao areaAtuacao,
+            ConselhoProfissional conselho,
+            String numeroRegistro,
+            String ufRegistro,
+            Instant agora) {
+        this.nomeCompleto = nomeCompleto;
+        this.email = email;
+        this.telefone = telefone;
+        this.areaAtuacao = areaAtuacao;
+        this.conselho = conselho;
+        this.numeroRegistro = numeroRegistro;
+        this.ufRegistro = ufRegistro;
+        this.atualizadoEm = agora;
+    }
+
+    /** Muda o perfil junto com o registro profissional (obrigatório só para PROFISSIONAL — D-086). */
+    public void alterarPerfil(
+            Perfil novoPerfil,
+            AreaAtuacao areaAtuacao,
+            ConselhoProfissional conselho,
+            String numeroRegistro,
+            String ufRegistro,
+            Instant agora) {
+        this.perfil = novoPerfil;
+        this.areaAtuacao = areaAtuacao;
+        this.conselho = conselho;
+        this.numeroRegistro = numeroRegistro;
+        this.ufRegistro = ufRegistro;
         this.atualizadoEm = agora;
     }
 

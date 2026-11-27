@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import br.com.clinicaviene.CpfsFicticios;
 import br.com.clinicaviene.TestcontainersConfiguration;
 import br.com.clinicaviene.dto.NovoUsuarioDto;
+import br.com.clinicaviene.dto.RegistroProfissionalDto;
 import br.com.clinicaviene.dto.UsuarioAutenticado;
 import br.com.clinicaviene.dto.UsuarioResponse;
 import br.com.clinicaviene.entity.Usuario;
@@ -213,6 +214,88 @@ public class UsuarioServiceIT {
         assertThat(depois.isTrocarSenha()).isFalse();
         assertThat(codificador.matches("Nova#Senha1234", depois.senhaHash())).isTrue();
         assertThat(contarAuditoria("SENHA_ALTERADA", admin.id())).isEqualTo(1);
+    }
+
+    @Test
+    void editaDadosSemMudarCpfERespeitaQuemPodeGerenciar() {
+        UsuarioAutenticado master = existente(Perfil.MASTER);
+        UsuarioAutenticado dev = existente(Perfil.DEV);
+        UsuarioAutenticado profissional = existente(Perfil.PROFISSIONAL);
+        String cpfAntes = repositorio.findById(profissional.id()).orElseThrow().getCpf();
+        String numero = numeroUnico();
+
+        Usuario editado = servico.atualizarDados(
+                profissional.id(), "  Nome   Novo ", " Novo." + numero + "@Exemplo.com", "71999990000",
+                new RegistroProfissionalDto(AreaAtuacao.PSICOLOGIA, ConselhoProfissional.CRP, numero, "ba"), master);
+
+        assertThat(editado.getNomeCompleto()).isEqualTo("Nome Novo");
+        assertThat(editado.getEmail()).isEqualTo("novo." + numero + "@exemplo.com");
+        assertThat(editado.getConselho()).isEqualTo(ConselhoProfissional.CRP);
+        assertThat(editado.getUfRegistro()).isEqualTo("BA");
+        assertThat(repositorio.findById(profissional.id()).orElseThrow().getCpf()).isEqualTo(cpfAntes);
+        assertThat(contarAuditoria("USUARIO_ALTERADO", profissional.id())).isEqualTo(1);
+
+        // DEV não edita MASTER; MASTER não enxerga DEV; o gestor edita os próprios dados
+        assertThatThrownBy(() -> servico.atualizarDados(master.id(), "X", emailUnico(), null, semRegistro(), dev))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> servico.atualizarDados(dev.id(), "X", emailUnico(), null, semRegistro(), master))
+                .isInstanceOf(RecursoNaoEncontradoException.class);
+        assertThat(servico.atualizarDados(master.id(), "Dona", emailUnico(), null, semRegistro(), master)
+                        .getNomeCompleto())
+                .isEqualTo("Dona");
+        // registro só para PROFISSIONAL; e-mail não pode repetir
+        assertThatThrownBy(() -> servico.atualizarDados(
+                        master.id(), "Dona", emailUnico(), null,
+                        new RegistroProfissionalDto(AreaAtuacao.ODONTOLOGIA, ConselhoProfissional.CRO, "1", "BA"), master))
+                .isInstanceOf(RegraNegocioException.class);
+        String emailDoDev = repositorio.findById(dev.id()).orElseThrow().getEmail();
+        assertThatThrownBy(() -> servico.atualizarDados(master.id(), "Dona", emailDoDev, null, semRegistro(), master))
+                .hasMessage("Já existe um usuário com este e-mail.");
+    }
+
+    @Test
+    void mudaPerfilComRegistroEDerrubaSessoes() {
+        UsuarioAutenticado master = existente(Perfil.MASTER);
+        UsuarioAutenticado admin = existente(Perfil.ADMIN);
+        String numero = numeroUnico();
+
+        Usuario promovido = servico.alterarPerfil(
+                admin.id(), Perfil.PROFISSIONAL,
+                new RegistroProfissionalDto(AreaAtuacao.NUTRICAO, ConselhoProfissional.CRN, numero, "BA"), master);
+        assertThat(promovido.getPerfil()).isEqualTo(Perfil.PROFISSIONAL);
+        assertThat(promovido.getConselho()).isEqualTo(ConselhoProfissional.CRN);
+        assertThat(contarAuditoria("USUARIO_PERFIL_ALTERADO", admin.id())).isEqualTo(1);
+
+        Usuario rebaixado = servico.alterarPerfil(admin.id(), Perfil.ADMIN, null, master);
+        assertThat(rebaixado.getPerfil()).isEqualTo(Perfil.ADMIN);
+        assertThat(rebaixado.getConselho()).isNull();
+        assertThat(rebaixado.getNumeroRegistro()).isNull();
+    }
+
+    @Test
+    void regrasDeMudancaDePerfil() {
+        UsuarioAutenticado master = existente(Perfil.MASTER);
+        UsuarioAutenticado dev = existente(Perfil.DEV);
+        UsuarioAutenticado admin = existente(Perfil.ADMIN);
+        UsuarioAutenticado outroMaster = existente(Perfil.MASTER);
+
+        assertThatThrownBy(() -> servico.alterarPerfil(admin.id(), Perfil.DEV, null, master))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> servico.alterarPerfil(dev.id(), Perfil.ADMIN, null, dev))
+                .isInstanceOf(RegraNegocioException.class); // o próprio perfil
+        assertThatThrownBy(() -> servico.alterarPerfil(master.id(), Perfil.ADMIN, null, master))
+                .hasMessage("Não é possível alterar o próprio perfil.");
+        assertThatThrownBy(() -> servico.alterarPerfil(outroMaster.id(), Perfil.ADMIN, null, dev))
+                .isInstanceOf(AccessDeniedException.class); // DEV não gerencia MASTER
+        assertThatThrownBy(() -> servico.alterarPerfil(admin.id(), Perfil.PROFISSIONAL, semRegistro(), master))
+                .isInstanceOf(RegraNegocioException.class); // PROFISSIONAL sem registro
+        assertThatThrownBy(() -> servico.alterarPerfil(admin.id(), Perfil.MASTER, null, existente(Perfil.ADMIN)))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThat(servico.alterarPerfil(admin.id(), Perfil.MASTER, null, dev).getPerfil()).isEqualTo(Perfil.MASTER);
+    }
+
+    private static RegistroProfissionalDto semRegistro() {
+        return new RegistroProfissionalDto(null, null, null, null);
     }
 
     @Test

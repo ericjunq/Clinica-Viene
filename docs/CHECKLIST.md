@@ -93,11 +93,11 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 Plano aprovado em 2026-11-27 (D-088 a D-095).
 
 **2A. Cadastro do paciente**
-- [~] `IdUtils.novoId()` (UUID v7) como gerador padrão de ids, aplicado às entidades (D-095) — aguardando CI
-- [~] `Paciente` (CPF cifrado + `cpf_hash` único parcial), `ResponsavelLegal` (CPF cifrado obrigatório), `PacienteVersao` (histórico cifrado, somente inclusão no banco) — V11 — aguardando CI
-- [~] Regras de CPF (D-053): menor sem CPF → responsável com CPF; adulto sem CPF só com aprovação do MASTER + justificativa + auditoria; alerta de duplicidade (409 + confirmação) — aguardando CI
-- [~] Pré-cadastro pela recepção; busca por CPF/nome/nascimento; edição de endereço/telefone/e-mail com versão auditada; nome/CPF/nascimento não editáveis (D-092) — `/api/v1/pacientes` — aguardando CI
-- [~] Leitura de ficha cadastral auditada; matriz de autorização (ADMIN/MASTER sim; PROFISSIONAL/DEV não) — `PacienteServiceIT`, `PacienteControllerIT` — aguardando CI
+- [x] `IdUtils.novoId()` (UUID v7) como gerador padrão de ids, aplicado às entidades (D-095) — **CI verde**
+- [x] `Paciente` (CPF cifrado + `cpf_hash` único parcial), `ResponsavelLegal` (CPF cifrado obrigatório), `PacienteVersao` (histórico cifrado, somente inclusão no banco) — V11 — **CI verde**
+- [x] Regras de CPF (D-053): menor sem CPF → responsável com CPF; adulto sem CPF só com aprovação do MASTER + justificativa + auditoria; alerta de duplicidade (409 + confirmação) — **CI verde**
+- [x] Pré-cadastro pela recepção; busca por CPF/nome/nascimento; edição de endereço/telefone/e-mail com versão auditada; nome/CPF/nascimento não editáveis (D-092) — `/api/v1/pacientes` — **CI verde**
+- [x] Leitura de ficha cadastral auditada; matriz de autorização (ADMIN/MASTER sim; PROFISSIONAL/DEV não) — `PacienteServiceIT`, `PacienteControllerIT` — **CI verde**
 
 **2B. Termos LGPD**
 - [ ] `TermoVersao` + `AceiteTermo` (D-075) + consentimentos opcionais revogáveis (D-093) + tela do MASTER com texto-exemplo (rascunho)

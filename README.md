@@ -163,6 +163,7 @@ Por fim, edite o `.env` e preencha:
 | `CPF_HMAC_CHAVE` | Chave do HMAC usado para buscar CPF sem decifrar |
 | `JWT_CHAVE_PRIVADA` | Chave RSA que assina o token de acesso |
 | `APP_URL_PUBLICA` | Endereço do frontend usado nos links enviados aos pacientes |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_CHAVE_ACESSO`, `S3_CHAVE_SECRETA` | Storage dos documentos (PDFs vão cifrados); em dev, o SeaweedFS do compose |
 | `OPENAPI_HABILITADO` | Liga o Swagger UI (só em desenvolvimento) |
 | `DEV_INICIAL_CPF`, `_NOME`, `_EMAIL`, `_SENHA` | Primeiro usuário, criado só com o banco vazio |
 | `*_PORTA` | Portas expostas em `localhost` |

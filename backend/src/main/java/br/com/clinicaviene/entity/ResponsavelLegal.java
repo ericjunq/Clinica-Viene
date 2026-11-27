@@ -29,18 +29,18 @@ public class ResponsavelLegal {
     @Column(name = "paciente_id", nullable = false, updatable = false)
     private UUID pacienteId;
 
-    @Column(name = "nome_completo", nullable = false, length = 150, updatable = false)
+    @Column(name = "nome_completo", nullable = false, length = 150)
     private String nomeCompleto;
 
     @Convert(converter = CampoCriptografadoConverter.class)
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private String cpf;
 
-    @Column(name = "cpf_hash", nullable = false, length = 64, updatable = false)
+    @Column(name = "cpf_hash", nullable = false, length = 64)
     private String cpfHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, updatable = false)
+    @Column(nullable = false, length = 20)
     private Parentesco parentesco;
 
     @Column(length = 20)
@@ -73,6 +73,18 @@ public class ResponsavelLegal {
         this.telefone = telefone;
         this.email = email;
         this.criadoEm = agora;
+        this.atualizadoEm = agora;
+    }
+
+    /** Dados conferidos e assinados na ficha (D-091/D-092). */
+    public void atualizarPelaFicha(
+            String nomeCompleto, String cpf, String cpfHash, Parentesco parentesco, String telefone, String email, Instant agora) {
+        this.nomeCompleto = nomeCompleto;
+        this.cpf = cpf;
+        this.cpfHash = cpfHash;
+        this.parentesco = parentesco;
+        this.telefone = telefone;
+        this.email = email;
         this.atualizadoEm = agora;
     }
 

@@ -60,6 +60,7 @@ services:
       CPF_HMAC_CHAVE: ${CPF_HMAC_CHAVE:?defina CPF_HMAC_CHAVE no .env}
       JWT_CHAVE_PRIVADA: ${JWT_CHAVE_PRIVADA:?defina JWT_CHAVE_PRIVADA no .env}
       APP_URL_PUBLICA: ${APP_URL_PUBLICA:-http://localhost:4200}
+      S3_ENDPOINT: http://seaweedfs:8333
       DEV_INICIAL_CPF: ${DEV_INICIAL_CPF:-}
       DEV_INICIAL_NOME: ${DEV_INICIAL_NOME:-}
       DEV_INICIAL_EMAIL: ${DEV_INICIAL_EMAIL:-}
@@ -69,6 +70,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      seaweedfs:
+        condition: service_started
       mailpit:
         condition: service_started
 

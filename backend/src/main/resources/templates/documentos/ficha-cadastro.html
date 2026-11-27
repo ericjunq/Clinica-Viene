@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha de cadastro e saúde</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 20mm 16mm;
+      @bottom-left { content: "Viene Odontologia &amp; Saúde · Ficha de cadastro e saúde"; font-size: 8pt; color: #8c6240; }
+      @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #8c6240; }
+    }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #3a2a1c; line-height: 1.35; }
+    h1 { font-family: Times, serif; font-size: 20pt; color: #6b4a2e; margin: 0; }
+    h2 { font-family: Times, serif; font-size: 14pt; color: #6b4a2e; border-bottom: 1px solid #c69a72; padding-bottom: 2pt; margin: 16pt 0 6pt 0; }
+    h3 { font-size: 10.5pt; color: #8c6240; margin: 10pt 0 4pt 0; }
+    .marca { font-size: 9pt; letter-spacing: 2pt; color: #8c6240; }
+    .subtitulo { color: #6b4a2e; margin-top: 2pt; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { padding: 3pt 4pt; vertical-align: top; text-align: left; }
+    .dados td.rotulo { width: 32%; color: #6b4a2e; }
+    .respostas tr { border-bottom: 0.5pt solid #e2cdbb; }
+    .respostas td.pergunta { width: 62%; }
+    .respostas td.resposta { font-weight: bold; }
+    .termo-texto { white-space: pre-wrap; font-size: 8.5pt; color: #4a3626; border-left: 2pt solid #edd3c2; padding-left: 6pt; margin: 4pt 0 8pt 0; }
+    .assinatura { margin-top: 10pt; border: 1pt solid #c69a72; padding: 8pt; page-break-inside: avoid; }
+    .assinatura img { height: 70pt; }
+    .nome-digitado { font-family: Times, serif; font-style: italic; font-size: 22pt; color: #2b1d12; }
+    .linha-assinatura { border-top: 0.75pt solid #3a2a1c; margin-top: 2pt; padding-top: 2pt; }
+    .evidencias td { font-size: 8.5pt; }
+    .evidencias td.rotulo { width: 28%; color: #6b4a2e; }
+    .hash { font-family: Courier, monospace; font-size: 7.5pt; word-wrap: break-word; }
+    .aviso { font-size: 8.5pt; color: #6b4a2e; }
+  </style>
+</head>
+<body>
+  <div class="marca">VIENE · ODONTOLOGIA &amp; SAÚDE</div>
+  <h1>Ficha de cadastro e saúde</h1>
+  <div class="subtitulo">
+    Preenchida e assinada eletronicamente em <span th:text="${assinadoEm}">data</span>
+    <span th:text="${origem}">origem</span>.
+  </div>
+
+  <h2>Dados do paciente</h2>
+  <table class="dados">
+    <tr><td class="rotulo">Nome completo</td><td th:text="${paciente.nome}">nome</td></tr>
+    <tr><td class="rotulo">CPF</td><td th:text="${paciente.cpf}">cpf</td></tr>
+    <tr><td class="rotulo">Data de nascimento</td><td th:text="${paciente.nascimento}">nascimento</td></tr>
+    <tr><td class="rotulo">E-mail</td><td th:text="${paciente.email}">email</td></tr>
+    <tr><td class="rotulo">Telefone</td><td th:text="${paciente.telefone}">telefone</td></tr>
+    <tr><td class="rotulo">Endereço</td><td th:text="${paciente.endereco}">endereco</td></tr>
+  </table>
+
+  <div th:if="${responsavel != null}">
+    <h2>Responsável legal</h2>
+    <table class="dados">
+      <tr><td class="rotulo">Nome completo</td><td th:text="${responsavel.nome}">nome</td></tr>
+      <tr><td class="rotulo">CPF</td><td th:text="${responsavel.cpf}">cpf</td></tr>
+      <tr><td class="rotulo">Parentesco</td><td th:text="${responsavel.parentesco}">parentesco</td></tr>
+      <tr><td class="rotulo">Telefone</td><td th:text="${responsavel.telefone}">telefone</td></tr>
+      <tr><td class="rotulo">E-mail</td><td th:text="${responsavel.email}">email</td></tr>
+    </table>
+  </div>
+
+  <h2 th:text="${'Ficha de saúde — ' + modelo}">Ficha de saúde</h2>
+  <div th:each="secao : ${secoes}">
+    <h3 th:if="${secao.nome != null and !secao.nome.isEmpty()}" th:text="${secao.nome}">Seção</h3>
+    <table class="respostas">
+      <tr th:each="item : ${secao.itens}">
+        <td class="pergunta" th:text="${item.pergunta}">pergunta</td>
+        <td class="resposta" th:text="${item.resposta}">resposta</td>
+      </tr>
+    </table>
+  </div>
+  <p class="aviso" th:if="${acompanhante != null}" th:text="${acompanhante}">acompanhante</p>
+
+  <h2>Privacidade e autorizações</h2>
+  <div th:each="termo : ${termos}">
+    <h3 th:text="${termo.titulo + ' (versão ' + termo.versao + '): ' + termo.decisao}">termo</h3>
+    <div class="termo-texto" th:text="${termo.texto}">texto</div>
+  </div>
+
+  <h2>Declaração e assinatura</h2>
+  <p th:text="${declaracao}">declaração</p>
+  <div class="assinatura">
+    <img th:if="${assinatura.imagem != null}" th:src="${assinatura.imagem}" alt="Assinatura" />
+    <div th:if="${assinatura.nomeDigitado != null}" class="nome-digitado" th:text="${assinatura.nomeDigitado}">nome</div>
+    <div class="linha-assinatura">
+      <strong th:text="${assinatura.signatario}">signatário</strong> ·
+      <span th:text="${assinatura.papel}">papel</span> ·
+      <span th:text="${assinatura.metodo}">método</span>
+    </div>
+  </div>
+
+  <h2>Trilha de evidências</h2>
+  <table class="evidencias">
+    <tr th:each="e : ${evidencias}">
+      <td class="rotulo" th:text="${e.rotulo}">rótulo</td>
+      <td th:classappend="${e.codigo} ? 'hash' : ''" th:text="${e.valor}">valor</td>
+    </tr>
+  </table>
+  <p class="aviso">
+    Documento assinado eletronicamente (Lei 14.063/2020). A integridade deste arquivo pode ser conferida pelo hash
+    SHA-256 registrado pela clínica no momento da assinatura.
+  </p>
+</body>
+</html>

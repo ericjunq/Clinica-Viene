@@ -32,18 +32,17 @@ public class Paciente {
     @Id
     private UUID id;
 
-    @Column(name = "nome_completo", nullable = false, length = 150, updatable = false)
+    @Column(name = "nome_completo", nullable = false, length = 150)
     private String nomeCompleto;
 
     /** CPF cifrado (só dígitos). Opcional para menor; adulto sem CPF só com aprovação do MASTER (D-053). */
     @Convert(converter = CampoCriptografadoConverter.class)
-    @Column(updatable = false)
     private String cpf;
 
-    @Column(name = "cpf_hash", length = 64, updatable = false)
+    @Column(name = "cpf_hash", length = 64)
     private String cpfHash;
 
-    @Column(name = "data_nascimento", nullable = false, updatable = false)
+    @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
     @Column(length = 254)
@@ -123,6 +122,19 @@ public class Paciente {
         this.semCpfJustificativa = justificativa;
         this.semCpfAprovadoPor = aprovadoPor;
         this.semCpfAprovadoEm = agora;
+    }
+
+    /**
+     * Nome, CPF e nascimento só mudam por ficha conferida e assinada pelo próprio paciente (D-092) — chamado
+     * apenas pelo {@code PacienteService} ao gravar a ficha assinada.
+     */
+    public void corrigirIdentificacaoPelaFicha(
+            String nomeCompleto, String cpf, String cpfHash, LocalDate dataNascimento, Instant agora) {
+        this.nomeCompleto = nomeCompleto;
+        this.cpf = cpf;
+        this.cpfHash = cpfHash;
+        this.dataNascimento = dataNascimento;
+        this.atualizadoEm = agora;
     }
 
     public void atualizarContato(String email, String telefone, EnderecoDto endereco, Instant agora) {

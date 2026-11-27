@@ -1,5 +1,18 @@
 package br.com.clinicaviene.service;
 
+import br.com.clinicaviene.dto.AssinarFichaRequest;
+import br.com.clinicaviene.dto.AssinaturaColetada;
+import br.com.clinicaviene.dto.DecisaoConsentimentoDto;
+import br.com.clinicaviene.dto.EvidenciaAceiteDto;
+import br.com.clinicaviene.dto.FichaAssinadaResponse;
+import br.com.clinicaviene.dto.NovaFichaDto;
+import br.com.clinicaviene.dto.PerguntaAnamneseDto;
+import br.com.clinicaviene.dto.RespostaAnamneseDto;
+import br.com.clinicaviene.enums.OrigemAlteracao;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import br.com.clinicaviene.config.CadastroPublicoProperties;
 import br.com.clinicaviene.config.EnvioCodigoProperties;
 import br.com.clinicaviene.dto.CodigoCadastroEnviadoResponse;
@@ -59,11 +72,17 @@ public class CadastroPublicoService {
 
     private static final String ENTIDADE = "Paciente";
     private static final SecureRandom ALEATORIO = new SecureRandom();
+    private static final ZoneId FUSO_CLINICA = ZoneId.of("America/Bahia");
+    private static final DateTimeFormatter DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
 
     private final ConviteCadastroRepository conviteCadastroRepository;
     private final SessaoCadastroRepository sessaoCadastroRepository;
     private final PacienteRepository pacienteRepository;
     private final ConviteService conviteService;
+    private final ConsentimentoService consentimentoService;
+    private final FichaAnamneseService fichaAnamneseService;
+    private final EntregaDocumentoService entregaDocumentoService;
+    private final ProvedorAssinatura provedorAssinatura;
     private final PacienteService pacienteService;
     private final ModeloAnamneseService modeloAnamneseService;
     private final TermoService termoService;
@@ -210,6 +229,99 @@ public class CadastroPublicoService {
         return new RevisaoCadastroResponse(true, menor(dados));
     }
 
+    /**
+     * Assina a ficha (2F — D-102): confere tudo de novo, coleta a assinatura no provedor, grava os dados conferidos
+     * (com versão), as decisões sobre os termos e a ficha assinada (PDF cifrado no storage + hash), e encerra o
+     * convite (uso único). Tudo na mesma transação: ou a ficha fica completa, ou nada muda no banco.
+     */
+    @Transactional
+    public FichaAssinadaResponse assinar(
+            String token, String tokenSessao, AssinarFichaRequest pedido, String ip, String dispositivo) {
+        SessaoValida valida = sessaoValida(token, tokenSessao);
+        ConviteCadastro convite = valida.convite();
+        if (!pedido.declarou()) {
+            throw new RegraNegocioException("Marque a declaração de que as informações são verdadeiras para assinar.");
+        }
+        FichaCadastroRequest ficha = pedido.ficha();
+        UUID pacienteId = convite.getPacienteId();
+        Paciente paciente = paciente(convite);
+        // e-mail que confirmou a identidade, antes de a ficha eventualmente trocá-lo
+        String emailConfirmacao = convite.getModo() == ModoConvite.LINK ? conviteService.destinatario(paciente) : null;
+
+        DadosCadastroDto dados = pacienteService.validarFicha(pacienteId, ficha.dados());
+        ModeloAnamnese modelo = modeloVigente(convite);
+        if (!modelo.getId().equals(ficha.modeloAnamneseId())) {
+            throw new RegraNegocioException("A ficha de saúde foi atualizada pela clínica. Recarregue a página para continuar.");
+        }
+        List<PerguntaAnamneseDto> perguntas = modeloAnamneseService.perguntas(modelo);
+        Map<String, RespostaAnamneseDto> respostas = ficha.respostas() == null ? Map.of() : ficha.respostas();
+        List<String> alertas = RespostasAnamneseValidator.validar(perguntas, respostas);
+        validarTermos(ficha.termos());
+        List<TermoVersao> termos = termosVigentes();
+        Set<UUID> aceitos = ficha.termos().stream()
+                .filter(DecisaoTermoRequest::aceitou)
+                .map(DecisaoTermoRequest::termoVersaoId)
+                .collect(Collectors.toSet());
+
+        boolean peloResponsavel = menor(dados);
+        String signatario = peloResponsavel ? dados.responsavel().nomeCompleto() : dados.nomeCompleto();
+        AssinaturaColetada assinatura = provedorAssinatura.coletar(pedido.assinatura(), signatario);
+
+        Instant agora = agora();
+        OrigemAlteracao origem = convite.getModo().origem();
+        pacienteService.aplicarFicha(pacienteId, dados, origem);
+        consentimentoService.registrarDecisoes(
+                pacienteId,
+                termos.stream().map(t -> new DecisaoConsentimentoDto(t.getTipo(), aceitos.contains(t.getId()))).toList(),
+                new EvidenciaAceiteDto(origem, peloResponsavel, ip, dispositivo, null));
+
+        SessaoCadastro sessao = valida.sessao();
+        Map<String, Object> evidencias = new LinkedHashMap<>();
+        evidencias.put("ip", ip);
+        evidencias.put("dispositivo", dispositivo);
+        evidencias.put("convite", convite.getId().toString());
+        evidencias.put("modo", convite.getModo().name());
+        evidencias.put("sessao", sessao.getId().toString());
+        evidencias.put("identidadeConfirmadaEm", sessao.getConfirmadaEm().toString());
+        if (convite.getDocumentoConferidoPor() != null) {
+            evidencias.put("documentoConferidoPor", convite.getDocumentoConferidoPor().toString());
+        }
+        FichaAssinadaResponse assinada = fichaAnamneseService.registrar(new NovaFichaDto(
+                pacienteId,
+                convite.getId(),
+                origem,
+                dados,
+                modelo,
+                perguntas,
+                respostas,
+                alertas,
+                termos,
+                aceitos,
+                ficha.acompanhante(),
+                peloResponsavel,
+                provedorAssinatura.nome(),
+                assinatura,
+                identidade(convite, sessao, emailConfirmacao),
+                evidencias,
+                agora));
+        convite.marcarUsado(agora);
+        String entregaPara = entregaDocumentoService
+                .enviarFichaAssinada(pacienteId, assinada.documentoId(), peloResponsavel)
+                .orElse(null);
+        return new FichaAssinadaResponse(
+                assinada.fichaId(), assinada.documentoId(), assinada.sha256(), assinada.assinadoEm(), entregaPara);
+    }
+
+    private static String identidade(ConviteCadastro convite, SessaoCadastro sessao, String emailConfirmacao) {
+        String quando = DATA_HORA.format(sessao.getConfirmadaEm().atZone(FUSO_CLINICA)) + " (UTC-3)";
+        if (convite.getModo() == ModoConvite.LINK) {
+            return "Código de 6 dígitos enviado ao e-mail " + ConviteService.mascararEmail(emailConfirmacao)
+                    + " e confirmado em " + quando + ".";
+        }
+        return "Documento de identidade com foto conferido presencialmente pela recepção; cadastro aberto no aparelho "
+                + "da clínica em " + quando + ".";
+    }
+
     private void validarTermos(List<DecisaoTermoRequest> decisoes) {
         List<TermoVersao> vigentes = termosVigentes();
         Set<UUID> esperados = vigentes.stream().map(TermoVersao::getId).collect(Collectors.toSet());
@@ -235,6 +347,12 @@ public class CadastroPublicoService {
 
     /** Sessão confirmada, dentro do prazo, do mesmo convite, e convite ainda não usado nem cancelado. */
     private ConviteCadastro conviteDaSessao(String token, String tokenSessao) {
+        return sessaoValida(token, tokenSessao).convite();
+    }
+
+    private record SessaoValida(ConviteCadastro convite, SessaoCadastro sessao) {}
+
+    private SessaoValida sessaoValida(String token, String tokenSessao) {
         if (token == null || token.isBlank() || tokenSessao == null || tokenSessao.isBlank()) {
             throw new SessaoCadastroInvalidaException();
         }
@@ -243,11 +361,12 @@ public class CadastroPublicoService {
                 .findByTokenHash(TokenUtils.sha256(tokenSessao))
                 .filter(s -> s.valida(agora))
                 .orElseThrow(SessaoCadastroInvalidaException::new);
-        return conviteCadastroRepository
+        ConviteCadastro convite = conviteCadastroRepository
                 .findByTokenHash(TokenUtils.sha256(token))
                 .filter(c -> c.getId().equals(sessao.getConviteId()))
                 .filter(c -> c.situacao(agora) != SituacaoConvite.USADO && c.situacao(agora) != SituacaoConvite.CANCELADO)
                 .orElseThrow(SessaoCadastroInvalidaException::new);
+        return new SessaoValida(convite, sessao);
     }
 
     private ModeloAnamnese modeloVigente(ConviteCadastro convite) {

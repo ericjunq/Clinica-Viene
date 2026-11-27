@@ -13,7 +13,7 @@ spring:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:1025}
   thymeleaf:
-    # Templates (PDFs/e-mails) entram nas próximas fases.
+    # Templates dos PDFs em templates/documentos (D-102).
     check-template-location: false
   jpa:
     open-in-view: false
@@ -91,6 +91,19 @@ clinicaviene:
     validade-quiosque: 2h
     # Área da ficha de saúde quando a recepção não escolhe outra no convite (D-101).
     area-padrao: ODONTOLOGIA
+  armazenamento:
+    # Storage S3 compatível (D-056): SeaweedFS em dev; produção A CONFIRMAR (D-060). Arquivos vão cifrados.
+    endpoint: ${S3_ENDPOINT:http://localhost:8333}
+    regiao: ${S3_REGIAO:us-east-1}
+    bucket: ${S3_BUCKET:clinicaviene-documentos}
+    chave-acesso: ${S3_CHAVE_ACESSO:dev}
+    chave-secreta: ${S3_CHAVE_SECRETA:dev}
+    criar-bucket: ${S3_CRIAR_BUCKET:true}
+  entrega-documento:
+    # Link para o paciente baixar o PDF assinado; a página pede o CPF (D-094).
+    validade: 7d
+    maximo-downloads: 5
+    tentativas-cpf: 5
   cadastro-publico:
     # Tempo para o paciente preencher depois de confirmar a identidade (D-100).
     validade-sessao: 2h

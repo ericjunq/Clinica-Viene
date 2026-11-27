@@ -108,4 +108,54 @@ public class CifradorAesGcm {
             throw new CriptografiaException("Valor cifrado inválido ou adulterado", e);
         }
     }
+
+    /**
+     * Cifra um arquivo (ex.: PDF guardado no storage) com a chave ativa. Formato:
+     * {@code [tamanho da versão (1 byte)][versão][iv][texto cifrado + tag]}.
+     */
+    public byte[] cifrarBytes(byte[] conteudo) {
+        byte[] versao = versaoAtiva.getBytes(StandardCharsets.UTF_8);
+        byte[] iv = new byte[TAMANHO_IV_BYTES];
+        aleatorio.nextBytes(iv);
+        try {
+            Cipher cipher = Cipher.getInstance(ALGORITMO);
+            cipher.init(Cipher.ENCRYPT_MODE, chaves.get(versaoAtiva), new GCMParameterSpec(TAMANHO_TAG_BITS, iv));
+            cipher.updateAAD(versao);
+            byte[] cifrado = cipher.doFinal(conteudo);
+            return ByteBuffer.allocate(1 + versao.length + iv.length + cifrado.length)
+                    .put((byte) versao.length)
+                    .put(versao)
+                    .put(iv)
+                    .put(cifrado)
+                    .array();
+        } catch (GeneralSecurityException e) {
+            throw new CriptografiaException("Falha ao cifrar arquivo", e);
+        }
+    }
+
+    /** Decifra um arquivo produzido por {@link #cifrarBytes}. */
+    public byte[] decifrarBytes(byte[] dados) {
+        if (dados == null || dados.length < 1) {
+            throw new CriptografiaException("Arquivo cifrado em formato inválido");
+        }
+        int tamanhoVersao = dados[0] & 0xFF;
+        int inicioIv = 1 + tamanhoVersao;
+        if (tamanhoVersao == 0 || dados.length <= inicioIv + TAMANHO_IV_BYTES) {
+            throw new CriptografiaException("Arquivo cifrado em formato inválido");
+        }
+        String versao = new String(dados, 1, tamanhoVersao, StandardCharsets.UTF_8);
+        SecretKey chave = chaves.get(versao);
+        if (chave == null) {
+            throw new CriptografiaException("Versão de chave desconhecida: '" + versao + "'");
+        }
+        try {
+            Cipher cipher = Cipher.getInstance(ALGORITMO);
+            cipher.init(Cipher.DECRYPT_MODE, chave, new GCMParameterSpec(TAMANHO_TAG_BITS, dados, inicioIv, TAMANHO_IV_BYTES));
+            cipher.updateAAD(versao.getBytes(StandardCharsets.UTF_8));
+            int inicioCifrado = inicioIv + TAMANHO_IV_BYTES;
+            return cipher.doFinal(dados, inicioCifrado, dados.length - inicioCifrado);
+        } catch (GeneralSecurityException e) {
+            throw new CriptografiaException("Arquivo cifrado inválido ou adulterado", e);
+        }
+    }
 }

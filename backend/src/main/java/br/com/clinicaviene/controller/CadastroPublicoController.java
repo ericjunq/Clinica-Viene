@@ -1,8 +1,10 @@
 package br.com.clinicaviene.controller;
 
+import br.com.clinicaviene.dto.AssinarFichaRequest;
 import br.com.clinicaviene.dto.CodigoCadastroEnviadoResponse;
 import br.com.clinicaviene.dto.ConfirmarCodigoCadastroRequest;
 import br.com.clinicaviene.dto.ConviteAbertoResponse;
+import br.com.clinicaviene.dto.FichaAssinadaResponse;
 import br.com.clinicaviene.dto.FichaCadastroRequest;
 import br.com.clinicaviene.dto.FormularioCadastroResponse;
 import br.com.clinicaviene.dto.RevisaoCadastroResponse;
@@ -72,5 +74,16 @@ public class CadastroPublicoController {
             @RequestHeader(name = SESSAO, required = false) String sessao,
             @Valid @RequestBody FichaCadastroRequest ficha) {
         return cadastroPublicoService.revisar(convite, sessao, ficha);
+    }
+
+    /** Assina a ficha conferida (2F — D-102). */
+    @PostMapping("/assinatura")
+    public FichaAssinadaResponse assinar(
+            @RequestHeader(name = CONVITE, required = false) String convite,
+            @RequestHeader(name = SESSAO, required = false) String sessao,
+            @Valid @RequestBody AssinarFichaRequest pedido,
+            HttpServletRequest http) {
+        return cadastroPublicoService.assinar(
+                convite, sessao, pedido, http.getRemoteAddr(), http.getHeader(HttpHeaders.USER_AGENT));
     }
 }

@@ -28,6 +28,10 @@ public enum AcaoAuditoria {
     CADASTRO_QUIOSQUE_INICIADO,
     CADASTRO_FORMULARIO_LIDO,
     CADASTRO_REVISADO,
+    FICHA_ASSINADA,
+    DOCUMENTO_LINK_ENVIADO,
+    DOCUMENTO_BAIXADO,
+    DOCUMENTO_CPF_INCORRETO,
 
     // Termos, consentimentos e modelos (Fase 2)
     TERMO_CRIADO,

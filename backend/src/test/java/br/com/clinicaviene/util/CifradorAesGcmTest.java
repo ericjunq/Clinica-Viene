@@ -99,4 +99,28 @@ public class CifradorAesGcmTest {
         assertThatThrownBy(() -> new CifradorAesGcm(Map.of("v:1", CHAVE_V1), "v:1"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void cifraArquivoComIvAleatorioEDecifraMesmoAposTrocarAChaveAtiva() {
+        byte[] pdf = "%PDF-1.7 conteúdo de teste".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] a = cifrador.cifrarBytes(pdf);
+        byte[] b = cifrador.cifrarBytes(pdf);
+        assertThat(a).isNotEqualTo(b).isNotEqualTo(pdf);
+        assertThat(cifrador.decifrarBytes(a)).isEqualTo(pdf);
+
+        CifradorAesGcm comRotacao = new CifradorAesGcm(Map.of("v1", CHAVE_V1, "v2", CHAVE_V2), "v2");
+        assertThat(comRotacao.decifrarBytes(a)).isEqualTo(pdf);
+    }
+
+    @Test
+    void arquivoAdulteradoOuMalFormadoERecusado() {
+        byte[] cifrado = cifrador.cifrarBytes(new byte[] {1, 2, 3});
+        cifrado[cifrado.length - 1] ^= 1;
+        assertThatThrownBy(() -> cifrador.decifrarBytes(cifrado)).isInstanceOf(CriptografiaException.class);
+        assertThatThrownBy(() -> cifrador.decifrarBytes(new byte[] {0})).isInstanceOf(CriptografiaException.class);
+        assertThatThrownBy(() -> cifrador.decifrarBytes(new byte[0])).isInstanceOf(CriptografiaException.class);
+        byte[] versaoDesconhecida = cifrador.cifrarBytes(new byte[] {1});
+        versaoDesconhecida[2] = 'x';
+        assertThatThrownBy(() -> cifrador.decifrarBytes(versaoDesconhecida)).isInstanceOf(CriptografiaException.class);
+    }
 }

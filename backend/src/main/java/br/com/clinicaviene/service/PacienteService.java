@@ -333,6 +333,73 @@ public class PacienteService {
         return new DadosCadastroDto(nome, cpf, dados.dataNascimento(), email, telefone, endereco, responsavel);
     }
 
+    /**
+     * Grava os dados conferidos e assinados pelo paciente na ficha (D-091, D-092): corrige nome/CPF/nascimento se
+     * mudaram, atualiza contato e endereço e cria/atualiza o responsável legal, com versão e auditoria. Recebe os
+     * dados já validados por {@link #validarFicha}; confere de novo a unicidade do CPF (corrida entre fichas).
+     */
+    @Transactional
+    public void aplicarFicha(UUID id, DadosCadastroDto dados, OrigemAlteracao origem) {
+        Paciente paciente = pacienteRepository.findById(id).orElseThrow(PacienteNaoEncontradoException::new);
+        Instant agora = agora();
+        List<String> alterados = new ArrayList<>();
+        if (!Objects.equals(paciente.getNomeCompleto(), dados.nomeCompleto())) {
+            alterados.add("nome");
+        }
+        if (!Objects.equals(paciente.getCpf(), dados.cpf())) {
+            alterados.add("CPF");
+        }
+        if (!Objects.equals(paciente.getDataNascimento(), dados.dataNascimento())) {
+            alterados.add("data de nascimento");
+        }
+        String cpfHash = dados.cpf() == null ? null : cpfHasher.calcular(dados.cpf());
+        if (cpfHash != null && pacienteRepository.findByCpfHash(cpfHash).filter(o -> !o.getId().equals(id)).isPresent()) {
+            throw new RegraNegocioException("Este CPF já está em outro cadastro. Fale com a recepção.");
+        }
+        if (!alterados.isEmpty()) {
+            paciente.corrigirIdentificacaoPelaFicha(
+                    dados.nomeCompleto(), dados.cpf(), cpfHash, dados.dataNascimento(), agora);
+        }
+        if (!Objects.equals(paciente.getEmail(), dados.email())) {
+            alterados.add("e-mail");
+        }
+        if (!Objects.equals(paciente.getTelefone(), dados.telefone())) {
+            alterados.add("telefone");
+        }
+        if (!paciente.endereco().equals(dados.endereco())) {
+            alterados.add("endereço");
+        }
+        paciente.atualizarContato(dados.email(), dados.telefone(), dados.endereco(), agora);
+
+        ResponsavelLegal responsavel = responsavelLegalRepository.findByPacienteId(id).orElse(null);
+        ResponsavelLegalDto r = dados.responsavel();
+        if (r != null) {
+            String responsavelHash = cpfHasher.calcular(r.cpf());
+            if (responsavel == null) {
+                responsavel = responsavelLegalRepository.save(new ResponsavelLegal(
+                        id, r.nomeCompleto(), r.cpf(), responsavelHash, r.parentesco(), r.telefone(), r.email(), agora));
+                alterados.add("responsável legal");
+            } else if (!new ResponsavelLegalDto(
+                            responsavel.getNomeCompleto(), responsavel.getCpf(), responsavel.getParentesco(),
+                            responsavel.getTelefone(), responsavel.getEmail())
+                    .equals(r)) {
+                responsavel.atualizarPelaFicha(
+                        r.nomeCompleto(), r.cpf(), responsavelHash, r.parentesco(), r.telefone(), r.email(), agora);
+                alterados.add("responsável legal");
+            }
+        }
+        // a versão é registrada mesmo sem mudança: marca o retrato do cadastro que foi assinado
+        registrarVersao(
+                paciente,
+                responsavel,
+                alterados.isEmpty() ? "ficha assinada (sem alterações)" : "ficha assinada: " + String.join(", ", alterados),
+                origem,
+                null,
+                agora);
+        auditoriaService.registrar(new RegistroAuditoria(
+                null, AcaoAuditoria.PACIENTE_ALTERADO, ENTIDADE, id.toString(), "ficha assinada pelo próprio paciente"));
+    }
+
     public LocalDate hoje() {
         return LocalDate.now(clock.withZone(FUSO_CLINICA));
     }

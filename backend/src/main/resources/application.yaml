@@ -84,6 +84,11 @@ clinicaviene:
     bloqueio: 1h
     validade: 10m
     tentativas: 5
+  convite:
+    # Endereço do frontend usado no link do convite (D-091).
+    url-publica: ${APP_URL_PUBLICA:http://localhost:4200}
+    validade-link: 72h
+    validade-quiosque: 2h
   dev-inicial:
     # D-048 — só usados com o banco sem usuários; depois remova do ambiente.
     cpf: ${DEV_INICIAL_CPF:}

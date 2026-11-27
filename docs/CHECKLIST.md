@@ -106,7 +106,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] `ModeloAnamnese` versionado por área (tipos de pergunta, perguntas de alerta clínico, validação de respostas), exemplo odontológico completo (46 perguntas) (D-089, D-096) — backend (V13) — **CI verde**; tela do MASTER na 2G
 
 **2D. Convite**
-- [ ] `ConviteCadastro` (token hash, uso único, 72 h) + QR code + e-mail com regras de reenvio (D-073)
+- [~] `ConviteCadastro` (token hash, uso único, um ativo por paciente; LINK 72 h com QR/e-mail e reenvio D-073; QUIOSQUE 2 h com documento conferido) (D-098) — backend (V14) — implementado — testes pendentes de execução (`ConviteServiceIT`, `ConviteControllerIT`); telas na 2G
 
 **2E. Fluxo público do paciente**
 - [ ] Link (código no e-mail) e quiosque aberto pela recepção com conferência de documento (D-091); conferir dados, completar, anamnese, termos, consentimentos

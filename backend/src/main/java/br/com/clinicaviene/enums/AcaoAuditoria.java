@@ -19,6 +19,9 @@ public enum AcaoAuditoria {
     PACIENTE_LIDO,
     PACIENTE_PESQUISADO,
     PACIENTE_SEM_CPF_APROVADO,
+    CONVITE_CRIADO,
+    CONVITE_ENVIADO_EMAIL,
+    CONVITE_CANCELADO,
 
     // Termos, consentimentos e modelos (Fase 2)
     TERMO_CRIADO,

@@ -345,6 +345,13 @@ Ids continuam UUID (não enumeráveis em URLs, gerados no construtor, sem colis�
 **D-097 — Cache de dependências na montagem das imagens (CI)** · 2026-11-27
 O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Maven Central: cada execução montava a imagem do backend do zero e baixava todas as dependências. Correção: o Dockerfile do backend baixa as dependências numa **camada própria** (`mvn dependency:go-offline`, refeita só quando o `pom.xml` muda) e os jobs `docker` e `e2e` montam as imagens com `docker/build-push-action` e **cache do GitHub Actions** (`type=gha`); o E2E reaproveita as imagens (`docker compose up --no-build`, imagens `clinica-viene-backend:local`/`clinica-viene-frontend:local`). Complementa a D-087 (imagem oficial do Maven).
 
+**D-098 — Convite de cadastro: regras** · 2026-11-27 · Detalha a D-091
+- Dois modos: **LINK** (celular do paciente; vale **72 h**; mostrado como link/QR e, se pedido, enviado por e-mail) e **QUIOSQUE** (aparelho da clínica; vale **2 h**; só é criado com a recepcionista confirmando que conferiu o documento com foto — fica gravado quem conferiu; nunca vai por e-mail).
+- **Um convite ativo por paciente**: gerar outro cancela o anterior. A recepção também pode cancelar.
+- O token (≥ 256 bits) aparece **só na resposta da criação** (link + QR code); no banco fica o hash SHA-256. Link inválido, expirado, cancelado ou usado dá sempre a mesma resposta.
+- E-mail vai para o e-mail do paciente ou, se ele não tiver (menor), para o do responsável; não leva dado de saúde; a resposta mostra o e-mail mascarado. Reenvios seguem a D-073 por paciente (espera 1/2/5/10 min, 5 envios, depois 1 h); gerar só o QR, sem e-mail, não tem espera.
+- Só ADMIN e MASTER geram, listam e cancelam convites; tudo auditado (`CONVITE_CRIADO`, `CONVITE_ENVIADO_EMAIL`, `CONVITE_CANCELADO`). Validades e endereço público (`APP_URL_PUBLICA`) configuráveis.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

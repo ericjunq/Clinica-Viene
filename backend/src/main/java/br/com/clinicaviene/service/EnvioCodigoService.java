@@ -6,6 +6,7 @@ import br.com.clinicaviene.entity.Usuario;
 import br.com.clinicaviene.enums.FinalidadeEnvio;
 import br.com.clinicaviene.exceptions.MuitasTentativasException;
 import br.com.clinicaviene.repository.EnvioCodigoRepository;
+import br.com.clinicaviene.util.RegraReenvio;
 import br.com.clinicaviene.util.TokenUtils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -94,13 +95,8 @@ public class EnvioCodigoService {
                 usuario.getId(), finalidade, agora.minus(envioCodigoProperties.bloqueio()));
     }
 
-    /** Quando o próximo envio é permitido, dado quantos já houve na janela e quando foi o último. */
     Instant liberadoEm(int enviosNaJanela, Instant ultimoEnvio) {
-        if (enviosNaJanela >= envioCodigoProperties.maximoEnvios()) {
-            return ultimoEnvio.plus(envioCodigoProperties.bloqueio());
-        }
-        List<Duration> esperas = envioCodigoProperties.esperas();
-        return ultimoEnvio.plus(esperas.get(Math.min(enviosNaJanela - 1, esperas.size() - 1)));
+        return RegraReenvio.liberadoEm(enviosNaJanela, ultimoEnvio, envioCodigoProperties);
     }
 
     private static String assunto(FinalidadeEnvio finalidade) {

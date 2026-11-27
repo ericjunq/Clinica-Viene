@@ -119,7 +119,8 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 
 **2F. Assinatura e documento**
 - [x] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências) — `ProvedorAssinaturaInternoTest` — **CI verde**
-- [ ] Adaptador ZapSign (quando houver conta/sandbox) (D-090)
+- [x] Estrutura do adaptador ZapSign (`ZapSignClient`, desligado por padrão, limite de 10 MB) (D-103) — `ZapSignClientTest` — implementado — testes pendentes de execução
+- [ ] Ligar a ZapSign ao fluxo da ficha e testar com documento real (quando o projeto estiver avançado — plano gratuito: 3 documentos/mês) (D-090, D-103)
 - [x] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado cifrado pela aplicação (SeaweedFS em dev/teste, contêiner nos testes — D-056, D-102) — `ArmazenamentoServiceIT`, `CifradorAesGcmTest` — **CI verde**
 - [x] `FichaAnamnese`, `Documento`, `Assinatura` imutáveis (V16, banco rejeita UPDATE/DELETE), respostas e evidências cifradas; ao assinar grava dados conferidos (versão), decisões dos termos e encerra o convite (D-088, D-102) — `FichaAssinaturaServiceIT`, `CadastroPublicoControllerIT` — **CI verde**
 - [ ] Leitura da ficha pelo profissional vinculado (Fase 4) (D-088)
@@ -136,7 +137,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [ ] E2E: pré-cadastro → link → anamnese → termos → assinatura → ficha concluída
 
 **Pendências que dependem do autor**
-- [ ] Conta ZapSign (sandbox) para ligar o adaptador (D-090)
+- [x] Conta ZapSign criada (plano gratuito, 3 documentos/mês) — teste real adiado (D-103)
 - [ ] Revisão do exemplo de anamnese (dentista) e dos termos (advogado) antes de publicar (D-089)
 
 ## Fase 3 — Agenda

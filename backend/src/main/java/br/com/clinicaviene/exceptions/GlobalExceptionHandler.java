@@ -64,6 +64,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage()));
     }
 
+    @ExceptionHandler(ZapSignException.class)
+    ProblemDetail zapSign(ZapSignException e) {
+        log.warn("Falha na ZapSign: {}", e.getMessage());
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_GATEWAY, "A plataforma de assinatura não respondeu. Tente de novo em instantes.");
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     ProblemDetail acessoNegado(AccessDeniedException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Acesso negado.");

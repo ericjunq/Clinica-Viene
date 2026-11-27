@@ -248,7 +248,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 - Tipos: ficha de cadastro + anamnese, termo de consentimento do procedimento, registro de procedimento, termos LGPD aceitos.
 - **Paciente**: assinatura eletrônica avançada (Lei 14.063/2020) — OTP por e-mail/SMS ou presencial no tablet, desenho da assinatura, IP, dispositivo, data/hora, hash, trilha de evidências.
 - **Profissional**: preferencialmente certificado digital ICP-Brasil (Resolução CFO 91/2009 – NGS2).
-- **Plataforma de assinatura: ZapSign** (D-090), via interface `ProvedorAssinatura`, com assinatura embutida no sistema (desenhada ou digitada). Até haver conta/sandbox, e nos testes, provedor interno atrás da mesma interface.
+- **Plataforma de assinatura: ZapSign** (D-090), via interface `ProvedorAssinatura`, com assinatura embutida no sistema (desenhada ou digitada). Até haver conta/sandbox, e nos testes, provedor interno atrás da mesma interface. Cliente da API da ZapSign pronto e desligado (`clinicaviene.zapsign.habilitado=false`, PDF até 10 MB — D-103).
 - **Tablet na recepção** (se conseguido): assinatura presencial do próprio documento.
 - **Envio**: e-mail **não leva o PDF com dado de saúde em anexo aberto**. Envia link de uso limitado; a página pede o **CPF completo** do paciente (ou do responsável) antes de liberar o download (D-094). Destinatários: procedimento → profissional, clínica, paciente; ficha de cadastro → clínica, paciente.
 

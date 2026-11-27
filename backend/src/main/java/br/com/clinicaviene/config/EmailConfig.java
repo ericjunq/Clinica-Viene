@@ -5,5 +5,5 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({EmailProperties.class, EnvioCodigoProperties.class, ConviteProperties.class, CadastroPublicoProperties.class,
-    EntregaDocumentoProperties.class})
+    EntregaDocumentoProperties.class, ZapSignProperties.class})
 public class EmailConfig {}

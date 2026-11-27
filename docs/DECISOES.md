@@ -378,6 +378,13 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 - **Entrega (D-094)**: e-mail com link `/documento#<token>` para o paciente (ou o responsável, quando ele assinou), sem dado de saúde; vale **7 dias**, até **5 downloads**, **5 CPFs errados** bloqueiam o link. A página pede o CPF do paciente (ou do responsável, se o paciente não tiver CPF). Sem e-mail (quiosque), a recepção entrega o PDF depois (2G).
 - **Frontend**: depois de "Conferir ficha", a tela de assinatura oferece **Desenhar** (quadro próprio em canvas — dedo, caneta ou mouse; sem biblioteca externa) ou **Digitar o nome**, com a declaração obrigatória; ao concluir, a tela esquece tokens e respostas e, no quiosque, pede para devolver o aparelho. Página pública `/documento#<token>` pede o CPF e baixa o PDF.
 
+**D-103 — Adaptador ZapSign: estrutura pronta, envio desligado** · 2026-11-27 · Detalha a D-090
+- O autor criou conta na ZapSign, mas o plano gratuito tem **3 documentos/mês**: o teste com documento real fica para quando o projeto estiver avançado. Por ora, só a estrutura, **sem nenhum envio**.
+- `ZapSignClient` (`criarDocumento` com o PDF em base64 e `detalharDocumento`) + `ZapSignProperties` (`clinicaviene.zapsign.*`, variáveis `ZAPSIGN_*`). Com `habilitado=false` (padrão) toda chamada é recusada **antes** de sair da aplicação; os testes usam um servidor HTTP local que imita a API.
+- Conferido na documentação da ZapSign: **1 PDF de até 10 MB** por documento (o cliente recusa acima disso antes de enviar), PDF em base64 sem o prefixo `data:`, autenticação `Bearer`. Signatário com `auth_mode=assinaturaTela`, nome travado (`lock_name`) e **sem e-mail/WhatsApp automático** da ZapSign — o sistema mostra o `sign_url`. `original_file`/`signed_file` são links temporários (60 min): o PDF assinado será baixado e guardado no storage próprio, nunca o link.
+- Existe **sandbox** (`https://sandbox.api.zapsign.com.br/api/v1`, conta própria em sandbox.app.zapsign.com.br) sem validade jurídica e que não consome a cota — é o padrão da `url-api`. Produção (`api.zapsign.com.br`) exige plano com API.
+- Ainda **não está ligado ao fluxo da ficha** (que segue com o provedor interno): ligar exige definir o momento do envio, a tela embutida do `sign_url` e o webhook de documento assinado — fica para quando houver o teste real.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

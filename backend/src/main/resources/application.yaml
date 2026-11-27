@@ -104,6 +104,14 @@ clinicaviene:
     validade: 7d
     maximo-downloads: 5
     tentativas-cpf: 5
+  zapsign:
+    # D-090/D-103 — estrutura pronta, desligada: nenhuma chamada sai enquanto habilitado=false.
+    # Sandbox (sem validade jurídica, não cobra): https://sandbox.api.zapsign.com.br/api/v1
+    habilitado: ${ZAPSIGN_HABILITADO:false}
+    url-api: ${ZAPSIGN_URL_API:https://sandbox.api.zapsign.com.br/api/v1}
+    token: ${ZAPSIGN_TOKEN:}
+    tamanho-maximo-pdf: 10MB
+    tempo-limite: 30s
   cadastro-publico:
     # Tempo para o paciente preencher depois de confirmar a identidade (D-100).
     validade-sessao: 2h

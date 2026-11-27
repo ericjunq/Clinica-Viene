@@ -61,7 +61,7 @@ Por lidar com dados de saúde, o projeto segue a **LGPD** como requisito de prim
 | Modelos de anamnese configuráveis por área (exemplo odontológico incluso) | ✅ Concluído (backend) |
 | Convite de cadastro por link, QR code ou quiosque | ✅ Concluído (backend) |
 | Fluxo público do paciente: confirmação por código ou quiosque, dados, ficha de saúde, privacidade | ✅ Concluído |
-| Assinatura eletrônica da ficha (desenho ou nome), PDF com hash, storage cifrado e entrega por link + CPF | ✅ Concluído (provedor interno; ZapSign quando houver conta) |
+| Assinatura eletrônica da ficha (desenho ou nome), PDF com hash, storage cifrado e entrega por link + CPF | ✅ Concluído (provedor interno; cliente ZapSign pronto e desligado) |
 | Telas internas de pacientes e convites, configurações do MASTER | 🚧 Próxima etapa |
 | Agenda, prontuário, financeiro, integrações | ⏳ Planejado |
 
@@ -165,6 +165,7 @@ Por fim, edite o `.env` e preencha:
 | `JWT_CHAVE_PRIVADA` | Chave RSA que assina o token de acesso |
 | `APP_URL_PUBLICA` | Endereço do frontend usado nos links enviados aos pacientes |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_CHAVE_ACESSO`, `S3_CHAVE_SECRETA` | Storage dos documentos (PDFs vão cifrados); em dev, o SeaweedFS do compose |
+| `ZAPSIGN_HABILITADO`, `ZAPSIGN_URL_API`, `ZAPSIGN_TOKEN` | Plataforma de assinatura ZapSign — **desligada** por padrão (`false`); a URL padrão é a do sandbox |
 | `OPENAPI_HABILITADO` | Liga o Swagger UI (só em desenvolvimento) |
 | `DEV_INICIAL_CPF`, `_NOME`, `_EMAIL`, `_SENHA` | Primeiro usuário, criado só com o banco vazio |
 | `*_PORTA` | Portas expostas em `localhost` |

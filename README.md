@@ -63,7 +63,7 @@ Por lidar com dados de saúde, o projeto segue a **LGPD** como requisito de prim
 | Fluxo público do paciente: confirmação por código ou quiosque, dados, ficha de saúde, privacidade | ✅ Concluído |
 | Assinatura eletrônica da ficha (desenho ou nome), PDF com hash, storage cifrado e entrega por link + CPF | ✅ Concluído (provedor interno; cliente ZapSign pronto e desligado) |
 | Entrega da ficha assinada pela recepção (QR na tela ou e-mail), sem a recepção abrir o PDF | ✅ Concluído |
-| Agenda: consultórios, categorias, horários dos profissionais (fixos, extras, ausências) e agendamentos sem conflito | 🚧 Em andamento (backend pronto; telas a seguir) |
+| Agenda: consultórios, categorias, horários dos profissionais (fixos, extras, ausências), calendário do dia, marcação com vários procedimentos, check-in e remarcação sem conflito | 🚧 Em andamento (falta aviso em tempo real, semana, lista do dia e arrastar) |
 | Prontuário, financeiro, integrações | ⏳ Planejado |
 
 O andamento detalhado fica em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).

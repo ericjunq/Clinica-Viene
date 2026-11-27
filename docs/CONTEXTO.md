@@ -136,7 +136,7 @@ Telas internas (D-104): **Pacientes** (busca, pré-cadastro, ficha com abas Cada
 - Status: `AGENDADO → CONFIRMADO → PACIENTE_CHEGOU → EM_ATENDIMENTO → CONCLUIDO`, ou `FALTOU` / `CANCELADO` (com motivo e quem cancelou). Remarcar = cancelar com motivo "remarcado" + novo agendamento ligado ao anterior.
 - **Conflitos impedidos no banco**: `EXCLUDE USING gist` com `tstzrange` para (profissional, período) e (consultório, período), ignorando cancelados.
 - **Check-in**: recepção marca `PACIENTE_CHEGOU` → notificação em tempo real para o profissional (WebSocket/STOMP), com som e confirmação de leitura.
-- **Calendário (D-085)**: próprio, no frontend (sem biblioteca de calendário). Visão do dia com uma coluna por consultório ou profissional, semana de um profissional e lista do dia; indisponibilidade esmaecida, bloqueios hachurados, cor por status; arrastar para remarcar (com confirmação e motivo).
+- **Calendário (D-085, D-107)**: próprio, no frontend (sem biblioteca de calendário), sempre na hora da clínica (America/Bahia). Visão do dia com uma coluna por consultório ou profissional, semana de um profissional e lista do dia; indisponibilidade esmaecida, bloqueios hachurados, cor por status; arrastar para remarcar (com confirmação e motivo).
 
 ---
 

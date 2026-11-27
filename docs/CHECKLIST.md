@@ -165,12 +165,15 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] `Agendamento` com itens (categoria + descrição), status completo, exclusão de conflitos no banco e recusa fora da disponibilidade (D-106); aviso de ficha pendente — V18 — `AgendamentoControllerIT`, `StatusAgendamentoTest` — **CI verde**
 - [x] Marcar / remarcar / cancelar (com motivo), alterar itens, confirmar/check-in/atendimento/falta (backend) — **CI verde**
 - [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — **CI verde**
-- [ ] Check-in + notificação WebSocket ao profissional
-- [ ] Calendário próprio (D-085): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, bloqueios, indisponibilidade esmaecida, cor por status); clicar em horário livre → novo agendamento
+- [x] Check-in na tela (detalhes da consulta: confirmar, chegou, faltou, iniciar/concluir atendimento, cancelar, remarcar) (D-107) — E2E (check-in) — implementado — testes pendentes de execução
+- [ ] Notificação de chegada em tempo real ao profissional (WebSocket)
+- [x] Calendário próprio (D-085, D-107): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, indisponibilidade esmaecida, cor por status, aviso de ficha pendente); clicar em horário livre → nova consulta com itens — Vitest + E2E — implementado — testes pendentes de execução
+- [x] Telas: horários dos profissionais (fixos, extras, ausências) e configurações de consultórios e categorias (D-107) — E2E — implementado — testes pendentes de execução
 - [ ] Calendário próprio: semana de um profissional
 - [ ] Calendário próprio: lista do dia para o check-in
 - [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo)
-- [ ] Testes do calendário: cálculo de posições e sobreposição (unitários) + agendar/remarcar no navegador (E2E)
+- [x] Testes do calendário: hora da clínica, posições e sobreposição (unitários, `calendario.spec.ts`) + marcar e check-in no navegador (E2E) — implementado — testes pendentes de execução
+- [ ] E2E de remarcar pelo navegador (junto do arrastar para remarcar)
 - [x] Testes de concorrência de agendamento (4 recepcionistas no mesmo horário → 1 grava) — `AgendamentoControllerIT` — **CI verde**
 
 ## Fase 4 — Prontuário

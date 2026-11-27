@@ -1,0 +1,205 @@
+<a mat-button routerLink="/agenda" class="voltar">← Agenda</a>
+<h1>Horários dos profissionais</h1>
+<p class="nota">
+  Cadastre o que o profissional passar: os horários fixos da semana, as brechas fora da rotina
+  (horário extra) e as ausências. Fora desses horários não é possível marcar consulta.
+</p>
+
+<mat-form-field appearance="outline" class="campo-profissional">
+  <mat-label>Profissional</mat-label>
+  <mat-select
+    id="horarios-profissional"
+    [ngModel]="profissionalId"
+    (ngModelChange)="escolherProfissional($event)"
+  >
+    @for (p of profissionais(); track p.id) {
+      <mat-option [value]="p.id">{{ p.nomeCompleto }}</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+
+@if (erro(); as e) {
+  <p class="alerta erro" role="alert">{{ e }}</p>
+}
+@if (!ativos().length) {
+  <p class="alerta info">
+    Nenhum consultório ativo. O MASTER cadastra em Configurações → Consultórios.
+  </p>
+}
+
+@if (horarios(); as h) {
+  <div class="colunas-config">
+    <section class="cartao">
+      <h2>Horários fixos</h2>
+      <ul class="lista">
+        @for (f of h.fixos; track f.id) {
+          <li>
+            <span>
+              <strong>{{ rotuloDia(f.diaSemana) }}</strong> {{ f.horaInicio.slice(0, 5) }}–{{
+                f.horaFim.slice(0, 5)
+              }}
+              · {{ nomeConsultorio(f.consultorioId) }}
+              <span class="nota">
+                desde {{ f.vigenciaInicio | date: 'dd/MM/yyyy' : 'UTC' }}
+                @if (f.vigenciaFim) {
+                  até {{ f.vigenciaFim | date: 'dd/MM/yyyy' : 'UTC' }}
+                }
+              </span>
+            </span>
+            <button mat-button (click)="encerrarFixo(f.id, f.vigenciaInicio)">Encerrar</button>
+          </li>
+        } @empty {
+          <li class="nota">Nenhum horário fixo.</li>
+        }
+      </ul>
+      <form class="formulario-linha" (ngSubmit)="adicionarFixo()">
+        <mat-form-field appearance="outline">
+          <mat-label>Dia</mat-label>
+          <mat-select name="dia" id="fixo-dia" [(ngModel)]="fixo.diaSemana">
+            @for (d of dias; track d.valor) {
+              <mat-option [value]="d.valor">{{ d.rotulo }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Das</mat-label>
+          <input
+            matInput
+            type="time"
+            step="900"
+            name="ini"
+            id="fixo-inicio"
+            [(ngModel)]="fixo.horaInicio"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Às</mat-label>
+          <input
+            matInput
+            type="time"
+            step="900"
+            name="fim"
+            id="fixo-fim"
+            [(ngModel)]="fixo.horaFim"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Consultório</mat-label>
+          <mat-select name="consultorio" id="fixo-consultorio" [(ngModel)]="fixo.consultorioId">
+            @for (c of ativos(); track c.id) {
+              <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>A partir de</mat-label>
+          <input matInput type="date" name="vigIni" [(ngModel)]="fixo.vigenciaInicio" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Até (opcional)</mat-label>
+          <input matInput type="date" name="vigFim" [(ngModel)]="fixo.vigenciaFim" />
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="ocupado()">Adicionar horário fixo</button>
+      </form>
+    </section>
+
+    <section class="cartao">
+      <h2>Horários extras e ausências</h2>
+      <ul class="lista">
+        @for (e of h.excecoes; track e.id) {
+          <li>
+            <span>
+              <span
+                class="etiqueta"
+                [class.ativo]="e.tipo === 'HORARIO_EXTRA'"
+                [class.inativo]="e.tipo === 'AUSENCIA'"
+                >{{ e.tipo === 'HORARIO_EXTRA' ? 'extra' : 'ausência' }}</span
+              >
+              {{ e.inicio | date: 'dd/MM/yyyy HH:mm' : '-0300' }} –
+              {{ e.fim | date: 'dd/MM/yyyy HH:mm' : '-0300' }} ·
+              {{ nomeConsultorio(e.consultorioId) }}
+              @if (e.motivo) {
+                <span class="nota">· {{ e.motivo }}</span>
+              }
+            </span>
+            <button mat-button (click)="cancelarExcecao(e)">Cancelar</button>
+          </li>
+        } @empty {
+          <li class="nota">Nenhuma exceção a partir de hoje.</li>
+        }
+      </ul>
+      <form class="formulario-linha" (ngSubmit)="adicionarExcecao()">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select
+            name="tipo"
+            id="excecao-tipo"
+            [ngModel]="excecao.tipo"
+            (ngModelChange)="mudouTipoExcecao($event)"
+          >
+            <mat-option value="HORARIO_EXTRA">Horário extra (brecha)</mat-option>
+            <mat-option value="AUSENCIA">Ausência (folga, férias)</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>De (dia)</mat-label>
+          <input
+            matInput
+            type="date"
+            name="dIni"
+            id="excecao-data-inicio"
+            [(ngModel)]="excecao.dataInicio"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Hora</mat-label>
+          <input
+            matInput
+            type="time"
+            step="900"
+            name="hIni"
+            id="excecao-hora-inicio"
+            [(ngModel)]="excecao.horaInicio"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Até (dia)</mat-label>
+          <input
+            matInput
+            type="date"
+            name="dFim"
+            id="excecao-data-fim"
+            [(ngModel)]="excecao.dataFim"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Hora</mat-label>
+          <input
+            matInput
+            type="time"
+            step="900"
+            name="hFim"
+            id="excecao-hora-fim"
+            [(ngModel)]="excecao.horaFim"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Consultório</mat-label>
+          <mat-select name="cons" [(ngModel)]="excecao.consultorioId">
+            @if (excecao.tipo === 'AUSENCIA') {
+              <mat-option value="">Todos</mat-option>
+            }
+            @for (c of ativos(); track c.id) {
+              <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Motivo (opcional)</mat-label>
+          <input matInput name="motivo" [(ngModel)]="excecao.motivo" maxlength="300" />
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="ocupado()">Adicionar</button>
+      </form>
+    </section>
+  </div>
+}

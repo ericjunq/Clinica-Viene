@@ -411,6 +411,14 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - **Mudança de horários com consultas marcadas**: encerrar horário fixo, cadastrar ausência ou cancelar horário extra é recusado se alguma consulta futura em aberto ficaria fora dos horários — a recepção remarca ou cancela antes.
 - Consultar a agenda é registrado na auditoria (`AGENDA_CONSULTADA`), assim como criar, alterar, mudar situação, cancelar e remarcar.
 
+**D-107 — Telas da agenda** · 2026-11-27 · Detalha D-085, D-106
+- **Agenda do dia** (`/agenda`, ADMIN, MASTER e PROFISSIONAL): colunas por **consultório** ou por **profissional** (o profissional vê só a própria coluna); áreas fora dos horários de atendimento esmaecidas (hachura); consultas posicionadas pela hora, cor por situação, ícone de **ficha pendente**; cancelados ocultos (opção para mostrar); sobreposições dividem a largura.
+- **Marcar**: clique num horário livre (encaixado na grade de 15 min) abre o diálogo com paciente (busca), profissional (já escolhido se só um atende ali), consultório, dia, hora, duração e **vários procedimentos** (categoria da área do profissional + descrição). Clique fora dos horários avisa para cadastrar um horário extra.
+- **Detalhes da consulta**: ações conforme situação e perfil — confirmar, paciente chegou (check-in), faltou, iniciar/concluir atendimento (recepção ou o próprio profissional), cancelar com motivo, remarcar (dia, hora, duração, motivo); ficha pendente leva ao paciente.
+- **Horários dos profissionais** (`/agenda/horarios`, ADMIN e MASTER) e **Configurações → Consultórios / Categorias de procedimento** (MASTER).
+- **Hora da clínica**: o calendário mostra sempre America/Bahia, qualquer que seja o fuso do computador. A Bahia não tem horário de verão desde 2012, então o frontend usa UTC−3 fixo (se isso mudar, ajustar `calendario.ts`).
+- Ainda faltam (próximas etapas): aviso em tempo real ao profissional (WebSocket), semana de um profissional, lista do dia para o check-in e arrastar para remarcar.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

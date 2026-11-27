@@ -17,11 +17,13 @@ function botaoVisivel(page: Page, nome: string) {
   return page.getByRole('button', { name: nome, exact: true }).filter({ visible: true });
 }
 
-test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PDF', async ({
-  page,
-  browser,
-}) => {
-  test.setTimeout(180_000);
+// Os testes deste arquivo usam a mesma sessão da MASTER, em sequência (o 2FA dela só é cadastrado uma vez).
+test.describe.configure({ mode: 'serial' });
+
+let page: Page;
+
+test.beforeAll(async ({ browser }) => {
+  page = await browser.newPage();
   page.on('dialog', (dialogo) => void dialogo.accept());
 
   // primeiro acesso da MASTER: 2FA + troca de senha
@@ -40,6 +42,16 @@ test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PD
   await page.locator('#confirmacao').fill(SENHA_NOVA_MASTER);
   await page.getByRole('button', { name: 'Salvar' }).click();
   await expect(page.getByRole('heading', { name: /Olá,/ })).toBeVisible();
+});
+
+test.afterAll(async () => {
+  await page?.close();
+});
+
+test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PDF', async ({
+  browser,
+}) => {
+  test.setTimeout(180_000);
 
   // configurações: publica a política de privacidade de exemplo
   await page.getByRole('link', { name: 'Configurações' }).click();
@@ -132,4 +144,91 @@ test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PD
   await expect(page.getByText('Ciente', { exact: true })).toBeVisible();
   await page.getByRole('tab', { name: 'Histórico' }).click();
   await expect(page.getByText('Paciente (aparelho da clínica)').first()).toBeVisible();
+});
+
+/** Dia da semana (rótulo da tela) de uma data aaaa-mm-dd. */
+const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+test('agenda: profissional, consultório, horário fixo, consulta marcada no calendário e check-in', async () => {
+  test.setTimeout(180_000);
+  // mesmo dia da semana, daqui a 7 dias (sempre no futuro), na hora da clínica (UTC−3)
+  const hojeClinica = new Date(Date.now() - 3 * 3600_000);
+  const alvo = new Date(hojeClinica.getTime() + 7 * 86400_000).toISOString().slice(0, 10);
+  const diaSemana = DIAS[new Date(`${alvo}T12:00:00Z`).getUTCDay()];
+
+  // a MASTER cadastra a dentista
+  await page.getByRole('link', { name: 'Usuários' }).click();
+  await page.getByRole('button', { name: 'Novo usuário' }).click();
+  await page.locator('#nome').fill('Dentista Ficticia');
+  await page.locator('#cpf-novo').pressSequentially('86241307940');
+  await page.locator('#email').fill('dentista.e2e@exemplo.com');
+  await page.locator('#perfil').click();
+  await page.getByRole('option', { name: 'Profissional de saúde' }).click();
+  await page.getByRole('combobox', { name: 'Área de atuação' }).click();
+  await page.getByRole('option', { name: 'ODONTOLOGIA' }).click();
+  await page.getByRole('combobox', { name: 'Conselho' }).click();
+  await page.getByRole('option', { name: 'CRO', exact: true }).click();
+  await page.locator('#numero').fill('12345');
+  await page.getByRole('combobox', { name: 'UF' }).click();
+  await page.getByRole('option', { name: 'BA', exact: true }).click();
+  await page.locator('#senha-provisoria').fill('Provisoria#Dentista1');
+  await page.getByRole('button', { name: 'Criar usuário' }).click();
+  await expect(page.getByRole('cell', { name: 'Dentista Ficticia' })).toBeVisible();
+
+  // configurações: consultório e categorias de exemplo
+  await page.getByRole('link', { name: 'Configurações' }).click();
+  await page.getByRole('tab', { name: 'Consultórios' }).click();
+  await page.locator('#novo-consultorio').fill('Consultório 1');
+  await page.getByRole('button', { name: 'Adicionar' }).click();
+  await expect(page.getByText('Consultório 1')).toBeVisible();
+  await page.getByRole('tab', { name: 'Categorias de procedimento' }).click();
+  await page.getByRole('button', { name: 'Carregar categorias de exemplo' }).click();
+  await expect(page.getByText('ORTODONTIA', { exact: true })).toBeVisible();
+
+  // horário fixo da dentista nesse dia da semana, 8h–18h
+  await page.getByRole('link', { name: 'Agenda' }).click();
+  await page.getByRole('link', { name: 'Horários dos profissionais' }).click();
+  await page.locator('#horarios-profissional').click();
+  await page.getByRole('option', { name: 'Dentista Ficticia' }).click();
+  await page.locator('#fixo-dia').click();
+  await page.getByRole('option', { name: diaSemana }).click();
+  await page.locator('#fixo-fim').fill('18:00');
+  await page.getByRole('button', { name: 'Adicionar horário fixo' }).click();
+  await expect(page.getByText(`${diaSemana} 08:00–18:00`)).toBeVisible();
+
+  // agenda do dia: clica às 9h na coluna do consultório (faixa começa às 7h; 1,6 px por minuto)
+  await page.getByRole('link', { name: '← Agenda' }).click();
+  await page.locator('#agenda-data').fill(alvo);
+  const coluna = page.locator('.coluna[data-coluna="Consultório 1"]');
+  await expect(coluna.locator('.livre')).toHaveCount(1);
+  await coluna.click({ position: { x: 40, y: (9 * 60 - 7 * 60) * 1.6 + 6 } });
+
+  // marcação: paciente, dentista já escolhida (única atendendo), dois procedimentos
+  await expect(page.getByRole('heading', { name: 'Marcar consulta' })).toBeVisible();
+  await expect(page.locator('#agendamento-hora')).toHaveValue('09:00');
+  await page.locator('#agendamento-busca').fill('Paciente Ficticio');
+  await page.getByRole('button', { name: 'Buscar' }).click();
+  await page.getByRole('button', { name: 'Escolher' }).click();
+  await page.getByTestId('item-1').getByRole('combobox', { name: 'Categoria' }).click();
+  await page.getByRole('option', { name: 'Ortodontia' }).click();
+  await page
+    .getByTestId('item-1')
+    .getByLabel('Descrição (opcional)')
+    .fill('Manutenção do aparelho');
+  await page.getByRole('button', { name: 'Outro procedimento' }).click();
+  await page.getByTestId('item-2').getByRole('combobox', { name: 'Categoria' }).click();
+  await page.getByRole('option', { name: /Clínica geral/ }).click();
+  await page.getByRole('button', { name: 'Marcar', exact: true }).click();
+
+  const bloco = coluna.locator('.bloco', { hasText: NOME_PACIENTE });
+  await expect(bloco).toBeVisible();
+  await expect(bloco).toContainText('09:00–09:30');
+
+  // check-in: o paciente chegou
+  await bloco.click();
+  await expect(page.getByText('Ortodontia')).toBeVisible();
+  await page.getByRole('button', { name: 'Paciente chegou' }).click();
+  await expect(page.getByRole('button', { name: 'Iniciar atendimento' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fechar' }).click();
+  await expect(bloco).toContainText('Chegou');
 });

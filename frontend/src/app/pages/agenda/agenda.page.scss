@@ -1,0 +1,174 @@
+.barra-agenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.data-agenda {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--viene-texto);
+}
+
+.calendario {
+  --largura-horas: 3.5rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.cabecalho-colunas,
+.corpo {
+  display: grid;
+  grid-template-columns: var(--largura-horas) repeat(var(--colunas), minmax(11rem, 1fr));
+  min-width: calc(var(--largura-horas) + var(--colunas) * 11rem);
+}
+
+.cabecalho-colunas {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #fff;
+  border-bottom: 1px solid var(--viene-pessego);
+}
+
+.titulo-coluna {
+  padding: 0.6rem 0.5rem;
+  font-weight: 600;
+  color: var(--viene-marrom);
+  text-align: center;
+  border-left: 1px solid var(--viene-creme);
+}
+
+.corpo {
+  position: relative;
+}
+
+.horas {
+  position: relative;
+}
+
+.hora {
+  position: absolute;
+  right: 0.4rem;
+  transform: translateY(-0.45rem);
+  font-size: 0.75rem;
+  color: var(--viene-caramelo-escuro);
+}
+
+.coluna {
+  position: relative;
+  border-left: 1px solid var(--viene-creme);
+  /* fora do horário de atendimento: esmaecido */
+  background: repeating-linear-gradient(135deg, #f3ebe4 0 6px, #efe5dc 6px 12px);
+
+  &.clicavel {
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--viene-caramelo);
+  }
+}
+
+.linha-hora {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--viene-creme);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.livre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #fff;
+}
+
+.bloco {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  overflow: hidden;
+  padding: 0.2rem 0.4rem;
+  border: none;
+  border-left: 4px solid var(--cor-status);
+  border-radius: 0.4rem;
+  background: var(--fundo-status);
+  color: var(--viene-texto);
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(74, 54, 38, 0.15);
+
+  --cor-status: #8c6240;
+  --fundo-status: #f4e6d9;
+
+  &[data-status='CONFIRMADO'] {
+    --cor-status: #3f6fa0;
+    --fundo-status: #e2ecf6;
+  }
+
+  &[data-status='PACIENTE_CHEGOU'] {
+    --cor-status: #3f7a4a;
+    --fundo-status: #e3efe3;
+  }
+
+  &[data-status='EM_ATENDIMENTO'] {
+    --cor-status: #7a4a8c;
+    --fundo-status: #efe3f4;
+  }
+
+  &[data-status='CONCLUIDO'] {
+    --cor-status: #8a8a8a;
+    --fundo-status: #efefef;
+  }
+
+  &[data-status='FALTOU'],
+  &[data-status='CANCELADO'] {
+    --cor-status: #a3362b;
+    --fundo-status: #f8e3df;
+    opacity: 0.75;
+    text-decoration: line-through;
+  }
+}
+
+.bloco-hora {
+  font-weight: 600;
+}
+
+.bloco-paciente {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-weight: 600;
+}
+
+.bloco-detalhe {
+  color: var(--viene-caramelo-escuro);
+}
+
+.pendente {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  color: #b06a00;
+  vertical-align: middle;
+}
+
+.legenda {
+  margin-top: 0.5rem;
+}

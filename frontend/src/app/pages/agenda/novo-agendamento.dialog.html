@@ -1,0 +1,133 @@
+<h2 mat-dialog-title>Marcar consulta</h2>
+<mat-dialog-content class="dialogo-agenda">
+  @if (paciente(); as p) {
+    <div class="paciente-escolhido">
+      <span
+        ><strong>{{ p.nomeCompleto }}</strong>
+        <span class="nota">{{ p.cpfMascarado ?? 'sem CPF' }}</span></span
+      >
+      <button mat-button type="button" (click)="paciente.set(null)">Trocar</button>
+    </div>
+  } @else {
+    <form class="busca-paciente" (ngSubmit)="pesquisar()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Paciente (nome, CPF ou nascimento)</mat-label>
+        <input
+          matInput
+          id="agendamento-busca"
+          name="busca"
+          [(ngModel)]="busca"
+          autocomplete="off"
+        />
+      </mat-form-field>
+      <button mat-stroked-button type="submit">Buscar</button>
+    </form>
+    <ul class="lista">
+      @for (r of resultados(); track r.id) {
+        <li>
+          <span
+            >{{ r.nomeCompleto }} <span class="nota">{{ r.cpfMascarado ?? 'sem CPF' }}</span></span
+          >
+          <button mat-button type="button" (click)="escolher(r)">Escolher</button>
+        </li>
+      }
+      @if (buscou() && !resultados().length) {
+        <li class="nota">
+          Nenhum paciente encontrado. Faça o pré-cadastro em
+          <a routerLink="/pacientes" mat-dialog-close>Pacientes</a>.
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="formulario-linha">
+    <mat-form-field appearance="outline">
+      <mat-label>Profissional</mat-label>
+      <mat-select
+        id="agendamento-profissional"
+        [ngModel]="profissionalId()"
+        (ngModelChange)="mudouProfissional($event)"
+      >
+        @for (p of dados.profissionais; track p.id) {
+          <mat-option [value]="p.id">{{ p.nomeCompleto }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Consultório</mat-label>
+      <mat-select id="agendamento-consultorio" [(ngModel)]="consultorioId">
+        @for (c of ativos; track c.id) {
+          <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="formulario-linha">
+    <mat-form-field appearance="outline">
+      <mat-label>Dia</mat-label>
+      <input matInput type="date" id="agendamento-data" [(ngModel)]="data" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Hora</mat-label>
+      <input matInput type="time" step="900" id="agendamento-hora" [(ngModel)]="hora" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Duração</mat-label>
+      <mat-select id="agendamento-duracao" [(ngModel)]="duracao">
+        @for (d of duracoes; track d) {
+          <mat-option [value]="d">{{ d }} min</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <h3>Procedimentos</h3>
+  @if (profissionalId() && !categorias().length) {
+    <p class="alerta info">
+      Não há categorias ativas para a área deste profissional. O MASTER cadastra em Configurações.
+    </p>
+  }
+  @for (item of itens; track $index; let i = $index) {
+    <div class="formulario-linha item" [attr.data-testid]="'item-' + (i + 1)">
+      <mat-form-field appearance="outline">
+        <mat-label>Categoria</mat-label>
+        <mat-select [(ngModel)]="item.categoriaId" [disabled]="!profissionalId()">
+          @for (c of categorias(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="descricao">
+        <mat-label>Descrição (opcional)</mat-label>
+        <input matInput [(ngModel)]="item.descricao" maxlength="300" />
+      </mat-form-field>
+      @if (itens.length > 1) {
+        <button
+          mat-icon-button
+          type="button"
+          (click)="removerItem(i)"
+          aria-label="Remover procedimento"
+        >
+          <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+        </button>
+      }
+    </div>
+  }
+  <button mat-button type="button" (click)="adicionarItem()">
+    <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+    Outro procedimento
+  </button>
+
+  <mat-form-field appearance="outline" class="largura-total">
+    <mat-label>Observação (opcional)</mat-label>
+    <input matInput [(ngModel)]="observacao" maxlength="500" />
+  </mat-form-field>
+
+  @if (erro(); as e) {
+    <p class="alerta erro" role="alert">{{ e }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button (click)="salvar()" [disabled]="salvando()">Marcar</button>
+</mat-dialog-actions>

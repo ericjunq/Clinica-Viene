@@ -75,6 +75,18 @@ export const routes: Routes = [
         title: 'Paciente — ClinicaViene',
       },
       {
+        path: 'agenda',
+        loadComponent: () => import('./pages/agenda/agenda.page').then((m) => m.AgendaPage),
+        canActivate: [perfilGuard('ADMIN', 'MASTER', 'PROFISSIONAL')],
+        title: 'Agenda — ClinicaViene',
+      },
+      {
+        path: 'agenda/horarios',
+        loadComponent: () => import('./pages/agenda/horarios.page').then((m) => m.HorariosPage),
+        canActivate: [perfilGuard('ADMIN', 'MASTER')],
+        title: 'Horários dos profissionais — ClinicaViene',
+      },
+      {
         path: 'configuracoes',
         loadComponent: () =>
           import('./pages/configuracoes/configuracoes.page').then((m) => m.ConfiguracoesPage),

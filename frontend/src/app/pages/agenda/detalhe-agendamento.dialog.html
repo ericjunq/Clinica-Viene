@@ -1,0 +1,125 @@
+<h2 mat-dialog-title>{{ a().paciente.nomeCompleto }}</h2>
+<mat-dialog-content class="dialogo-agenda">
+  <p>
+    <span class="etiqueta status" [attr.data-status]="a().status">{{
+      rotuloStatus[a().status]
+    }}</span>
+    {{ a().inicio | date: "dd/MM/yyyy 'às' HH:mm" : '-0300' }}–{{
+      a().fim | date: 'HH:mm' : '-0300'
+    }}
+  </p>
+  <dl class="dados-consulta">
+    <dt>Profissional</dt>
+    <dd>{{ a().profissional.nome }}</dd>
+    <dt>Consultório</dt>
+    <dd>{{ a().consultorio.nome }}</dd>
+    <dt>Procedimentos</dt>
+    <dd>
+      <ul>
+        @for (i of a().itens; track $index) {
+          <li>
+            <strong>{{ i.categoriaNome }}</strong>
+            @if (i.descricao) {
+              — {{ i.descricao }}
+            }
+          </li>
+        }
+      </ul>
+    </dd>
+    @if (a().observacao) {
+      <dt>Observação</dt>
+      <dd>{{ a().observacao }}</dd>
+    }
+    @if (a().motivoCancelamento) {
+      <dt>Motivo do cancelamento</dt>
+      <dd>{{ a().motivoCancelamento }}</dd>
+    }
+    @if (a().chegadaEm) {
+      <dt>Chegada</dt>
+      <dd>{{ a().chegadaEm | date: 'HH:mm' : '-0300' }}</dd>
+    }
+  </dl>
+
+  @if (a().paciente.fichaPendente && dados.gestao) {
+    <p class="alerta info">
+      Ficha de cadastro pendente: envie o convite ou abra o quiosque na chegada —
+      <a [routerLink]="['/pacientes', a().paciente.id]" mat-dialog-close>abrir o paciente</a>.
+    </p>
+  }
+
+  @if (modo() === 'cancelar') {
+    <mat-form-field appearance="outline" class="largura-total">
+      <mat-label>Motivo do cancelamento</mat-label>
+      <input matInput id="motivo-cancelamento" [(ngModel)]="motivo" maxlength="300" />
+    </mat-form-field>
+  }
+  @if (modo() === 'remarcar') {
+    <div class="formulario-linha">
+      <mat-form-field appearance="outline">
+        <mat-label>Novo dia</mat-label>
+        <input matInput type="date" id="remarcar-data" [(ngModel)]="novaData" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Hora</mat-label>
+        <input matInput type="time" step="900" id="remarcar-hora" [(ngModel)]="novaHora" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Duração</mat-label>
+        <mat-select [(ngModel)]="novaDuracao">
+          @for (d of duracoes; track d) {
+            <mat-option [value]="d">{{ d }} min</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="largura-total">
+      <mat-label>Motivo da remarcação</mat-label>
+      <input matInput id="motivo-remarcacao" [(ngModel)]="motivo" maxlength="300" />
+    </mat-form-field>
+  }
+
+  @if (erro(); as e) {
+    <p class="alerta erro" role="alert">{{ e }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="acoes-consulta">
+  @if (modo() === 'ver') {
+    @if (pode('confirmar')) {
+      <button mat-stroked-button (click)="mudar('CONFIRMADO')" [disabled]="ocupado()">
+        Confirmar
+      </button>
+    }
+    @if (pode('chegou')) {
+      <button mat-flat-button (click)="mudar('PACIENTE_CHEGOU')" [disabled]="ocupado()">
+        Paciente chegou
+      </button>
+    }
+    @if (pode('iniciar')) {
+      <button mat-flat-button (click)="mudar('EM_ATENDIMENTO')" [disabled]="ocupado()">
+        Iniciar atendimento
+      </button>
+    }
+    @if (pode('concluir')) {
+      <button mat-flat-button (click)="mudar('CONCLUIDO')" [disabled]="ocupado()">Concluir</button>
+    }
+    @if (pode('faltou')) {
+      <button mat-button (click)="mudar('FALTOU')" [disabled]="ocupado()">Faltou</button>
+    }
+    @if (pode('remarcar')) {
+      <button mat-button (click)="modo.set('remarcar')">Remarcar</button>
+    }
+    @if (pode('cancelar')) {
+      <button mat-button (click)="modo.set('cancelar')">Cancelar consulta</button>
+    }
+    <button mat-button (click)="fechar()">Fechar</button>
+  } @else {
+    <button mat-button (click)="modo.set('ver'); erro.set(null)">Voltar</button>
+    @if (modo() === 'cancelar') {
+      <button mat-flat-button (click)="cancelar()" [disabled]="ocupado()">
+        Confirmar cancelamento
+      </button>
+    } @else {
+      <button mat-flat-button (click)="remarcar()" [disabled]="ocupado()">Remarcar</button>
+    }
+  }
+</mat-dialog-actions>

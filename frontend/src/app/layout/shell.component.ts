@@ -35,6 +35,9 @@ export class ShellComponent {
   protected readonly itens = computed<ItemMenu[]>(() => {
     const perfil = this.usuario()?.perfil;
     const itens: ItemMenu[] = [{ rotulo: 'Início', icone: 'home', rota: '/' }];
+    if (perfil === 'ADMIN' || perfil === 'MASTER' || perfil === 'PROFISSIONAL') {
+      itens.push({ rotulo: 'Agenda', icone: 'calendar_month', rota: '/agenda' });
+    }
     if (perfil === 'ADMIN' || perfil === 'MASTER') {
       itens.push({ rotulo: 'Pacientes', icone: 'patient_list', rota: '/pacientes' });
     }

@@ -1,0 +1,120 @@
+.voltar {
+  margin-bottom: 0.25rem;
+}
+
+.nota {
+  color: var(--viene-caramelo-escuro);
+  font-size: 0.85rem;
+}
+
+.cartao {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
+  padding: 1.25rem 1.5rem;
+  margin-top: 1rem;
+
+  h2 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+  }
+}
+
+.campo-profissional {
+  min-width: 20rem;
+}
+
+.colunas-config {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+  gap: 1rem;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+
+  li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--viene-creme);
+  }
+}
+
+.formulario-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  align-items: flex-start;
+
+  mat-form-field {
+    flex: 1 1 9rem;
+  }
+
+  button {
+    margin-top: 0.5rem;
+  }
+}
+
+.dialogo-agenda {
+  min-width: min(40rem, 85vw);
+}
+
+.busca-paciente {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.paciente-escolhido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.6rem;
+  background: var(--viene-creme-claro);
+}
+
+.item .descricao {
+  flex: 2 1 14rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.dados-consulta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.25rem;
+
+  dt {
+    font-weight: 600;
+    color: var(--viene-marrom);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+}
+
+.acoes-consulta {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}

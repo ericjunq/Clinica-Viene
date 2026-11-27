@@ -1,0 +1,129 @@
+<div class="cabecalho">
+  <h1>Agenda</h1>
+  @if (gestao()) {
+    <a mat-stroked-button routerLink="/agenda/horarios">
+      <mat-icon fontSet="material-symbols-outlined">schedule</mat-icon>
+      Horários dos profissionais
+    </a>
+  }
+</div>
+
+<div class="barra-agenda">
+  <button mat-icon-button (click)="avancar(-1)" aria-label="Dia anterior">
+    <mat-icon fontSet="material-symbols-outlined">chevron_left</mat-icon>
+  </button>
+  <button mat-stroked-button (click)="hoje()">Hoje</button>
+  <button mat-icon-button (click)="avancar(1)" aria-label="Próximo dia">
+    <mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon>
+  </button>
+  <input
+    type="date"
+    class="data-agenda"
+    id="agenda-data"
+    aria-label="Dia da agenda"
+    [ngModel]="data()"
+    (ngModelChange)="irPara($event)"
+  />
+  @if (!ehProfissional()) {
+    <mat-button-toggle-group
+      [value]="visao()"
+      (change)="visao.set($event.value)"
+      aria-label="Colunas da agenda"
+    >
+      <mat-button-toggle value="consultorio">Por consultório</mat-button-toggle>
+      <mat-button-toggle value="profissional">Por profissional</mat-button-toggle>
+    </mat-button-toggle-group>
+  }
+  <mat-checkbox [checked]="mostrarCancelados()" (change)="mostrarCancelados.set($event.checked)">
+    Mostrar cancelados
+  </mat-checkbox>
+  <button mat-icon-button (click)="carregarDia()" aria-label="Atualizar" [disabled]="carregando()">
+    <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
+  </button>
+</div>
+
+@if (erro(); as e) {
+  <p class="alerta erro" role="alert">{{ e }}</p>
+}
+
+@if (!colunas().length) {
+  <p class="alerta info">
+    @if (visao() === 'consultorio') {
+      Nenhum consultório ativo. O MASTER cadastra em Configurações → Consultórios.
+    } @else {
+      Nenhum profissional ativo.
+    }
+  </p>
+} @else {
+  <div class="calendario" [style.--colunas]="colunas().length">
+    <div class="cabecalho-colunas">
+      <div class="canto"></div>
+      @for (c of colunas(); track c.id) {
+        <div class="titulo-coluna">{{ c.titulo }}</div>
+      }
+    </div>
+    <div class="corpo" [style.height.px]="alturaTotal()">
+      <div class="horas">
+        @for (h of horas(); track h.topo) {
+          <span class="hora" [style.top.px]="h.topo">{{ h.rotulo }}</span>
+        }
+      </div>
+      @for (c of colunas(); track c.id) {
+        <div
+          class="coluna"
+          [attr.data-coluna]="c.titulo"
+          [class.clicavel]="gestao()"
+          (click)="clicarColuna(c, $event)"
+          (keydown.enter)="abrirMarcacao(c, c.livres[0]?.inicio ?? 480)"
+          tabindex="0"
+        >
+          @for (h of horas(); track h.topo) {
+            <div class="linha-hora" [style.top.px]="h.topo"></div>
+          }
+          @for (l of c.livres; track $index) {
+            <div class="livre" [style.top.px]="l.topo" [style.height.px]="l.altura"></div>
+          }
+          @for (b of c.blocos; track b.agendamento.id) {
+            <button
+              type="button"
+              class="bloco"
+              [attr.data-status]="b.agendamento.status"
+              [style.top.px]="b.topo"
+              [style.height.px]="b.altura"
+              [style.left]="'calc(' + (b.raia * 100) / b.raias + '% + 2px)'"
+              [style.width]="'calc(' + 100 / b.raias + '% - 4px)'"
+              (click)="abrirDetalhe(b.agendamento)"
+            >
+              <span class="bloco-hora">{{ horaDe(b.agendamento) }}</span>
+              <span class="bloco-paciente">
+                @if (b.agendamento.paciente.fichaPendente) {
+                  <mat-icon
+                    fontSet="material-symbols-outlined"
+                    class="pendente"
+                    aria-label="Ficha pendente"
+                    >assignment_late</mat-icon
+                  >
+                }
+                {{ b.agendamento.paciente.nomeCompleto }}
+              </span>
+              <span class="bloco-detalhe">
+                @if (visao() === 'consultorio') {
+                  {{ b.agendamento.profissional.nome }} ·
+                } @else {
+                  {{ b.agendamento.consultorio.nome }} ·
+                }
+                {{ rotuloStatus[b.agendamento.status] }}
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+  <p class="legenda nota">
+    Áreas brancas: horários de atendimento. Clique num horário livre para marcar; clique numa
+    consulta para ver os detalhes.
+    <mat-icon fontSet="material-symbols-outlined" class="pendente">assignment_late</mat-icon> ficha
+    de cadastro pendente.
+  </p>
+}

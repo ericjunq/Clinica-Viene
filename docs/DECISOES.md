@@ -116,7 +116,7 @@ Motivo: controle total do autor sobre o schema; dados fictícios nunca chegam a 
 
 ---
 
-**D-043 — UI: PrimeNG + FullCalendar** · 2026-11-26 · (saiu de A CONFIRMAR) · **Parte do PrimeNG SUBSTITUÍDA por D-083** (Angular Material)
+**D-043 — UI: PrimeNG + FullCalendar** · 2026-11-26 · (saiu de A CONFIRMAR) · **Parte do PrimeNG SUBSTITUÍDA por D-084** (Angular Material); **parte do FullCalendar SUBSTITUÍDA por D-085** (calendário próprio)
 PrimeNG (versão compatível com o Angular instalado) como biblioteca de componentes e FullCalendar (`@fullcalendar/angular`) para a agenda. Não bloqueia o `ng new`; as bibliotecas entram quando começarem as telas. Motivo: PrimeNG tem tabelas, formulários e componentes de calendário prontos para sistema administrativo; FullCalendar resolve visões de agenda por dia/semana/recurso (consultório/profissional).
 
 **D-049 — Spring Modulith 2.2.0 (GA) via `spring-modulith-bom`** · 2026-11-26
@@ -281,7 +281,14 @@ Seguindo as peças enviadas pelo autor (Viene Odontologia & Saúde): fundo creme
 
 **D-084 — Angular Material no lugar do PrimeNG** · 2026-11-26 · Substitui a parte de PrimeNG da D-043
 Ao renderizar as telas apareceu o aviso "Invalid PrimeUI License": o PrimeNG compatível com Angular 22 (e desde a v18) está sob a **PrimeUI License**, comercial — a licença Community gratuita exige chave, renovação anual e limites (menos de US$ 1 mi/ano, menos de 10 funcionários, menos de 5 devs). Decisão do autor: trocar para **Angular Material 22** (MIT, Google), sem chave nem renovação e sem risco de mudar de faixa se a clínica crescer. Ícones: `material-symbols` (Apache-2.0), hospedado localmente. A identidade visual da D-082 foi mantida (tema M3 com os tons da Viene). Efeito colateral: pacote inicial caiu de ~660 kB para ~327 kB.
-FullCalendar continua previsto para a agenda (núcleo MIT); visões por recurso (lado a lado por consultório/profissional) são pagas — decidir na Fase 3.
+Agenda: ver D-085 (calendário próprio no lugar do FullCalendar).
+
+**D-085 — Agenda com calendário próprio (sem FullCalendar)** · 2026-11-27 · Substitui a parte de FullCalendar da D-043
+O FullCalendar tem núcleo gratuito (MIT), mas as visões por recurso — agenda do dia com uma coluna por consultório ou por profissional, e a linha do tempo — são da versão Premium (licença comercial por desenvolvedor). Decisão do autor: construir o calendário da agenda no próprio frontend.
+- Grade de horários com posicionamento por CSS (início → distância do topo, duração → altura); colunas configuráveis (dias, consultórios ou profissionais); sobreposições dividem a largura; arrastar para remarcar com o Angular CDK Drag & Drop (MIT, já no projeto).
+- Regras da clínica desenhadas no próprio calendário: horários fora da disponibilidade esmaecidos, exceções (folgas/feriados), bloqueios hachurados, cor por status do agendamento, check-in direto no bloco.
+- Ordem de construção (Fase 3): (1) visão do dia por consultório/profissional; (2) semana de um profissional; (3) lista do dia para o check-in; (4) arrastar para remarcar (com confirmação e motivo); (5) mês só se fizer falta.
+Motivo: nenhuma licença (nem se a clínica crescer), encaixe exato nas regras de agenda e no visual da Viene, pacote mais leve. Custo: mais trabalho de construção e testes (posições, sobreposição, E2E de agendamento), e a manutenção é nossa.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
@@ -357,7 +364,7 @@ Definido mais para o fim do projeto, após levantamento de custos: volume estima
 
 **D-042 — Ações permitidas ao chatbot da recepção** · A CONFIRMAR (discutir quando chegar a fase)
 
-**D-043 — Biblioteca de UI** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: PrimeNG + FullCalendar).
+**D-043 — Biblioteca de UI** · ~~A CONFIRMAR~~ → decidida em 2026-11-26 (ver Aceitas: hoje Angular Material — D-084 — e calendário próprio — D-085).
 
 **D-048 — Como carregar dados de configuração reais (seeds) em produção** · A CONFIRMAR · 2026-11-26 · **Parte do primeiro usuário decidida em 2026-11-26** (ver Aceitas: inicializador cria o DEV). Continua A CONFIRMAR para taxas, repasses, anamnese e termos.
 A D-047 só permite `INSERT` de dados fictícios em testes, mas o sistema precisa de configurações iniciais reais: taxas (§8.5), repasses (§8.6), modelo de anamnese, termos LGPD e o primeiro usuário MASTER. Opções: (a) migration de `INSERT` específica, aprovada caso a caso; (b) cadastro pela tela de configurações/endpoint administrativo, sem seed no banco; (c) inicializador na aplicação (ex.: `ApplicationRunner`) idempotente. Decidir antes da Fase 1 (primeiro usuário) e da Fase 5 (taxas/repasses).

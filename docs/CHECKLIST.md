@@ -34,7 +34,6 @@ Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast
 - [x] Identidade visual Viene (cores, Cormorant Garamond + Montserrat hospedadas localmente, logo, fundos) (D-082)
 - [x] Licença do PrimeNG: trocado por **Angular Material** (MIT) — D-084; telas refeitas mantendo o visual (32 testes unitários passaram localmente)
 - [ ] Logo oficial em SVG/PNG para substituir o monograma desenhado (D-082)
-- [ ] FullCalendar na agenda (Fase 3) — atenção: visões por recurso são pagas (D-084)
 - [ ] **Tarefa manual do autor**: ruleset na `main` no GitHub bloqueando force push e exclusão (sem exigir PR — desenvolvimento direto na `main`, D-058/D-065)
 - [x] Política de migrations registrada (D-047) — branch `docs-fundacao-projeto`
 - [~] Renomear pacote para `br.com.clinicaviene` (groupId, artifactId `clinica-viene`, fixtures em `fixtures.lombok`) — D-062
@@ -111,7 +110,11 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [ ] `Agendamento` com status completo + exclusão de conflitos no banco
 - [ ] Marcar / remarcar / cancelar (com motivo)
 - [ ] Check-in + notificação WebSocket ao profissional
-- [ ] Telas: agenda por profissional/consultório (FullCalendar — D-043), check-in
+- [ ] Calendário próprio (D-085): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, bloqueios, indisponibilidade esmaecida, cor por status); clicar em horário livre → novo agendamento
+- [ ] Calendário próprio: semana de um profissional
+- [ ] Calendário próprio: lista do dia para o check-in
+- [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo)
+- [ ] Testes do calendário: cálculo de posições e sobreposição (unitários) + agendar/remarcar no navegador (E2E)
 - [ ] Testes de concorrência de agendamento
 
 ## Fase 4 — Prontuário

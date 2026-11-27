@@ -196,7 +196,7 @@ public class DisponibilidadeService {
     }
 
     /** O profissional atende nesse consultório durante todo o período? (usado ao marcar consulta) */
-    @Transactional(readOnly = true)
+    @Transactional // sem readOnly: também é chamado no meio de gravações
     public boolean atendeNoPeriodo(UUID profissionalId, UUID consultorioId, Instant inicio, Instant fim) {
         LocalDate de = inicio.atZone(agenda.fuso()).toLocalDate();
         LocalDate ate = fim.atZone(agenda.fuso()).toLocalDate();
@@ -239,7 +239,7 @@ public class DisponibilidadeService {
     }
 
     /** Profissional ativo (perfil PROFISSIONAL). */
-    @Transactional(readOnly = true)
+    @Transactional // sem readOnly: também é chamado no meio de gravações
     public Usuario profissional(UUID id) {
         return usuarioRepository.findById(id)
                 .filter(u -> u.getPerfil() == Perfil.PROFISSIONAL && u.getStatus() == StatusUsuario.ATIVO)

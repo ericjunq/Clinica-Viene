@@ -16,10 +16,12 @@ import br.com.clinicaviene.entity.ExcecaoAgenda;
 import br.com.clinicaviene.entity.Usuario;
 import br.com.clinicaviene.enums.AcaoAuditoria;
 import br.com.clinicaviene.enums.Perfil;
+import br.com.clinicaviene.enums.StatusAgendamento;
 import br.com.clinicaviene.enums.StatusUsuario;
 import br.com.clinicaviene.enums.TipoExcecaoAgenda;
 import br.com.clinicaviene.exceptions.RecursoNaoEncontradoException;
 import br.com.clinicaviene.exceptions.RegraNegocioException;
+import br.com.clinicaviene.repository.AgendamentoRepository;
 import br.com.clinicaviene.repository.DisponibilidadeProfissionalRepository;
 import br.com.clinicaviene.repository.ExcecaoAgendaRepository;
 import br.com.clinicaviene.repository.UsuarioRepository;
@@ -52,6 +54,7 @@ public class DisponibilidadeService {
 
     private final DisponibilidadeProfissionalRepository disponibilidadeRepository;
     private final ExcecaoAgendaRepository excecaoRepository;
+    private final AgendamentoRepository agendamentoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ConsultorioService consultorioService;
     private final AuditoriaService auditoriaService;
@@ -129,6 +132,7 @@ public class DisponibilidadeService {
         } else {
             d.encerrar(ultimoDia);
         }
+        exigirConsultasDentroDosHorarios(profissionalId);
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.DISPONIBILIDADE_ENCERRADA, ENTIDADE, profissionalId.toString(), "horário fixo " + horarioId));
     }
@@ -156,8 +160,11 @@ public class DisponibilidadeService {
             }
         }
         String motivo = pedido.motivo() == null || pedido.motivo().isBlank() ? null : pedido.motivo().trim();
-        ExcecaoAgenda e = excecaoRepository.save(new ExcecaoAgenda(
+        ExcecaoAgenda e = excecaoRepository.saveAndFlush(new ExcecaoAgenda(
                 profissionalId, pedido.consultorioId(), pedido.tipo(), pedido.inicio(), pedido.fim(), motivo, ator.id(), agora()));
+        if (pedido.tipo() == TipoExcecaoAgenda.AUSENCIA) {
+            exigirConsultasDentroDosHorarios(profissionalId);
+        }
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.EXCECAO_AGENDA_CRIADA, ENTIDADE, profissionalId.toString(), pedido.tipo() + " " + e.getId()));
         return e;
@@ -170,6 +177,10 @@ public class DisponibilidadeService {
                 .filter(x -> x.getProfissionalId().equals(profissionalId) && x.ativa())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Exceção não encontrada."));
         e.cancelar(ator.id(), agora());
+        if (e.getTipo() == TipoExcecaoAgenda.HORARIO_EXTRA) {
+            excecaoRepository.flush();
+            exigirConsultasDentroDosHorarios(profissionalId);
+        }
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.EXCECAO_AGENDA_CANCELADA, ENTIDADE, profissionalId.toString(), e.getTipo() + " " + excecaoId));
     }
@@ -192,6 +203,24 @@ public class DisponibilidadeService {
         return DisponibilidadeCalculo.cabe(calcular(profissionalId, de, ate), consultorioId, inicio, fim);
     }
 
+    /**
+     * Depois de reduzir os horários (encerrar fixo, ausência, cancelar extra), nenhuma consulta futura em aberto pode
+     * ficar fora deles: a recepção remarca ou cancela antes. A transação inteira é desfeita.
+     */
+    private void exigirConsultasDentroDosHorarios(UUID profissionalId) {
+        disponibilidadeRepository.flush();
+        long fora = agendamentoRepository
+                .findByProfissionalIdAndStatusInAndInicioGreaterThanEqual(
+                        profissionalId, List.of(StatusAgendamento.AGENDADO, StatusAgendamento.CONFIRMADO), agora())
+                .stream()
+                .filter(a -> !atendeNoPeriodo(profissionalId, a.getConsultorioId(), a.getInicio(), a.getFim()))
+                .count();
+        if (fora > 0) {
+            throw new RegraNegocioException("Há " + fora + " consulta(s) marcada(s) que ficariam fora dos horários do"
+                    + " profissional. Remarque ou cancele antes.");
+        }
+    }
+
     private List<IntervaloDisponivelDto> calcular(UUID profissionalId, LocalDate de, LocalDate ate) {
         Instant ini = de.atStartOfDay(agenda.fuso()).toInstant();
         Instant fim = ate.plusDays(1).atStartOfDay(agenda.fuso()).toInstant();
@@ -209,7 +238,9 @@ public class DisponibilidadeService {
         }
     }
 
-    private Usuario profissional(UUID id) {
+    /** Profissional ativo (perfil PROFISSIONAL). */
+    @Transactional(readOnly = true)
+    public Usuario profissional(UUID id) {
         return usuarioRepository.findById(id)
                 .filter(u -> u.getPerfil() == Perfil.PROFISSIONAL && u.getStatus() == StatusUsuario.ATIVO)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Profissional não encontrado ou inativo."));

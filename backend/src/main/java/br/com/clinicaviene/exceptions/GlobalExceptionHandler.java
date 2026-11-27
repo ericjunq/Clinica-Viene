@@ -52,6 +52,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problema;
     }
 
+    @ExceptionHandler(ConflitoAgendaException.class)
+    ProblemDetail conflitoAgenda(ConflitoAgendaException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     @ExceptionHandler(RenovacaoConcorrenteException.class)
     ProblemDetail renovacaoConcorrente(RenovacaoConcorrenteException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());

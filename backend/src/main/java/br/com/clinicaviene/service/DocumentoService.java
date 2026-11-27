@@ -9,7 +9,10 @@ import br.com.clinicaviene.exceptions.PacienteNaoEncontradoException;
 import br.com.clinicaviene.repository.AssinaturaRepository;
 import br.com.clinicaviene.repository.DocumentoRepository;
 import br.com.clinicaviene.repository.PacienteRepository;
+import br.com.clinicaviene.enums.TipoDocumento;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -53,5 +56,14 @@ public class DocumentoService {
                             a == null ? null : a.getMetodo());
                 })
                 .toList();
+    }
+
+    /** Pacientes (dentre os informados) que já têm ficha de cadastro assinada — para o aviso de ficha pendente. */
+    @Transactional(readOnly = true)
+    public Set<UUID> comFichaAssinada(Collection<UUID> pacienteIds) {
+        if (pacienteIds.isEmpty()) {
+            return Set.of();
+        }
+        return documentoRepository.pacientesComDocumento(TipoDocumento.FICHA_CADASTRO, pacienteIds);
     }
 }

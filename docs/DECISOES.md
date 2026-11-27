@@ -406,6 +406,10 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - **Itens do agendamento**: um agendamento pode ter **vários itens**, cada um com **categoria + descrição própria** (ex.: "Ortodontia — manutenção" + "Clínica geral — limpeza"); cada item vira um procedimento separado no prontuário e no financeiro. **Categorias por área**, com **código estável** (o financeiro liga preço e repasse ao código) e nome editável; o MASTER configura, com exemplo de odontologia (as categorias da §8.6) carregado por ação, sem migration de `INSERT`.
 - **Paciente só com pré-cadastro pode ser agendado**, com aviso de "ficha pendente" na agenda e no check-in.
 - Permissões: consultórios e categorias — MASTER; horários e agendamentos — ADMIN e MASTER; o profissional vê a própria agenda e os próprios horários; DEV não acessa a agenda.
+- **Situação do agendamento**: `AGENDADO → CONFIRMADO → PACIENTE_CHEGOU → EM_ATENDIMENTO → CONCLUIDO` (check-in direto de AGENDADO também vale), ou `FALTOU` / `CANCELADO` (com motivo). Início e fim do atendimento: o próprio profissional ou a recepção. **Remarcar** = cancelar com "Remarcado: motivo" + novo agendamento ligado ao anterior, com os mesmos itens (pode trocar profissional/consultório/duração). Itens e observação podem mudar enquanto a consulta estiver agendada/confirmada.
+- **Conflitos**: conferidos no service (mensagem clara: profissional ou consultório) e garantidos no banco por `EXCLUDE USING gist` (D-021) — duas recepcionistas no mesmo horário: só uma grava (teste de concorrência). Não se marca no passado.
+- **Mudança de horários com consultas marcadas**: encerrar horário fixo, cadastrar ausência ou cancelar horário extra é recusado se alguma consulta futura em aberto ficaria fora dos horários — a recepção remarca ou cancela antes.
+- Consultar a agenda é registrado na auditoria (`AGENDA_CONSULTADA`), assim como criar, alterar, mudar situação, cancelar e remarcar.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.

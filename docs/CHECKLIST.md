@@ -58,14 +58,14 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] Regras: DEV/MASTER criam ADMIN/PROFISSIONAL; DEV cria MASTER; MASTER cria MASTER; nenhum endpoint cria DEV; MASTER não gerencia DEV; DEV não desativa MASTER; ninguém altera o próprio status (D-067) — `RegrasDePerfil` + `ServicoUsuarios`; endpoints `/api/v1/usuarios` (testados via HTTP na 1D)
 - [x] Política de senha (D-066) + Argon2id (D-074) + troca da própria senha — **CI verde**
 - [x] Inicializador do DEV (D-048) — `DEV_INICIAL_*` — **CI verde**
-- [~] Edição de dados do usuário e mudança de perfil (D-086): `PUT /usuarios/{id}`, `PATCH /usuarios/{id}/perfil`, tela com "Editar"; perfil passa a vir do banco a cada requisição — aguardando CI
+- [x] Edição de dados do usuário e mudança de perfil (D-086): `PUT /usuarios/{id}`, `PATCH /usuarios/{id}/perfil`, tela com "Editar"; perfil passa a vir do banco a cada requisição — **CI verde**
 
 **1D. Autenticação**
 - [x] Sessões: JWT RS256 15 min (`JWT_CHAVE_PRIVADA`), token de renovação opaco (hash SHA-256) com rotação, fim absoluto de 12 h, reuso → revoga a cadeia (tolerância de 20 s para corrida entre abas → 409), logout (`ServicoSessoesIT`)
 - [x] Login em 2 passos: `LoginService` (desafio), `DoisFatoresService`, `AuthController` (`/login`, `/2fa/cadastro`, `/2fa/confirmar`, `/2fa/verificar`, `/renovar`, `/logout`, `/eu`) + cookie `cv_renovacao` (D-071, D-079) — `AuthControllerIT` — **CI verde**
 - [x] Status checado a cada requisição (`UsuarioJwtConverter`); desativar revoga sessões (D-068); troca de senha pendente → só rotas de troca de senha
 - [x] Rate limit de login (Bucket4j: 20/IP, 5 falhas/CPF em 15 min → 429 + `Retry-After`) (D-079)
-- [~] Limpeza periódica dos buckets ociosos do rate limit (a cada 15 min; Bucket4j com o relógio da aplicação) (D-087) — aguardando CI
+- [x] Limpeza periódica dos buckets ociosos do rate limit (a cada 15 min; Bucket4j com o relógio da aplicação) (D-087) — **CI verde**
 
 **1E. 2FA**
 - [x] TOTP (RFC 6238, janela ±1, anti-replay) + QR code (ZXing) + 10 códigos de recuperação (D-072, D-079)
@@ -75,7 +75,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] Telas (hoje em Angular Material — D-084) de login, 2FA (cadastro com QR, códigos de recuperação, verificação por app/e-mail/recuperação com contagem para reenvio), troca de senha, recuperação de senha, usuários (lista, cadastro, ativar/desativar) (D-081) — **testes unitários executados localmente: 31 passaram**; lint e build ok
 - [x] Interceptor de renovação automática + guards por sessão, troca de senha e perfil (D-081) — testados (Vitest)
 - [x] Playwright + job E2E no CI (compose completo, `.env` descartável): primeiro acesso do DEV, senha errada, rota protegida (D-081) — **CI verde (3 testes no navegador)**
-- [~] Build da imagem do backend com a imagem oficial `maven:3.10.2-eclipse-temurin-25-alpine` (sem baixar o Maven a cada build) (D-087) — aguardando CI
+- [x] Build da imagem do backend com a imagem oficial `maven:3.10.2-eclipse-temurin-25-alpine` (sem baixar o Maven a cada build) (D-087) — **CI verde**
 
 **1G. Recuperação de senha por e-mail** (opcional)
 - [x] Recuperação de senha: `POST /auth/senha/recuperar` (resposta sempre igual) → código de 6 dígitos por e-mail → `POST /auth/senha/redefinir`; senha validada antes de gastar o código; derruba as sessões; 2FA continua exigido no login (D-073, D-080) — `AuthControllerIT` — **CI verde**; tela no frontend
@@ -87,7 +87,7 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 
 **Testes da fase**
 - [x] Matriz de autorização (cada perfil × cada endpoint) — `UsuarioControllerIT` para `/api/v1/usuarios` — **CI verde** (repetir para cada endpoint novo)
-- [~] Cobertura mínima no build: 85% total, 80% em `service` e `auth` (D-087) — aguardando CI
+- [x] Cobertura mínima no build: 85% total, 80% em `service` e `auth` (D-087) — **CI verde**
 
 ## Fase 2 — Pacientes e anamnese
 - [ ] `TermoVersao` + `AceiteTermo` (movidos da Fase 1 — D-075)

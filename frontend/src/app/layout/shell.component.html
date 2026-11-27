@@ -6,7 +6,7 @@
         mat-button
         [routerLink]="item.rota"
         routerLinkActive="ativo"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: item.rota === '/' }"
       >
         <mat-icon fontSet="material-symbols-outlined">{{ item.icone }}</mat-icon>
         {{ item.rotulo }}

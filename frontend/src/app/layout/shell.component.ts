@@ -35,8 +35,14 @@ export class ShellComponent {
   protected readonly itens = computed<ItemMenu[]>(() => {
     const perfil = this.usuario()?.perfil;
     const itens: ItemMenu[] = [{ rotulo: 'Início', icone: 'home', rota: '/' }];
+    if (perfil === 'ADMIN' || perfil === 'MASTER') {
+      itens.push({ rotulo: 'Pacientes', icone: 'patient_list', rota: '/pacientes' });
+    }
     if (perfil === 'DEV' || perfil === 'MASTER') {
       itens.push({ rotulo: 'Usuários', icone: 'group', rota: '/usuarios' });
+    }
+    if (perfil === 'MASTER') {
+      itens.push({ rotulo: 'Configurações', icone: 'settings', rota: '/configuracoes' });
     }
     itens.push({ rotulo: 'Trocar senha', icone: 'key', rota: '/trocar-senha' });
     return itens;

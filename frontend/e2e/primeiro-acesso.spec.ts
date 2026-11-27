@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { codigoTotp } from './totp';
+import { CPF_MASTER, SENHA_MASTER } from './usuarios-e2e';
 
 /**
  * Primeiro acesso do usuário DEV criado pelo inicializador (D-048): login → cadastro do 2FA → códigos de
@@ -51,6 +52,17 @@ test('primeiro acesso do DEV: 2FA, troca de senha e criação de usuário', asyn
   await page.getByRole('button', { name: 'Criar usuário' }).click();
   await expect(page.getByRole('cell', { name: 'Recepcionista Fictícia' })).toBeVisible();
   await expect(page.getByRole('cell', { name: '***.016.613-**' })).toBeVisible();
+
+  // dona da clínica (MASTER), usada no E2E do cadastro de paciente
+  await page.getByRole('button', { name: 'Novo usuário' }).click();
+  await page.locator('#nome').fill('Dona Fictícia');
+  await page.locator('#cpf-novo').pressSequentially(CPF_MASTER);
+  await page.locator('#email').fill('master.e2e@exemplo.com');
+  await page.locator('#perfil').click();
+  await page.getByRole('option', { name: /MASTER/ }).click();
+  await page.locator('#senha-provisoria').fill(SENHA_MASTER);
+  await page.getByRole('button', { name: 'Criar usuário' }).click();
+  await expect(page.getByRole('cell', { name: 'Dona Fictícia' })).toBeVisible();
 
   // edição: muda o nome (CPF fica bloqueado)
   await page

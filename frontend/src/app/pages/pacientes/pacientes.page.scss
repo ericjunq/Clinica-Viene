@@ -1,0 +1,72 @@
+.busca {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+
+  .campo-busca {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 0.5rem;
+  }
+}
+
+.tabela {
+  overflow-x: auto;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
+  background: #fff;
+
+  table {
+    width: 100%;
+    min-width: 40rem;
+  }
+}
+
+.clicavel {
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--viene-creme-claro);
+  }
+}
+
+.vazio,
+.dica {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.dica {
+  color: var(--viene-caramelo-escuro);
+}
+
+.linha {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1 1 14rem;
+  }
+}
+
+h3 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1.3rem;
+}
+
+.acoes-alerta {
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .busca {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

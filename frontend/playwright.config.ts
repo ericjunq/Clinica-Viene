@@ -15,5 +15,20 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    // Cria os usuários (DEV → MASTER) num banco novo; os demais fluxos dependem dele.
+    {
+      name: 'primeiro-acesso',
+      testMatch: 'primeiro-acesso.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'fluxos',
+      testIgnore: 'primeiro-acesso.spec.ts',
+      dependencies: ['primeiro-acesso'],
+      // Não repete: a senha provisória da MASTER já terá sido trocada na primeira tentativa.
+      retries: 0,
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
 });

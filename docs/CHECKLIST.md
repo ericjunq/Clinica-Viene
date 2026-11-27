@@ -113,7 +113,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 **2E. Fluxo público do paciente**
 - [x] Backend: abrir convite, código no e-mail (LINK) ou sessão direta (QUIOSQUE), sessão de preenchimento de 2 h, formulário (pré-cadastro + anamnese vigente + termos vigentes), revisão completa da ficha (D-091, D-100) — V15 — `CadastroPublicoServiceIT`, `CadastroPublicoControllerIT` — **CI verde**
 - [x] Frontend: tela pública `/cadastro#<token>` (código ou quiosque, seus dados, ficha de saúde, privacidade, conferir) — Vitest — **CI verde**
-- [ ] E2E do fluxo do paciente (Playwright) — junto da 2G, quando as telas internas gerarem o convite
+- [x] E2E do fluxo do paciente (Playwright) — junto da 2G (`cadastro-paciente.spec.ts`) — implementado — testes pendentes de execução
 
 - [x] Área da ficha de saúde escolhida no convite (D-101, Q-013) — coluna no CREATE da V14 — **CI verde**
 
@@ -128,13 +128,15 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Frontend: passo de assinatura (desenho no quadro ou nome digitado + declaração) e página `/documento` de download com CPF — Vitest — **CI verde**
 
 **2G. Telas internas**
-- [ ] Pacientes (lista, busca, ficha cadastral com histórico, convite/QR, abrir quiosque), configurações do MASTER (modelos, termos)
+- [x] Backend: documentos do paciente (só metadados) e novo link de entrega gerado pela recepção (QR na tela ou e-mail) (D-104) — `DocumentoControllerIT` — **CI verde**
+- [x] Pacientes: lista/busca, pré-cadastro (menor, adulto sem CPF, duplicidade), ficha com cadastro/contato, convite (link/QR, quiosque, cancelar), documentos (QR de download), privacidade (revogar), histórico (D-104) — Vitest — implementado — testes pendentes de execução
+- [x] Configurações do MASTER: termos (exemplos, rascunho, publicar, nova versão) e fichas de saúde com editor de perguntas (D-104) — Vitest — implementado — testes pendentes de execução
 
 - [x] CI: cache de dependências na montagem das imagens (camada `dependency:go-offline` + cache do GitHub Actions) contra 429 do Maven Central (D-097) — **CI verde**; job Docker de 3m25s para 23s com cache
 
 **Testes da fase**
 - [ ] Regra ArchUnit: só o service da anamnese usa o repository da anamnese (D-078)
-- [ ] E2E: pré-cadastro → link → anamnese → termos → assinatura → ficha concluída
+- [x] E2E: pré-cadastro → quiosque → anamnese → termos → assinatura → ficha concluída → download com CPF (D-104) — implementado — testes pendentes de execução
 
 **Pendências que dependem do autor**
 - [x] Conta ZapSign criada (plano gratuito, 3 documentos/mês) — teste real adiado (D-103)

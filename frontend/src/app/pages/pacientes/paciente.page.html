@@ -1,0 +1,378 @@
+<a mat-button routerLink="/pacientes" class="voltar">
+  <mat-icon fontSet="material-symbols-outlined">arrow_back</mat-icon>
+  Pacientes
+</a>
+
+@if (erro(); as mensagem) {
+  <p class="alerta erro" role="alert">{{ mensagem }}</p>
+}
+
+@if (paciente(); as p) {
+  <div class="titulo">
+    <h1>{{ p.nomeCompleto }}</h1>
+    <span class="subtitulo">
+      {{ p.cpfMascarado ?? 'sem CPF' }} · {{ p.dataNascimento | date: 'dd/MM/yyyy' : 'UTC' }} ·
+      {{ p.idade }} anos
+      @if (p.menorDeIdade) {
+        <span class="etiqueta inativo">menor de idade</span>
+      }
+    </span>
+  </div>
+
+  <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false">
+    <!-- CADASTRO -->
+    <mat-tab label="Cadastro">
+      <section class="cartao">
+        @if (!editandoContato()) {
+          <dl class="dados">
+            <dt>E-mail</dt>
+            <dd>{{ p.email ?? '—' }}</dd>
+            <dt>Telefone</dt>
+            <dd>{{ p.telefone ?? '—' }}</dd>
+            <dt>Endereço</dt>
+            <dd>
+              @if (p.endereco?.logradouro) {
+                {{ p.endereco?.logradouro }}, {{ p.endereco?.numero }}
+                {{ p.endereco?.complemento }} — {{ p.endereco?.bairro }},
+                {{ p.endereco?.cidade }}/{{ p.endereco?.uf }} · CEP {{ p.endereco?.cep }}
+              } @else {
+                —
+              }
+            </dd>
+            @if (p.responsavel; as r) {
+              <dt>Responsável</dt>
+              <dd>
+                {{ r.nomeCompleto }} ({{ parentesco() }}) · {{ r.cpfMascarado }}
+                @if (r.telefone) {
+                  · {{ r.telefone }}
+                }
+                @if (r.email) {
+                  · {{ r.email }}
+                }
+              </dd>
+            }
+            <dt>Cadastrado em</dt>
+            <dd>{{ p.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          </dl>
+          <p class="nota">
+            Nome, CPF e data de nascimento só mudam quando o paciente confere e assina uma nova
+            ficha.
+          </p>
+          <button mat-stroked-button (click)="editarContato()">
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+            Editar contato e endereço
+          </button>
+        } @else {
+          <form [formGroup]="contato" (ngSubmit)="salvarContato()" class="formulario">
+            <div class="linha">
+              <mat-form-field appearance="outline">
+                <mat-label>E-mail</mat-label>
+                <input matInput id="contato-email" type="email" formControlName="email" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Telefone</mat-label>
+                <input matInput id="contato-telefone" formControlName="telefone" />
+              </mat-form-field>
+            </div>
+            <div class="linha">
+              <mat-form-field appearance="outline" class="curto">
+                <mat-label>CEP</mat-label>
+                <input matInput formControlName="cep" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Logradouro</mat-label>
+                <input matInput formControlName="logradouro" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="curto">
+                <mat-label>Número</mat-label>
+                <input matInput formControlName="numero" />
+              </mat-form-field>
+            </div>
+            <div class="linha">
+              <mat-form-field appearance="outline">
+                <mat-label>Complemento</mat-label>
+                <input matInput formControlName="complemento" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Bairro</mat-label>
+                <input matInput formControlName="bairro" />
+              </mat-form-field>
+            </div>
+            <div class="linha">
+              <mat-form-field appearance="outline">
+                <mat-label>Cidade</mat-label>
+                <input matInput formControlName="cidade" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="curto">
+                <mat-label>UF</mat-label>
+                <input matInput formControlName="uf" maxlength="2" />
+              </mat-form-field>
+            </div>
+            @if (erroContato(); as e) {
+              <p class="alerta erro" role="alert">{{ e }}</p>
+            }
+            <div class="acoes">
+              <button mat-button type="button" (click)="editandoContato.set(false)">
+                Cancelar
+              </button>
+              <button mat-flat-button type="submit" [disabled]="salvandoContato()">Salvar</button>
+            </div>
+          </form>
+        }
+      </section>
+    </mat-tab>
+
+    <!-- CONVITE -->
+    <mat-tab label="Convite">
+      <section class="cartao" [formGroup]="convite">
+        <p>
+          O paciente confere os dados, responde a ficha de saúde, decide sobre os termos e assina.
+          Gere um novo convite apaga o anterior que ainda não foi usado.
+        </p>
+        <mat-form-field appearance="outline" class="area">
+          <mat-label>Ficha de saúde da área</mat-label>
+          <mat-select id="convite-area" formControlName="areaAtuacao">
+            @for (a of areas; track a) {
+              <mat-option [value]="a">{{ rotuloArea[a] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="opcoes-convite">
+          <div class="opcao">
+            <h3>
+              <mat-icon fontSet="material-symbols-outlined">smartphone</mat-icon>
+              No celular do paciente
+            </h3>
+            <p class="nota">
+              Link/QR válido por 72 horas. Para abrir, o paciente recebe um código no e-mail.
+            </p>
+            @if (temEmail()) {
+              <mat-checkbox formControlName="enviarEmail"
+                >Enviar o link por e-mail também</mat-checkbox
+              >
+            } @else {
+              <p class="alerta info">Sem e-mail cadastrado: use o aparelho da clínica.</p>
+            }
+            <button
+              mat-flat-button
+              (click)="gerarLink()"
+              [disabled]="gerandoConvite() || !temEmail()"
+            >
+              Gerar link
+            </button>
+          </div>
+          <div class="opcao">
+            <h3>
+              <mat-icon fontSet="material-symbols-outlined">tablet</mat-icon>
+              No aparelho da clínica
+            </h3>
+            <p class="nota">Válido por 2 horas. Não pede código: a recepção confere o documento.</p>
+            <mat-checkbox formControlName="documentoConferido" id="documento-conferido">
+              Conferi o documento com foto do paciente
+            </mat-checkbox>
+            <button mat-flat-button (click)="abrirQuiosque()" [disabled]="gerandoConvite()">
+              Abrir quiosque
+            </button>
+          </div>
+        </div>
+
+        @if (erroConvite(); as e) {
+          <p class="alerta erro" role="alert">{{ e }}</p>
+        }
+
+        @if (conviteCriado(); as c) {
+          <div class="resultado" data-testid="convite-criado">
+            <img [src]="c.qrCode" alt="QR code do convite" width="200" height="200" />
+            <div>
+              @if (c.modo === 'LINK') {
+                <p>
+                  Peça para o paciente ler o QR code com a câmera do celular.
+                  @if (c.emailEnviadoPara) {
+                    O link também foi enviado para <strong>{{ c.emailEnviadoPara }}</strong>.
+                  }
+                </p>
+              } @else {
+                <p>
+                  Leia o QR code no tablet da clínica, ou abra o cadastro aqui mesmo (sua sessão
+                  será encerrada antes de entregar o aparelho ao paciente).
+                </p>
+              }
+              <p class="nota">Válido até {{ c.expiraEm | date: 'dd/MM/yyyy HH:mm' }}.</p>
+              <code class="link" data-testid="link-convite">{{ c.link }}</code>
+              <div class="acoes-resultado">
+                <button mat-stroked-button (click)="copiar(c.link)">
+                  <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+                  Copiar link
+                </button>
+                @if (c.modo === 'QUIOSQUE') {
+                  <button mat-flat-button (click)="abrirNesteAparelho(c.link)">
+                    Abrir neste aparelho
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (convites().length) {
+          <h3>Convites</h3>
+          <ul class="lista">
+            @for (c of convites(); track c.id) {
+              <li>
+                <span>
+                  {{ c.modo === 'LINK' ? 'Link' : 'Quiosque' }} · {{ rotuloArea[c.areaAtuacao] }} ·
+                  {{ c.criadoEm | date: 'dd/MM/yyyy HH:mm' }}
+                </span>
+                <span
+                  class="etiqueta"
+                  [class.ativo]="c.situacao === 'ATIVO' || c.situacao === 'USADO'"
+                  [class.inativo]="c.situacao === 'CANCELADO' || c.situacao === 'EXPIRADO'"
+                  >{{ c.situacao }}</span
+                >
+                @if (c.situacao === 'ATIVO') {
+                  <button mat-button (click)="cancelarConvite(c)">Cancelar</button>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </mat-tab>
+
+    <!-- DOCUMENTOS -->
+    <mat-tab label="Documentos">
+      <section class="cartao">
+        <p class="nota">
+          A ficha assinada tem dados de saúde: a recepção não abre o PDF. Gere um link para o
+          paciente baixar no celular dele — a página pede o CPF (do paciente ou do responsável).
+        </p>
+        @if (erroDocumentos(); as e) {
+          <p class="alerta erro" role="alert">{{ e }}</p>
+        }
+        @for (d of documentos(); track d.id) {
+          <div class="documento">
+            <div>
+              <strong>Ficha de cadastro assinada</strong>
+              <div class="nota">
+                {{ d.criadoEm | date: 'dd/MM/yyyy HH:mm' }} · assinada por
+                {{ d.assinadoPor === 'RESPONSAVEL_LEGAL' ? 'responsável' : 'paciente' }}
+                ({{ d.metodo === 'DESENHO' ? 'desenho' : 'nome digitado' }})
+              </div>
+            </div>
+            <div class="acoes-resultado">
+              <button
+                mat-stroked-button
+                (click)="gerarEntrega(d, false)"
+                [disabled]="gerandoEntrega()"
+              >
+                <mat-icon fontSet="material-symbols-outlined">qr_code</mat-icon>
+                Mostrar QR para baixar
+              </button>
+              @if (temEmail()) {
+                <button mat-button (click)="gerarEntrega(d, true)" [disabled]="gerandoEntrega()">
+                  Enviar link por e-mail
+                </button>
+              }
+            </div>
+          </div>
+          @if (entrega()?.documentoId === d.id) {
+            <div class="resultado" data-testid="entrega-criada">
+              <img
+                [src]="entrega()!.criada.qrCode"
+                alt="QR code para baixar a ficha"
+                width="180"
+                height="180"
+              />
+              <div>
+                <p>O paciente lê o QR com o celular e informa o CPF para baixar o PDF.</p>
+                <p class="nota">
+                  Válido até {{ entrega()!.criada.expiraEm | date: 'dd/MM/yyyy HH:mm' }} (até 5
+                  downloads).
+                </p>
+                <code class="link" data-testid="link-entrega">{{ entrega()!.criada.link }}</code>
+                <button mat-stroked-button (click)="copiar(entrega()!.criada.link)">
+                  <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+                  Copiar link
+                </button>
+              </div>
+            </div>
+          }
+        } @empty {
+          <p>Nenhum documento assinado ainda.</p>
+        }
+      </section>
+    </mat-tab>
+
+    <!-- PRIVACIDADE -->
+    <mat-tab label="Privacidade">
+      <section class="cartao">
+        <ul class="lista">
+          @for (c of consentimentos(); track c.tipo) {
+            <li>
+              <span>{{ rotuloTermo[c.tipo] }}</span>
+              <span>
+                <span
+                  class="etiqueta"
+                  [class.ativo]="c.situacao === 'ACEITO'"
+                  [class.inativo]="c.situacao === 'REVOGADO' || c.situacao === 'RECUSADO'"
+                  >{{ rotuloSituacao(c) }}</span
+                >
+                @if (c.registradoEm) {
+                  <span class="nota">
+                    {{ c.registradoEm | date: 'dd/MM/yyyy' }} · v{{ c.versao }}</span
+                  >
+                }
+              </span>
+              @if (podeRevogar(c)) {
+                <button mat-button (click)="iniciarRevogacao(c.tipo)">Revogar</button>
+              }
+            </li>
+          }
+        </ul>
+        @if (revogando(); as tipo) {
+          <div class="alerta info">
+            <p>
+              Revogar <strong>{{ rotuloTermo[tipo] }}</strong> a pedido do paciente? A partir de
+              agora o sistema deixa de usar esse dado para esse fim.
+            </p>
+            <mat-form-field appearance="outline" class="largura-total">
+              <mat-label>Observação (opcional)</mat-label>
+              <input matInput [formControl]="justificativa" />
+            </mat-form-field>
+            @if (erroPrivacidade(); as e) {
+              <p class="alerta erro">{{ e }}</p>
+            }
+            <div class="acoes">
+              <button mat-button (click)="revogando.set(null)">Voltar</button>
+              <button mat-flat-button (click)="confirmarRevogacao()">Revogar</button>
+            </div>
+          </div>
+        }
+        <p class="nota">
+          Para autorizar de novo, o paciente decide numa nova ficha (a recepção não marca
+          consentimento pelo paciente).
+        </p>
+      </section>
+    </mat-tab>
+
+    <!-- HISTÓRICO -->
+    <mat-tab label="Histórico">
+      <section class="cartao">
+        <ul class="lista historico">
+          @for (v of historico(); track v.id) {
+            <li>
+              <span class="nota">{{ v.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span>{{ v.camposAlterados }}</span>
+              <span class="etiqueta">{{ rotuloOrigem[v.origem] }}</span>
+            </li>
+          } @empty {
+            <li>Sem alterações registradas.</li>
+          }
+        </ul>
+      </section>
+    </mat-tab>
+  </mat-tab-group>
+} @else if (!erro()) {
+  <p>Carregando…</p>
+}

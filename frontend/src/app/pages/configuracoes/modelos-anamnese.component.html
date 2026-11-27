@@ -1,0 +1,152 @@
+<section class="cartao">
+  <p class="nota">
+    Cada área tem a sua ficha. O paciente responde a versão publicada mais recente da área escolhida
+    no convite. Perguntas marcadas como <strong>alerta</strong> aparecem em destaque para o
+    profissional quando a resposta indica risco (Sim, ou uma opção diferente da primeira).
+  </p>
+
+  @if (!edicao()) {
+    <div class="barra">
+      @if (!temOdontologia()) {
+        <button mat-stroked-button (click)="carregarExemplo()" [disabled]="ocupado()">
+          Carregar exemplo de odontologia
+        </button>
+      }
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="area">
+        <mat-label>Área</mat-label>
+        <mat-select [(ngModel)]="novaArea" id="modelo-area">
+          @for (a of areas; track a) {
+            <mat-option [value]="a">{{ rotuloArea[a] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button (click)="novoModelo()">Nova ficha</button>
+    </div>
+  }
+
+  @if (erro(); as e) {
+    <p class="alerta erro" role="alert">{{ e }}</p>
+  }
+
+  @if (edicao(); as e) {
+    <div class="editor">
+      <h2>{{ e.id ? 'Editar rascunho' : 'Nova ficha' }} — {{ rotuloArea[e.areaAtuacao] }}</h2>
+      <mat-form-field appearance="outline" class="largura-total">
+        <mat-label>Título</mat-label>
+        <input matInput id="modelo-titulo" [(ngModel)]="e.titulo" />
+      </mat-form-field>
+
+      @for (p of e.perguntas; track $index; let i = $index) {
+        <div class="pergunta" [attr.data-testid]="'pergunta-' + (i + 1)">
+          <div class="pergunta-topo">
+            <strong>Pergunta {{ i + 1 }}</strong>
+            <span class="acoes">
+              <button mat-icon-button type="button" (click)="mover(i, -1)" aria-label="Subir">
+                <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="mover(i, 1)" aria-label="Descer">
+                <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="remover(i)"
+                aria-label="Remover pergunta"
+              >
+                <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+              </button>
+            </span>
+          </div>
+          <div class="linha">
+            <mat-form-field appearance="outline" class="secao">
+              <mat-label>Seção</mat-label>
+              <input matInput [(ngModel)]="p.secao" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="tipo">
+              <mat-label>Tipo de resposta</mat-label>
+              <mat-select [ngModel]="p.tipo" (ngModelChange)="mudouTipo(p, $event)">
+                @for (t of tipos; track t.valor) {
+                  <mat-option [value]="t.valor">{{ t.rotulo }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="largura-total">
+            <mat-label>Pergunta (como o paciente lê)</mat-label>
+            <input matInput [(ngModel)]="p.texto" maxlength="300" />
+          </mat-form-field>
+          @if (temOpcoes(p.tipo)) {
+            <mat-form-field appearance="outline" class="largura-total">
+              <mat-label>Opções (uma por linha; a primeira é a resposta "normal")</mat-label>
+              <textarea matInput [(ngModel)]="p.opcoesTexto" rows="4"></textarea>
+            </mat-form-field>
+          }
+          <mat-form-field appearance="outline" class="largura-total">
+            <mat-label>Texto de ajuda (opcional)</mat-label>
+            <input matInput [(ngModel)]="p.ajuda" maxlength="300" />
+          </mat-form-field>
+          <div class="marcas">
+            <mat-checkbox [(ngModel)]="p.obrigatoria">Obrigatória</mat-checkbox>
+            <mat-checkbox [(ngModel)]="p.alertaClinico">Alerta para o profissional</mat-checkbox>
+            @if (p.tipo === 'SIM_NAO_DETALHE') {
+              <mat-checkbox [(ngModel)]="p.detalheObrigatorioQuandoSim">
+                "Qual?" obrigatório quando Sim
+              </mat-checkbox>
+            }
+            @if (p.codigo) {
+              <span class="nota">código: {{ p.codigo }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      <button mat-stroked-button type="button" (click)="adicionarPergunta()">
+        <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+        Adicionar pergunta
+      </button>
+
+      @if (problemas().length) {
+        <ul class="alerta erro" role="alert">
+          @for (pr of problemas(); track pr) {
+            <li>{{ pr }}</li>
+          }
+        </ul>
+      }
+      <div class="barra fim">
+        <button mat-button type="button" (click)="edicao.set(null)">Cancelar</button>
+        <button mat-flat-button type="button" (click)="salvar()" [disabled]="ocupado()">
+          Salvar rascunho
+        </button>
+      </div>
+    </div>
+  } @else {
+    <ul class="lista">
+      @for (m of modelos(); track m.id) {
+        <li>
+          <span>
+            {{ rotuloArea[m.areaAtuacao] }} · v{{ m.versao }} · {{ m.titulo }} ·
+            {{ m.perguntas.length }} perguntas
+            @if (m.status === 'PUBLICADO') {
+              <span class="etiqueta" [class.ativo]="vigente(m)">
+                {{ vigente(m) ? 'vigente' : 'publicada' }}
+              </span>
+              <span class="nota">{{ m.publicadoEm | date: 'dd/MM/yyyy' }}</span>
+            } @else {
+              <span class="etiqueta rascunho">rascunho</span>
+            }
+          </span>
+          <span class="acoes">
+            @if (m.status === 'RASCUNHO') {
+              <button mat-button (click)="editar(m)">Editar</button>
+              <button mat-flat-button (click)="publicar(m)" [disabled]="ocupado()">Publicar</button>
+            } @else {
+              <button mat-button (click)="novaVersao(m)" [disabled]="ocupado()">Nova versão</button>
+            }
+          </span>
+        </li>
+      } @empty {
+        <li class="nota">Nenhuma ficha cadastrada.</li>
+      }
+    </ul>
+  }
+</section>

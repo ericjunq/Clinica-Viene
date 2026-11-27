@@ -61,6 +61,26 @@ export const routes: Routes = [
         canActivate: [perfilGuard('DEV', 'MASTER')],
         title: 'Usuários — ClinicaViene',
       },
+      {
+        path: 'pacientes',
+        loadComponent: () =>
+          import('./pages/pacientes/pacientes.page').then((m) => m.PacientesPage),
+        canActivate: [perfilGuard('ADMIN', 'MASTER')],
+        title: 'Pacientes — ClinicaViene',
+      },
+      {
+        path: 'pacientes/:id',
+        loadComponent: () => import('./pages/pacientes/paciente.page').then((m) => m.PacientePage),
+        canActivate: [perfilGuard('ADMIN', 'MASTER')],
+        title: 'Paciente — ClinicaViene',
+      },
+      {
+        path: 'configuracoes',
+        loadComponent: () =>
+          import('./pages/configuracoes/configuracoes.page').then((m) => m.ConfiguracoesPage),
+        canActivate: [perfilGuard('MASTER')],
+        title: 'Configurações — ClinicaViene',
+      },
     ],
   },
   { path: '**', redirectTo: '' },

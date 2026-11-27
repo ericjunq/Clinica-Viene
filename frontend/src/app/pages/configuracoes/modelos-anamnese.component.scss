@@ -1,0 +1,46 @@
+.area {
+  min-width: 12rem;
+}
+
+.editor {
+  margin-top: 0.5rem;
+}
+
+.pergunta {
+  border: 1px solid var(--viene-pessego);
+  border-radius: 0.8rem;
+  padding: 0.75rem 1rem 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.pergunta-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.linha {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .secao {
+    flex: 1 1 14rem;
+  }
+
+  .tipo {
+    flex: 1 1 12rem;
+  }
+}
+
+.marcas {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.fim {
+  justify-content: flex-end;
+}

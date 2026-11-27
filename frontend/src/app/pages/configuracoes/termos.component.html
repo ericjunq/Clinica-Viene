@@ -1,0 +1,65 @@
+<section class="cartao">
+  <p class="nota">
+    A política de privacidade é obrigatória; os demais são consentimentos opcionais que o paciente
+    pode recusar ou revogar. Os textos de exemplo precisam ser revisados por um advogado antes de
+    publicar.
+  </p>
+  @if (!termos().length) {
+    <div class="barra">
+      <button mat-flat-button (click)="carregarExemplos()" [disabled]="ocupado()">
+        Carregar textos de exemplo
+      </button>
+    </div>
+  }
+  @if (erro(); as e) {
+    <p class="alerta erro" role="alert">{{ e }}</p>
+  }
+
+  @for (g of grupos(); track g.tipo) {
+    <h3>{{ rotulo[g.tipo] }}</h3>
+    <ul class="lista">
+      @for (t of g.versoes; track t.id) {
+        <li>
+          <span>
+            v{{ t.versao }} · {{ t.titulo }}
+            @if (t.status === 'PUBLICADO') {
+              <span class="etiqueta" [class.ativo]="t.id === g.vigente?.id">
+                {{ t.id === g.vigente?.id ? 'vigente' : 'publicada' }}
+              </span>
+              <span class="nota">{{ t.publicadoEm | date: 'dd/MM/yyyy' }}</span>
+            } @else {
+              <span class="etiqueta rascunho">rascunho</span>
+            }
+          </span>
+          @if (t.status === 'RASCUNHO') {
+            <span class="acoes">
+              <button mat-button (click)="editar(t)">Editar</button>
+              <button mat-flat-button (click)="publicar(t)" [disabled]="ocupado()">Publicar</button>
+            </span>
+          }
+        </li>
+      } @empty {
+        <li class="nota">Nenhuma versão.</li>
+      }
+    </ul>
+    @if (!g.rascunho) {
+      <button mat-button (click)="novaVersao(g)">Nova versão</button>
+    }
+    @if (editando()?.tipo === g.tipo) {
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario">
+        <mat-form-field appearance="outline">
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="titulo" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Texto (Markdown: **negrito**, listas com "- ")</mat-label>
+          <textarea matInput formControlName="texto" rows="14"></textarea>
+        </mat-form-field>
+        <div class="barra">
+          <button mat-button type="button" (click)="editando.set(null)">Cancelar</button>
+          <button mat-flat-button type="submit" [disabled]="ocupado()">Salvar rascunho</button>
+        </div>
+      </form>
+    }
+  }
+</section>

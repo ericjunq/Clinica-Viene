@@ -20,7 +20,7 @@ npm start          # http://localhost:4200 — /api é encaminhado ao backend (p
 | `npm test` | Testes unitários (Vitest) |
 | `npm run lint` | ESLint (angular-eslint) |
 | `npm run format` / `format:check` | Prettier |
-| `npm run e2e` | Testes E2E (Playwright), com o ambiente completo no ar e `E2E_DEV_CPF`/`E2E_DEV_SENHA` definidos |
+| `npm run e2e` | Testes E2E (Playwright), com o ambiente completo no ar, banco novo e `E2E_DEV_CPF`/`E2E_DEV_SENHA` definidos |
 
 ## Organização
 
@@ -28,7 +28,7 @@ npm start          # http://localhost:4200 — /api é encaminhado ao backend (p
 src/app/
 ├── core/       modelos, serviços de API, interceptors, guards e validadores
 ├── layout/     estrutura da área logada (barra superior, navegação)
-├── pages/      telas (login, 2FA, usuários…), carregadas sob demanda
+├── pages/      telas (login, 2FA, usuários, pacientes, configurações, cadastro público…), carregadas sob demanda
 └── shared/     componentes reutilizáveis (logo, máscara de CPF)
 e2e/            testes Playwright
 ```

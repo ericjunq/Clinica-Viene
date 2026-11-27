@@ -56,13 +56,13 @@ Por lidar com dados de saúde, o projeto segue a **LGPD** como requisito de prim
 | Sessões com renovação rotativa, recuperação de senha, limite de tentativas | ✅ Concluído |
 | Usuários e perfis (DEV, MASTER, ADMIN, PROFISSIONAL) com registro profissional | ✅ Concluído |
 | Trilha de auditoria (somente inclusão) | ✅ Concluído |
-| Cadastro de pacientes, responsável legal e histórico de alterações | ✅ Concluído (backend) |
-| Termos LGPD versionados e consentimentos revogáveis | ✅ Concluído (backend) |
-| Modelos de anamnese configuráveis por área (exemplo odontológico incluso) | ✅ Concluído (backend) |
-| Convite de cadastro por link, QR code ou quiosque | ✅ Concluído (backend) |
+| Cadastro de pacientes: busca, pré-cadastro, responsável legal, contato e histórico de alterações | ✅ Concluído |
+| Termos LGPD versionados e consentimentos revogáveis (tela de configuração do MASTER) | ✅ Concluído |
+| Modelos de ficha de saúde por área, com editor de perguntas (exemplo odontológico incluso) | ✅ Concluído |
+| Convite de cadastro por link, QR code ou quiosque | ✅ Concluído |
 | Fluxo público do paciente: confirmação por código ou quiosque, dados, ficha de saúde, privacidade | ✅ Concluído |
 | Assinatura eletrônica da ficha (desenho ou nome), PDF com hash, storage cifrado e entrega por link + CPF | ✅ Concluído (provedor interno; cliente ZapSign pronto e desligado) |
-| Telas internas de pacientes e convites, configurações do MASTER | 🚧 Próxima etapa |
+| Entrega da ficha assinada pela recepção (QR na tela ou e-mail), sem a recepção abrir o PDF | ✅ Concluído |
 | Agenda, prontuário, financeiro, integrações | ⏳ Planejado |
 
 O andamento detalhado fica em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
@@ -224,6 +224,8 @@ Na primeira subida, com o banco vazio, o backend cria o usuário **DEV** definid
 2. O sistema obriga a **trocar a senha** e a **configurar o 2FA** (aplicativo autenticador ou e-mail).
 3. Guarde os **códigos de recuperação** exibidos.
 4. Crie o usuário **MASTER** (responsável pela clínica) e, depois, remova as linhas `DEV_INICIAL_*` do `.env`.
+5. Entre como MASTER e, em **Configurações**, carregue os textos de exemplo, revise e **publique** a política de privacidade e uma **ficha de saúde** (sem elas, o paciente não consegue concluir o cadastro).
+6. Em **Pacientes**, faça o pré-cadastro e gere o convite: link/QR para o celular do paciente ou **quiosque** num aparelho da clínica.
 
 Em desenvolvimento, os e-mails (códigos, convites) **não saem para a internet**: abra o Mailpit em http://localhost:8025 para vê-los.
 
@@ -273,6 +275,8 @@ npm run format:check     # Prettier
 # E2E (com o ambiente completo no ar — Opção A)
 E2E_DEV_CPF=<cpf> E2E_DEV_SENHA=<senha> npx playwright test
 ```
+
+Os testes E2E precisam de um **banco novo**: o projeto `primeiro-acesso` cria os usuários (DEV → MASTER fictícia) e o projeto `fluxos` depende dele (cadastro do paciente pelo quiosque, assinatura e download do PDF).
 
 Os relatórios de teste e de cobertura ficam disponíveis como artefatos de cada execução do CI.
 

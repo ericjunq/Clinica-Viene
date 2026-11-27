@@ -1,0 +1,156 @@
+.voltar {
+  margin-bottom: 0.5rem;
+}
+
+.titulo {
+  margin-bottom: 1rem;
+
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.subtitulo {
+  color: var(--viene-caramelo-escuro);
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cartao {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
+  padding: 1.25rem 1.5rem;
+  margin-top: 1rem;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+  margin: 0 0 1rem;
+
+  dt {
+    font-weight: 600;
+    color: var(--viene-marrom);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.nota {
+  color: var(--viene-caramelo-escuro);
+  font-size: 0.85rem;
+}
+
+.linha {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1 1 14rem;
+  }
+
+  .curto {
+    flex: 0 1 8rem;
+  }
+}
+
+.acoes,
+.acoes-resultado {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.acoes-resultado {
+  justify-content: flex-start;
+}
+
+.area {
+  min-width: 16rem;
+}
+
+.opcoes-convite {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.opcao {
+  border: 1px solid var(--viene-pessego);
+  border-radius: 0.8rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+
+  h3 {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0;
+    font-size: 1.3rem;
+  }
+}
+
+.resultado {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  background: var(--viene-creme-claro);
+
+  img {
+    border-radius: 0.5rem;
+    background: #fff;
+  }
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+
+  li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--viene-creme);
+  }
+}
+
+.historico li {
+  justify-content: flex-start;
+}
+
+.documento {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--viene-creme);
+}
+
+.link {
+  display: block;
+  word-break: break-all;
+  font-size: 0.75rem;
+  color: var(--viene-caramelo-escuro);
+  margin: 0.25rem 0 0.75rem;
+}

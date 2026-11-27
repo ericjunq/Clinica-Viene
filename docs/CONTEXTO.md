@@ -81,7 +81,10 @@ A recepção **não preenche a anamnese** pelo paciente (D-088, D-091): faz só 
 1. Recepção cria **pré-cadastro mínimo**: nome, CPF, telefone e/ou e-mail.
 2. Sistema gera `ConviteCadastro` (D-098): token aleatório (≥ 256 bits, guardado como hash, exibido só na criação), **uso único**, vinculado àquele paciente, **um ativo por paciente** (gerar outro cancela o anterior). Modo **LINK**: expira em 72 h, exibe QR code e/ou envia por e-mail (do paciente ou, se menor sem e-mail, do responsável; reenvio pela D-073). Modo **QUIOSQUE**: expira em 2 h, só com a recepcionista confirmando a conferência do documento com foto.
 3. Paciente abre o link → confirma identidade (código no e-mail; no quiosque, conferência do documento pela recepção) e recebe uma sessão de preenchimento de 2 h (D-100; link no formato `/cadastro#<token>`) → **confere/corrige** os dados do pré-cadastro e completa o resto → responde anamnese → lê a política de privacidade e marca (ou não) os consentimentos opcionais → **assina uma única vez** o documento completo (desenho ou nome digitado — D-090).
-4. Registro selado: PDF gerado, hash SHA-256 guardado, origem `PACIENTE_LINK`.
+4. Registro selado: PDF gerado, hash SHA-256 guardado, origem `PACIENTE_LINK` ou `PACIENTE_QUIOSQUE`.
+5. Entrega (D-094, D-104): o link de download vai ao e-mail; sem e-mail, a recepção gera na ficha do paciente um novo link e mostra o **QR na tela** para o paciente baixar no próprio celular com o CPF. A recepção **não abre o PDF** (tem dado de saúde).
+
+Telas internas (D-104): **Pacientes** (busca, pré-cadastro, ficha com abas Cadastro, Convite, Documentos, Privacidade e Histórico) para ADMIN/MASTER; **Configurações** (termos e fichas de saúde por área, com editor de perguntas) só para o MASTER. Abrir o quiosque "neste aparelho" encerra antes a sessão da recepção.
 
 ### 4.3 Regras
 

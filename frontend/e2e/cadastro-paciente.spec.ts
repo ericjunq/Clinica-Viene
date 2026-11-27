@@ -77,6 +77,8 @@ test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PD
   // pré-cadastro do paciente (sem e-mail)
   await page.getByRole('link', { name: 'Pacientes' }).click();
   await page.getByRole('button', { name: 'Novo paciente' }).click();
+  // o diálogo leva o foco ao primeiro campo ao terminar de abrir: espera, senão o texto cai no campo errado
+  await expect(page.locator('#paciente-nome')).toBeFocused();
   await page.locator('#paciente-nome').fill(NOME_PACIENTE);
   await page.locator('#paciente-nascimento').fill('1990-05-20');
   await page.locator('#paciente-cpf').pressSequentially(CPF_PACIENTE);
@@ -161,6 +163,7 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
   // a MASTER cadastra a dentista
   await page.getByRole('link', { name: 'Usuários' }).click();
   await page.getByRole('button', { name: 'Novo usuário' }).click();
+  await expect(page.locator('#nome')).toBeFocused();
   await page.locator('#nome').fill('Dentista Ficticia');
   await page.locator('#cpf-novo').pressSequentially('86241307940');
   await page.locator('#email').fill('dentista.e2e@exemplo.com');
@@ -208,6 +211,7 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
   // marcação: paciente, dentista já escolhida (única atendendo), dois procedimentos
   await expect(page.getByRole('heading', { name: 'Marcar consulta' })).toBeVisible();
   await expect(page.locator('#agendamento-hora')).toHaveValue('09:00');
+  await expect(page.locator('#agendamento-busca')).toBeFocused();
   await page.locator('#agendamento-busca').fill('Paciente Ficticio');
   await page.getByRole('button', { name: 'Buscar' }).click();
   await page.getByRole('button', { name: 'Escolher' }).click();

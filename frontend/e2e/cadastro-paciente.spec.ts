@@ -257,7 +257,7 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
   await expect(dentista.getByText(`Paciente chegou: ${NOME_PACIENTE}`)).toBeVisible({
     timeout: 10_000,
   });
-  await dentista.getByRole('button', { name: 'Ciente' }).click();
+  await dentista.getByRole('button', { name: 'Ciente', exact: true }).click();
   // um único aviso: depois do "Ciente" não sobra nenhum na tela
   await expect(dentista.locator('mat-snack-bar-container')).toHaveCount(0);
   await expect(dentista.locator('.bloco', { hasText: NOME_PACIENTE })).toContainText('Chegou');

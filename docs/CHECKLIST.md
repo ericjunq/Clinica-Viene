@@ -100,10 +100,10 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Leitura de ficha cadastral auditada; matriz de autorização (ADMIN/MASTER sim; PROFISSIONAL/DEV não) — `PacienteServiceIT`, `PacienteControllerIT` — **CI verde**
 
 **2B. Termos LGPD**
-- [~] `TermoVersao` + `AceiteTermo` (D-075) + consentimentos opcionais revogáveis (D-093) + textos-exemplo (D-096) — backend (V12) — aguardando CI; tela do MASTER na 2G
+- [x] `TermoVersao` + `AceiteTermo` (D-075) + consentimentos opcionais revogáveis (D-093) + textos-exemplo (D-096) — backend (V12) — **CI verde**; tela do MASTER na 2G
 
 **2C. Modelo de anamnese**
-- [~] `ModeloAnamnese` versionado por área (tipos de pergunta, perguntas de alerta clínico, validação de respostas), exemplo odontológico completo (46 perguntas) (D-089, D-096) — backend (V13) — aguardando CI; tela do MASTER na 2G
+- [x] `ModeloAnamnese` versionado por área (tipos de pergunta, perguntas de alerta clínico, validação de respostas), exemplo odontológico completo (46 perguntas) (D-089, D-096) — backend (V13) — **CI verde**; tela do MASTER na 2G
 
 **2D. Convite**
 - [ ] `ConviteCadastro` (token hash, uso único, 72 h) + QR code + e-mail com regras de reenvio (D-073)

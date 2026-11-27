@@ -1,4 +1,4 @@
-import { tokenDoFragmento } from './cadastro.page';
+import { tokenDoFragmento } from './token-do-link';
 
 describe('tokenDoFragmento', () => {
   it('lê o token que vem depois do # do link', () => {

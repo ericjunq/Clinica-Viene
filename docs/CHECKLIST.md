@@ -118,13 +118,13 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Área da ficha de saúde escolhida no convite (D-101, Q-013) — coluna no CREATE da V14 — **CI verde**
 
 **2F. Assinatura e documento**
-- [~] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências) — `ProvedorAssinaturaInternoTest` — implementado — testes pendentes de execução (CI)
+- [x] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências) — `ProvedorAssinaturaInternoTest` — **CI verde**
 - [ ] Adaptador ZapSign (quando houver conta/sandbox) (D-090)
-- [~] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado cifrado pela aplicação (SeaweedFS em dev/teste, contêiner nos testes — D-056, D-102) — `ArmazenamentoServiceIT`, `CifradorAesGcmTest` — implementado — testes pendentes de execução (CI)
-- [~] `FichaAnamnese`, `Documento`, `Assinatura` imutáveis (V16, banco rejeita UPDATE/DELETE), respostas e evidências cifradas; ao assinar grava dados conferidos (versão), decisões dos termos e encerra o convite (D-088, D-102) — `FichaAssinaturaServiceIT`, `CadastroPublicoControllerIT` — implementado — testes pendentes de execução (CI)
+- [x] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado cifrado pela aplicação (SeaweedFS em dev/teste, contêiner nos testes — D-056, D-102) — `ArmazenamentoServiceIT`, `CifradorAesGcmTest` — **CI verde**
+- [x] `FichaAnamnese`, `Documento`, `Assinatura` imutáveis (V16, banco rejeita UPDATE/DELETE), respostas e evidências cifradas; ao assinar grava dados conferidos (versão), decisões dos termos e encerra o convite (D-088, D-102) — `FichaAssinaturaServiceIT`, `CadastroPublicoControllerIT` — **CI verde**
 - [ ] Leitura da ficha pelo profissional vinculado (Fase 4) (D-088)
-- [~] Entrega do PDF por link + CPF (backend: e-mail com link `/documento#<token>`, 7 dias, 5 downloads, 5 CPFs errados bloqueiam; confere o hash ao baixar) (D-094) — implementado — testes pendentes de execução (CI)
-- [ ] Frontend: passo de assinatura (desenho/nome) e página `/documento` de download
+- [x] Entrega do PDF por link + CPF (backend: e-mail com link `/documento#<token>`, 7 dias, 5 downloads, 5 CPFs errados bloqueiam; confere o hash ao baixar) (D-094) — **CI verde**
+- [~] Frontend: passo de assinatura (desenho no quadro ou nome digitado + declaração) e página `/documento` de download com CPF — Vitest, lint e build executados localmente; CI pendente
 
 **2G. Telas internas**
 - [ ] Pacientes (lista, busca, ficha cadastral com histórico, convite/QR, abrir quiosque), configurações do MASTER (modelos, termos)

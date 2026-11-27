@@ -40,6 +40,12 @@ export const routes: Routes = [
     title: 'Cadastro — Viene Odontologia & Saúde',
   },
   {
+    // Download da ficha assinada pelo link do e-mail (público; token depois do # — D-094).
+    path: 'documento',
+    loadComponent: () => import('./pages/documento/documento.page').then((m) => m.DocumentoPage),
+    title: 'Ficha assinada — Viene Odontologia & Saúde',
+  },
+  {
     path: '',
     loadComponent: () => import('./layout/shell.component').then((m) => m.ShellComponent),
     canActivate: [autenticadoGuard, sessaoCompletaGuard],

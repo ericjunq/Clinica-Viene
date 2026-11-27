@@ -121,3 +121,19 @@ export const PARENTESCOS: { valor: Parentesco; rotulo: string }[] = [
   { valor: 'TUTOR', rotulo: 'Tutor(a)' },
   { valor: 'OUTRO', rotulo: 'Outro' },
 ];
+
+export type MetodoAssinatura = 'DESENHO' | 'NOME_DIGITADO';
+
+export interface AssinaturaFicha {
+  metodo: MetodoAssinatura;
+  imagem: string | null;
+  nomeDigitado: string | null;
+}
+
+export interface FichaAssinada {
+  fichaId: string;
+  documentoId: string;
+  sha256: string;
+  assinadoEm: string;
+  entregaEnviadaPara: string | null;
+}

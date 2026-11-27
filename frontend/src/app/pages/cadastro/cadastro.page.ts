@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -13,10 +14,13 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
+  AssinaturaFicha,
   ConviteAberto,
   DadosCadastro,
+  FichaAssinada,
   FichaCadastro,
   FormularioCadastro,
+  MetodoAssinatura,
   PARENTESCOS,
   Parentesco,
   RespostaAnamnese,
@@ -25,7 +29,9 @@ import {
 import { formatarEspera, mensagemDeErro } from '../../core/models/erro.model';
 import { CadastroPublicoService } from '../../core/services/cadastro-publico.service';
 import { CpfMaskDirective, formatarCpf } from '../../shared/cpf-mask/cpf-mask.directive';
+import { QuadroAssinaturaComponent } from '../../shared/assinatura/quadro-assinatura.component';
 import { LogoComponent } from '../../shared/logo/logo.component';
+import { tokenDoFragmento } from '../../shared/token-do-link';
 import {
   AnamneseFormComponent,
   pendentes,
@@ -33,13 +39,8 @@ import {
   respostasVazias,
 } from './anamnese-form.component';
 
-type Etapa = 'carregando' | 'invalido' | 'codigo' | 'quiosque' | 'preenchendo' | 'revisado';
-
-/** Extrai o token do convite: o link é /cadastro#token (o que vem depois do # não sai do navegador). */
-export function tokenDoFragmento(fragmento: string | null): string | null {
-  const token = fragmento?.trim();
-  return token ? token : null;
-}
+type Etapa =
+  'carregando' | 'invalido' | 'codigo' | 'quiosque' | 'preenchendo' | 'revisado' | 'assinado';
 
 /**
  * Cadastro do paciente pelo convite (CONTEXTO §4.2, D-091, D-100): confirma a identidade (código no e-mail
@@ -52,6 +53,7 @@ export function tokenDoFragmento(fragmento: string | null): string | null {
     FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
     MatExpansionModule,
@@ -64,6 +66,7 @@ export function tokenDoFragmento(fragmento: string | null): string | null {
     CpfMaskDirective,
     LogoComponent,
     AnamneseFormComponent,
+    QuadroAssinaturaComponent,
   ],
   templateUrl: './cadastro.page.html',
   styleUrls: ['../pagina-publica.scss', './cadastro.page.scss'],
@@ -82,6 +85,23 @@ export class CadastroPage implements OnInit, OnDestroy {
   protected readonly avisoReenvio = signal<string | null>(null);
   protected readonly formulario = signal<FormularioCadastro | null>(null);
   protected readonly revisao = signal<RevisaoCadastro | null>(null);
+  protected readonly fichaRevisada = signal<FichaCadastro | null>(null);
+  protected readonly metodo = signal<MetodoAssinatura>('DESENHO');
+  protected readonly desenho = signal<string | null>(null);
+  protected readonly declaracao = signal(false);
+  protected readonly assinada = signal<FichaAssinada | null>(null);
+  protected readonly nomeDigitado = this.fb.control('', Validators.maxLength(150));
+
+  /** Quem assina: o paciente ou, se menor, o responsável legal. */
+  protected readonly signatario = computed(() => {
+    const ficha = this.fichaRevisada();
+    if (!ficha) {
+      return '';
+    }
+    return this.revisao()?.peloResponsavel && ficha.dados.responsavel
+      ? ficha.dados.responsavel.nomeCompleto
+      : ficha.dados.nomeCompleto;
+  });
   protected readonly mostrarPendentes = signal(false);
   protected respostas: Record<string, RespostaAnamnese> = {};
   protected decisoes: Record<string, boolean> = {};
@@ -187,9 +207,44 @@ export class CadastroPage implements OnInit, OnDestroy {
       this.erro.set('Para continuar, marque que leu a política de privacidade.');
       return;
     }
-    this.executar(this.servico.revisar(this.ficha(f)), (revisao) => {
+    const ficha = this.ficha(f);
+    this.executar(this.servico.revisar(ficha), (revisao) => {
       this.revisao.set(revisao);
+      this.fichaRevisada.set(ficha);
       this.etapa.set('revisado');
+    });
+  }
+
+  /** Volta ao preenchimento para corrigir algo antes de assinar. */
+  protected corrigir(): void {
+    this.erro.set(null);
+    this.etapa.set('preenchendo');
+  }
+
+  protected podeAssinar(): boolean {
+    const assinatura =
+      this.metodo() === 'DESENHO' ? !!this.desenho() : !!this.nomeDigitado.value.trim();
+    return assinatura && this.declaracao() && !this.enviando();
+  }
+
+  protected assinar(): void {
+    const ficha = this.fichaRevisada();
+    if (!ficha || !this.podeAssinar()) {
+      return;
+    }
+    const assinatura: AssinaturaFicha =
+      this.metodo() === 'DESENHO'
+        ? { metodo: 'DESENHO', imagem: this.desenho(), nomeDigitado: null }
+        : { metodo: 'NOME_DIGITADO', imagem: null, nomeDigitado: this.nomeDigitado.value.trim() };
+    this.executar(this.servico.assinar(ficha, assinatura), (assinada) => {
+      this.assinada.set(assinada);
+      this.etapa.set('assinado');
+      // nada do preenchimento fica na memória do aparelho (pode ser o quiosque da clínica)
+      this.servico.encerrar();
+      this.respostas = {};
+      this.dados.reset();
+      this.fichaRevisada.set(null);
+      this.desenho.set(null);
     });
   }
 

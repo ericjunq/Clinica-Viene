@@ -1,0 +1,46 @@
+<main class="pagina-publica">
+  <app-logo />
+  <mat-card appearance="raised">
+    <mat-card-header>
+      <mat-card-title>Sua ficha assinada</mat-card-title>
+      <mat-card-subtitle>Viene Odontologia &amp; Saúde</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (token) {
+        <form class="formulario" (ngSubmit)="baixar()">
+          <p>
+            Para sua segurança, informe o CPF do paciente (ou do responsável, se o paciente não
+            tiver CPF).
+          </p>
+          <mat-form-field appearance="outline">
+            <mat-label>CPF</mat-label>
+            <input
+              matInput
+              id="cpf"
+              appCpfMask
+              [formControl]="cpf"
+              placeholder="000.000.000-00"
+              inputmode="numeric"
+            />
+          </mat-form-field>
+          @if (baixado()) {
+            <div class="alerta sucesso" role="status">Download iniciado.</div>
+          }
+          @if (erro(); as mensagem) {
+            <div class="alerta erro" role="alert">{{ mensagem }}</div>
+          }
+          <button
+            mat-flat-button
+            type="submit"
+            class="largura-total botao-principal"
+            [disabled]="enviando()"
+          >
+            Baixar PDF
+          </button>
+        </form>
+      } @else {
+        <div class="alerta erro" role="alert">{{ erro() }}</div>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

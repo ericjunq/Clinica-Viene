@@ -2,8 +2,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import {
+  AssinaturaFicha,
   CodigoEnviado,
   ConviteAberto,
+  FichaAssinada,
   FichaCadastro,
   FormularioCadastro,
   RevisaoCadastro,
@@ -70,6 +72,14 @@ export class CadastroPublicoService {
     return this.http.post<RevisaoCadastro>(`${this.api}/revisao`, ficha, {
       headers: this.cabecalhos(),
     });
+  }
+
+  assinar(ficha: FichaCadastro, assinatura: AssinaturaFicha): Observable<FichaAssinada> {
+    return this.http.post<FichaAssinada>(
+      `${this.api}/assinatura`,
+      { ficha, assinatura, declaracao: true },
+      { headers: this.cabecalhos() },
+    );
   }
 
   private cabecalhos(): HttpHeaders {

@@ -60,8 +60,9 @@ Por lidar com dados de saúde, o projeto segue a **LGPD** como requisito de prim
 | Termos LGPD versionados e consentimentos revogáveis | ✅ Concluído (backend) |
 | Modelos de anamnese configuráveis por área (exemplo odontológico incluso) | ✅ Concluído (backend) |
 | Convite de cadastro por link, QR code ou quiosque | ✅ Concluído (backend) |
-| Fluxo público do paciente: confirmação por código ou quiosque, dados, ficha de saúde, privacidade | ✅ Concluído (sem a assinatura) |
-| Assinatura eletrônica, PDF selado e entrega ao paciente | 🚧 Próxima etapa |
+| Fluxo público do paciente: confirmação por código ou quiosque, dados, ficha de saúde, privacidade | ✅ Concluído |
+| Assinatura eletrônica da ficha (desenho ou nome), PDF com hash, storage cifrado e entrega por link + CPF | ✅ Concluído (provedor interno; ZapSign quando houver conta) |
+| Telas internas de pacientes e convites, configurações do MASTER | 🚧 Próxima etapa |
 | Agenda, prontuário, financeiro, integrações | ⏳ Planejado |
 
 O andamento detalhado fica em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).

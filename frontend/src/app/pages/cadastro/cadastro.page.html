@@ -311,21 +311,94 @@
     }
 
     @case ('revisado') {
+      <mat-card appearance="raised" class="cartao-largo">
+        <mat-card-header>
+          <mat-card-title>Assinatura</mat-card-title>
+          <mat-card-subtitle>
+            @if (revisao()?.peloResponsavel) {
+              Assinatura do responsável legal: {{ signatario() }}
+            } @else {
+              Assinatura de {{ signatario() }}
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="formulario">
+          <div class="alerta sucesso" role="status">
+            Ficha conferida: dados, ficha de saúde e escolhas de privacidade estão completos.
+          </div>
+          <p>Você assina uma única vez, e a assinatura vale para a ficha inteira.</p>
+
+          <mat-button-toggle-group
+            class="metodos"
+            [value]="metodo()"
+            (change)="metodo.set($event.value)"
+            aria-label="Como assinar"
+          >
+            <mat-button-toggle value="DESENHO">Desenhar</mat-button-toggle>
+            <mat-button-toggle value="NOME_DIGITADO">Digitar o nome</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          @if (metodo() === 'DESENHO') {
+            <app-quadro-assinatura (assinatura)="desenho.set($event)" />
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Nome completo</mat-label>
+              <input
+                matInput
+                id="nome-assinatura"
+                [formControl]="nomeDigitado"
+                autocomplete="off"
+              />
+              <mat-hint>Escreva exatamente: {{ signatario() }}</mat-hint>
+            </mat-form-field>
+          }
+
+          <mat-checkbox
+            [checked]="declaracao()"
+            (change)="declaracao.set($event.checked)"
+            id="declaracao"
+          >
+            Declaro que as informações desta ficha são verdadeiras, que li a política de privacidade
+            e que as autorizações marcadas refletem a minha escolha.
+          </mat-checkbox>
+
+          @if (erro(); as mensagem) {
+            <div class="alerta erro" role="alert">{{ mensagem }}</div>
+          }
+          <div class="acoes-passo">
+            <button mat-button type="button" [disabled]="enviando()" (click)="corrigir()">
+              Voltar e corrigir
+            </button>
+            <button
+              mat-flat-button
+              type="button"
+              class="botao-principal"
+              [disabled]="!podeAssinar()"
+              (click)="assinar()"
+            >
+              Assinar ficha
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('assinado') {
       <mat-card appearance="raised">
         <mat-card-header>
-          <mat-card-title>Ficha conferida</mat-card-title>
+          <mat-card-title>Cadastro concluído</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="alerta sucesso" role="status">
-            Tudo certo com seus dados, sua ficha de saúde e suas escolhas de privacidade.
-          </div>
-          <p>
-            @if (revisao()?.peloResponsavel) {
-              O próximo passo é a assinatura da ficha pelo responsável legal.
-            } @else {
-              O próximo passo é a assinatura da ficha.
-            }
-          </p>
+          <div class="alerta sucesso" role="status">Ficha assinada com sucesso. Obrigado!</div>
+          @if (assinada()?.entregaEnviadaPara; as email) {
+            <p>
+              Enviamos para <strong>{{ email }}</strong> um link para você baixar a ficha assinada.
+              Para abrir, será pedido o CPF.
+            </p>
+          }
+          @if (convite()?.modo === 'QUIOSQUE') {
+            <p><strong>Pode devolver o aparelho à recepção.</strong></p>
+          }
         </mat-card-content>
       </mat-card>
     }

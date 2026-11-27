@@ -376,6 +376,7 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 - **Storage**: S3 compatível com endpoint configurável; o PDF sai do servidor **já cifrado** (AES-256-GCM, mesma chave versionada dos campos) — o provedor de storage nunca vê o conteúdo. SeaweedFS em dev e em contêiner nos testes; bucket criado sob demanda só em dev/teste.
 - **Imutável no banco**: `documento`, `assinatura` e `ficha_anamnese` com trigger que rejeita UPDATE/DELETE. Respostas, alertas, acompanhante e evidências cifrados.
 - **Entrega (D-094)**: e-mail com link `/documento#<token>` para o paciente (ou o responsável, quando ele assinou), sem dado de saúde; vale **7 dias**, até **5 downloads**, **5 CPFs errados** bloqueiam o link. A página pede o CPF do paciente (ou do responsável, se o paciente não tiver CPF). Sem e-mail (quiosque), a recepção entrega o PDF depois (2G).
+- **Frontend**: depois de "Conferir ficha", a tela de assinatura oferece **Desenhar** (quadro próprio em canvas — dedo, caneta ou mouse; sem biblioteca externa) ou **Digitar o nome**, com a declaração obrigatória; ao concluir, a tela esquece tokens e respostas e, no quiosque, pede para devolver o aparelho. Página pública `/documento#<token>` pede o CPF e baixa o PDF.
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.

@@ -124,8 +124,11 @@ public class ConviteService {
         auditoriaService.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.CONVITE_CANCELADO, ENTIDADE, pacienteId));
     }
 
-    /** Convite ativo pelo token (fluxo público — 2E). Inválido, expirado, cancelado ou usado: mesma resposta. */
-    @Transactional(readOnly = true)
+    /**
+     * Convite ativo pelo token (fluxo público — 2E). Inválido, expirado, cancelado ou usado: mesma resposta.
+     * Não é somente leitura: a busca trava a linha (evita uso duplo do mesmo convite em requisições simultâneas).
+     */
+    @Transactional
     public ConviteCadastro ativoPorToken(String token) {
         if (token == null || token.isBlank()) {
             throw new ConviteInvalidoException();

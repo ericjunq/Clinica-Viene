@@ -3,6 +3,7 @@ package br.com.clinicaviene.controller;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.hasSize;
 
 import br.com.clinicaviene.CpfsFicticios;
@@ -93,11 +94,13 @@ class ConfiguracaoControllerIT {
     void masterCarregaOsExemplosDeTermosEAnamnese() {
         comoUsuario(Perfil.MASTER).post("/api/v1/termos/exemplos").then().statusCode(200);
         comoUsuario(Perfil.MASTER).get("/api/v1/termos").then().statusCode(200).body("size()", greaterThanOrEqualTo(5));
-        comoUsuario(Perfil.MASTER)
-                .post("/api/v1/modelos-anamnese/exemplos/odontologia")
-                .then()
-                .statusCode(201)
-                .body("perguntas.size()", greaterThanOrEqualTo(40));
+        // O banco é compartilhado entre as classes de teste: outra pode ter criado a ficha de odontologia antes.
+        var resposta = comoUsuario(Perfil.MASTER).post("/api/v1/modelos-anamnese/exemplos/odontologia").then();
+        if (resposta.extract().statusCode() == 201) {
+            resposta.body("perguntas.size()", greaterThanOrEqualTo(40));
+        } else {
+            resposta.statusCode(422).body("detail", startsWith("A odontologia já tem modelo"));
+        }
     }
 
     @Test

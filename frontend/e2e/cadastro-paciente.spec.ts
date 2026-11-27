@@ -84,12 +84,12 @@ test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PD
   const paciente = await tablet.newPage();
   await paciente.goto(linkConvite.slice(linkConvite.indexOf('/cadastro')));
   await paciente.getByRole('button', { name: 'Começar' }).click();
-  await paciente.getByLabel('CEP').fill('45000-000');
-  await paciente.getByLabel('UF').fill('BA');
-  await paciente.getByLabel('Rua').fill('Rua Fictícia');
-  await paciente.getByLabel('Número').fill('100');
-  await paciente.getByLabel('Bairro').fill('Centro');
-  await paciente.getByLabel('Cidade').fill('Vitória da Conquista');
+  await paciente.getByRole('textbox', { name: 'CEP', exact: true }).fill('45000-000');
+  await paciente.getByRole('textbox', { name: 'UF', exact: true }).fill('BA');
+  await paciente.getByRole('textbox', { name: 'Rua', exact: true }).fill('Rua Fictícia');
+  await paciente.getByRole('textbox', { name: 'Número', exact: true }).fill('100');
+  await paciente.getByRole('textbox', { name: 'Bairro', exact: true }).fill('Centro');
+  await paciente.getByRole('textbox', { name: 'Cidade', exact: true }).fill('Vitória da Conquista');
   await botaoVisivel(paciente, 'Próximo').click();
   await paciente.getByRole('radio', { name: 'Não' }).check();
   await botaoVisivel(paciente, 'Próximo').click();

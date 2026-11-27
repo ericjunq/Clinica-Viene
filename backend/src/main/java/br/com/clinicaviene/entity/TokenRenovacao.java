@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.util.IdUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -43,7 +44,7 @@ public class TokenRenovacao {
     private Instant revogadoEm;
 
     public TokenRenovacao(UUID usuarioId, UUID cadeiaId, String tokenHash, Instant criadoEm, Instant expiraEm) {
-        this.id = UUID.randomUUID();
+        this.id = IdUtils.novoId();
         this.usuarioId = usuarioId;
         this.cadeiaId = cadeiaId;
         this.tokenHash = tokenHash;

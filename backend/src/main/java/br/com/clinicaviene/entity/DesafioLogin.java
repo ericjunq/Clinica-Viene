@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.util.IdUtils;
 import br.com.clinicaviene.util.CampoCriptografadoConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -50,7 +51,7 @@ public class DesafioLogin {
     private String totpSegredoPendente;
 
     public DesafioLogin(UUID usuarioId, String tokenHash, Instant agora, Instant expiraEm) {
-        this.id = UUID.randomUUID();
+        this.id = IdUtils.novoId();
         this.usuarioId = usuarioId;
         this.tokenHash = tokenHash;
         this.tentativas = 0;

@@ -45,6 +45,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
+    @ExceptionHandler(PossivelDuplicidadeException.class)
+    ProblemDetail possivelDuplicidade(PossivelDuplicidadeException e) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        problema.setProperty("pacientesSemelhantes", e.getPacientesSemelhantes());
+        return problema;
+    }
+
     @ExceptionHandler(RenovacaoConcorrenteException.class)
     ProblemDetail renovacaoConcorrente(RenovacaoConcorrenteException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());

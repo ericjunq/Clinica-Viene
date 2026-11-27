@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.util.IdUtils;
 import br.com.clinicaviene.enums.FinalidadeEnvio;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,7 +50,7 @@ public class EnvioCodigo {
     private Instant invalidadoEm;
 
     public EnvioCodigo(UUID usuarioId, FinalidadeEnvio finalidade, String codigoHash, Instant agora, Instant expiraEm) {
-        this.id = UUID.randomUUID();
+        this.id = IdUtils.novoId();
         this.usuarioId = usuarioId;
         this.finalidade = finalidade;
         this.codigoHash = codigoHash;

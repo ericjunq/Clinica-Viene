@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.util.IdUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -33,7 +34,7 @@ public class CodigoRecuperacao {
     private Instant usadoEm;
 
     public CodigoRecuperacao(UUID usuarioId, String codigoHash, Instant agora) {
-        this.id = UUID.randomUUID();
+        this.id = IdUtils.novoId();
         this.usuarioId = usuarioId;
         this.codigoHash = codigoHash;
         this.criadoEm = agora;

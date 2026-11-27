@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.util.IdUtils;
 import br.com.clinicaviene.dto.NovoUsuarioDto;
 import br.com.clinicaviene.enums.AreaAtuacao;
 import br.com.clinicaviene.enums.ConselhoProfissional;
@@ -101,7 +102,7 @@ public class Usuario {
     private Long versao;
 
     public Usuario(NovoUsuarioDto dados, String cpfHash, String senhaHash, UUID criadoPor, Instant agora) {
-        this.id = UUID.randomUUID();
+        this.id = IdUtils.novoId();
         this.nomeCompleto = dados.nomeCompleto();
         this.cpf = dados.cpf();
         this.cpfHash = cpfHash;

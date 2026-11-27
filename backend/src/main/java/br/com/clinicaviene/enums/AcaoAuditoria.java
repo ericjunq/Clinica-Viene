@@ -13,6 +13,13 @@ public enum AcaoAuditoria {
     SENHA_RECUPERACAO_SOLICITADA,
     SENHA_REDEFINIDA,
 
+    // Pacientes (Fase 2)
+    PACIENTE_CRIADO,
+    PACIENTE_ALTERADO,
+    PACIENTE_LIDO,
+    PACIENTE_PESQUISADO,
+    PACIENTE_SEM_CPF_APROVADO,
+
     // Autenticação (Fase 1)
     LOGIN_SENHA_OK,
     LOGIN_FALHA,

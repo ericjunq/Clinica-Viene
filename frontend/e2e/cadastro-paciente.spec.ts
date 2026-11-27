@@ -258,6 +258,8 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
     timeout: 10_000,
   });
   await dentista.getByRole('button', { name: 'Ciente' }).click();
+  // um único aviso: depois do "Ciente" não sobra nenhum na tela
+  await expect(dentista.locator('mat-snack-bar-container')).toHaveCount(0);
   await expect(dentista.locator('.bloco', { hasText: NOME_PACIENTE })).toContainText('Chegou');
 
   // ela inicia o atendimento pelos detalhes da consulta

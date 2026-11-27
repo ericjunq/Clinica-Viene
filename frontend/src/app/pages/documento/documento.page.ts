@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,6 +18,8 @@ import { tokenDoFragmento } from '../../shared/token-do-link';
 @Component({
   selector: 'app-documento-page',
   imports: [
+    // FormsModule: o <form> precisa do NgForm para o (ngSubmit) não recarregar a página.
+    FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,

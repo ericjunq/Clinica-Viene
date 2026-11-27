@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -24,6 +24,8 @@ import { CpfMaskDirective } from '../../shared/cpf-mask/cpf-mask.directive';
   selector: 'app-pacientes-page',
   imports: [
     DatePipe,
+    // FormsModule: o <form> da busca precisa do NgForm para o (ngSubmit) não recarregar a página.
+    FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,

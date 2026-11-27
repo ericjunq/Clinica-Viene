@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NovoPaciente } from '../../core/models/paciente.model';
@@ -81,5 +81,27 @@ describe('PacientesPage — pré-cadastro', () => {
     expect(
       montar(master, { semCpf: true, cpf: '', semCpfJustificativa: 'Estrangeiro sem CPF' }),
     ).toMatchObject({ cpf: null, semCpfJustificativa: 'Estrangeiro sem CPF' });
+  });
+
+  it('enviar o formulário de busca chama a API sem recarregar a página', () => {
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+    });
+    TestBed.inject(AuthService).usuario.set({ perfil: 'ADMIN' } as never);
+    const fixture = TestBed.createComponent(PacientesPage);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    const elemento = fixture.nativeElement as HTMLElement;
+    const campo = elemento.querySelector<HTMLInputElement>('#busca-paciente')!;
+    campo.value = 'Maria';
+    campo.dispatchEvent(new Event('input'));
+    const envio = new Event('submit', { cancelable: true });
+    elemento.querySelector('form')!.dispatchEvent(envio);
+
+    expect(envio.defaultPrevented).toBe(true);
+    http
+      .expectOne((r) => r.url === '/api/v1/pacientes' && r.params.get('busca') === 'Maria')
+      .flush([]);
+    http.verify();
   });
 });

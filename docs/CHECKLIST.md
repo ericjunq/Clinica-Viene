@@ -135,7 +135,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] CI: cache de dependências na montagem das imagens (camada `dependency:go-offline` + cache do GitHub Actions) contra 429 do Maven Central (D-097) — **CI verde**; job Docker de 3m25s para 23s com cache
 
 **Testes da fase**
-- [ ] Regra ArchUnit: só o service da anamnese usa o repository da anamnese (D-078)
+- [x] Regras ArchUnit de camadas: só o `FichaAnamneseService` usa o `FichaAnamneseRepository`; controllers não acessam repositories (D-078, D-105) — `CamadasArchTest` — implementado — testes pendentes de execução
 - [x] E2E: pré-cadastro → quiosque → anamnese → termos → assinatura → ficha concluída → download com CPF (D-104) — **CI verde**
 
 **Pendências que dependem do autor**

@@ -392,6 +392,9 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 - **Configurações** (só MASTER): termos por tipo (carregar exemplos, editar rascunho em Markdown, publicar com confirmação, nova versão a partir da vigente) e **fichas de saúde** por área com **editor de perguntas** (seção, texto, tipo, opções, obrigatória, alerta, "qual?" obrigatório, ajuda; subir/descer/remover). Código da pergunta gerado do texto (sem acento, único); "nova versão" duplica um modelo publicado.
 - **E2E**: projetos do Playwright `primeiro-acesso` (DEV cria também uma MASTER fictícia) → `fluxos` (MASTER publica política e ficha, pré-cadastra, abre o quiosque; o paciente assina num navegador separado; a recepção gera o QR e o paciente baixa o PDF com o CPF). Sem nova tentativa automática no projeto `fluxos` (a senha provisória já terá sido trocada).
 
+**D-105 — Regras de camadas verificadas por ArchUnit** · 2026-11-27 · Detalha a D-078
+Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1) só o `FichaAnamneseService` depende do `FichaAnamneseRepository` — dado de saúde passa sempre pelo service que confere a permissão e grava a auditoria (D-088); (2) classes de `controller` não dependem de `repository` (controller só converte e delega). Fixtures em `src/test/java/fixtures/arquitetura` provam que as regras pegam as violações. Cada novo repository de dado de saúde (prontuário, procedimentos — Fase 4) ganha a regra equivalente; a orientação está no `CLAUDE.md`.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

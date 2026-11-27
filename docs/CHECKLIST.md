@@ -112,7 +112,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 
 **2E. Fluxo público do paciente**
 - [x] Backend: abrir convite, código no e-mail (LINK) ou sessão direta (QUIOSQUE), sessão de preenchimento de 2 h, formulário (pré-cadastro + anamnese vigente + termos vigentes), revisão completa da ficha (D-091, D-100) — V15 — `CadastroPublicoServiceIT`, `CadastroPublicoControllerIT` — **CI verde**
-- [~] Frontend: tela pública `/cadastro#<token>` (código ou quiosque, seus dados, ficha de saúde, privacidade, conferir) — Vitest, lint e build executados localmente; CI pendente
+- [x] Frontend: tela pública `/cadastro#<token>` (código ou quiosque, seus dados, ficha de saúde, privacidade, conferir) — Vitest — **CI verde**
 - [ ] E2E do fluxo do paciente (Playwright) — junto da 2G, quando as telas internas gerarem o convite
 
 **2F. Assinatura e documento**

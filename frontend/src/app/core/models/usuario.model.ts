@@ -30,6 +30,19 @@ export interface Usuario {
   criadoEm: string;
 }
 
+export interface RegistroProfissional {
+  areaAtuacao: AreaAtuacao | null;
+  conselho: ConselhoProfissional | null;
+  numeroRegistro: string | null;
+  ufRegistro: string | null;
+}
+
+export interface AtualizacaoUsuario extends RegistroProfissional {
+  nomeCompleto: string;
+  email: string;
+  telefone: string | null;
+}
+
 export interface NovoUsuario {
   nomeCompleto: string;
   cpf: string;

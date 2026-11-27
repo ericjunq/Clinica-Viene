@@ -46,6 +46,9 @@
     <ng-container matColumnDef="acoes">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let u">
+        @if (podeEditar(u)) {
+          <button mat-button (click)="abrirEdicao(u)">Editar</button>
+        }
         @if (podeAlterarStatus(u)) {
           <button mat-button (click)="alternarStatus(u)">
             {{ u.status === 'ATIVO' ? 'Desativar' : 'Ativar' }}
@@ -64,7 +67,7 @@
 </div>
 
 <ng-template #formulario>
-  <h2 mat-dialog-title>Novo usuário</h2>
+  <h2 mat-dialog-title>{{ emEdicao() ? 'Editar usuário' : 'Novo usuário' }}</h2>
   <form [formGroup]="form" (ngSubmit)="salvar()">
     <mat-dialog-content class="formulario">
       <mat-form-field appearance="outline">
@@ -74,6 +77,9 @@
       <mat-form-field appearance="outline">
         <mat-label>CPF</mat-label>
         <input matInput id="cpf-novo" appCpfMask formControlName="cpf" inputmode="numeric" />
+        @if (emEdicao()) {
+          <mat-hint>O CPF não pode ser alterado.</mat-hint>
+        }
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>E-mail</mat-label>
@@ -125,19 +131,27 @@
         </div>
       }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Senha provisória</mat-label>
-        <input
-          matInput
-          id="senha-provisoria"
-          type="password"
-          formControlName="senhaProvisoria"
-          autocomplete="new-password"
-        />
-        <mat-hint
-          >12+ caracteres, maiúscula, minúscula e especial. Trocada no primeiro acesso.</mat-hint
-        >
-      </mat-form-field>
+      @if (!emEdicao()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Senha provisória</mat-label>
+          <input
+            matInput
+            id="senha-provisoria"
+            type="password"
+            formControlName="senhaProvisoria"
+            autocomplete="new-password"
+          />
+          <mat-hint
+            >12+ caracteres, maiúscula, minúscula e especial. Trocada no primeiro acesso.</mat-hint
+          >
+        </mat-form-field>
+      } @else if (
+        form.controls.perfil.enabled && form.controls.perfil.value !== emEdicao()?.perfil
+      ) {
+        <div class="alerta info">
+          Ao mudar o perfil, a pessoa sai do sistema e precisa entrar de novo.
+        </div>
+      }
 
       @if (erroFormulario(); as mensagem) {
         <div class="alerta erro" role="alert">{{ mensagem }}</div>
@@ -145,7 +159,9 @@
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button type="button" mat-dialog-close>Cancelar</button>
-      <button mat-flat-button type="submit" [disabled]="salvando()">Criar usuário</button>
+      <button mat-flat-button type="submit" [disabled]="salvando()">
+        {{ emEdicao() ? 'Salvar' : 'Criar usuário' }}
+      </button>
     </mat-dialog-actions>
   </form>
 </ng-template>

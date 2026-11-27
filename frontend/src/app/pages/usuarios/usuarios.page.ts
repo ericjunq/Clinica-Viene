@@ -8,12 +8,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { Observable, concatMap, of } from 'rxjs';
 import { mensagemDeErro } from '../../core/models/erro.model';
 import {
   AreaAtuacao,
   ConselhoProfissional,
   NovoUsuario,
   Perfil,
+  RegistroProfissional,
   Usuario,
 } from '../../core/models/usuario.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -81,6 +83,8 @@ export class UsuariosPage implements OnInit {
   protected readonly carregando = signal(false);
   protected readonly salvando = signal(false);
   protected readonly erroFormulario = signal<string | null>(null);
+  /** Usuário em edição (null = cadastro de novo usuário). */
+  protected readonly emEdicao = signal<Usuario | null>(null);
 
   protected readonly perfis: { rotulo: string; valor: Perfil }[] = [
     { rotulo: 'Dono(a) da clínica (MASTER)', valor: 'MASTER' },
@@ -139,18 +143,57 @@ export class UsuariosPage implements OnInit {
     return !(eu.perfil === 'DEV' && usuario.perfil === 'MASTER');
   }
 
+  /** Pode editar: quem pode alterar o status, ou a própria pessoa (D-086). */
+  protected podeEditar(usuario: Usuario): boolean {
+    return this.eu()?.id === usuario.id || this.podeAlterarStatus(usuario);
+  }
+
+  protected ehEuMesmo(): boolean {
+    return this.emEdicao()?.id === this.eu()?.id;
+  }
+
   protected abrirCadastro(): void {
+    this.emEdicao.set(null);
     this.form.reset({ perfil: 'ADMIN' });
-    this.erroFormulario.set(null);
-    this.dialogoAberto = this.dialogo.open(this.formularioTpl(), {
-      width: '34rem',
-      maxWidth: '95vw',
+    this.form.controls.cpf.enable();
+    this.form.controls.senhaProvisoria.enable();
+    this.form.controls.perfil.enable();
+    this.abrirDialogo();
+  }
+
+  protected abrirEdicao(usuario: Usuario): void {
+    this.emEdicao.set(usuario);
+    this.form.reset({
+      nomeCompleto: usuario.nomeCompleto,
+      cpf: usuario.cpfMascarado ?? '',
+      email: usuario.email,
+      telefone: usuario.telefone ?? '',
+      perfil: usuario.perfil,
+      areaAtuacao: usuario.areaAtuacao,
+      conselho: usuario.conselho,
+      numeroRegistro: usuario.numeroRegistro ?? '',
+      ufRegistro: usuario.ufRegistro,
+      senhaProvisoria: '',
     });
+    // CPF não muda; senha não se define aqui; ninguém muda o próprio perfil (D-086)
+    this.form.controls.cpf.disable();
+    this.form.controls.senhaProvisoria.disable();
+    if (this.ehEuMesmo() || usuario.perfil === 'DEV') {
+      this.form.controls.perfil.disable();
+    } else {
+      this.form.controls.perfil.enable();
+    }
+    this.abrirDialogo();
   }
 
   protected salvar(): void {
     if (this.form.invalid || this.salvando()) {
       this.form.markAllAsTouched();
+      return;
+    }
+    const emEdicao = this.emEdicao();
+    if (emEdicao) {
+      this.salvarEdicao(emEdicao);
       return;
     }
     const valor = this.form.getRawValue();
@@ -182,6 +225,62 @@ export class UsuariosPage implements OnInit {
         this.erroFormulario.set(mensagemDeErro(e));
         this.salvando.set(false);
       },
+    });
+  }
+
+  private salvarEdicao(usuario: Usuario): void {
+    const valor = this.form.getRawValue();
+    const novoPerfil = valor.perfil ?? usuario.perfil;
+    const registro: RegistroProfissional =
+      novoPerfil === 'PROFISSIONAL'
+        ? {
+            areaAtuacao: valor.areaAtuacao,
+            conselho: valor.conselho,
+            numeroRegistro: valor.numeroRegistro || null,
+            ufRegistro: valor.ufRegistro,
+          }
+        : { areaAtuacao: null, conselho: null, numeroRegistro: null, ufRegistro: null };
+    const mudarPerfil: Observable<unknown> =
+      novoPerfil !== usuario.perfil
+        ? this.usuarioService.alterarPerfil(usuario.id, novoPerfil, registro)
+        : of(null);
+    this.salvando.set(true);
+    this.erroFormulario.set(null);
+    mudarPerfil
+      .pipe(
+        concatMap(() =>
+          this.usuarioService.atualizar(usuario.id, {
+            nomeCompleto: valor.nomeCompleto ?? '',
+            email: valor.email ?? '',
+            telefone: valor.telefone || null,
+            ...registro,
+          }),
+        ),
+      )
+      .subscribe({
+        next: (salvo) => {
+          this.salvando.set(false);
+          this.dialogoAberto?.close();
+          this.avisar(
+            novoPerfil !== usuario.perfil
+              ? `${salvo.nomeCompleto}: dados salvos. Perfil alterado — a pessoa precisa entrar de novo.`
+              : `${salvo.nomeCompleto}: dados salvos.`,
+          );
+          this.carregar();
+        },
+        error: (e: unknown) => {
+          this.erroFormulario.set(mensagemDeErro(e));
+          this.salvando.set(false);
+          this.carregar();
+        },
+      });
+  }
+
+  private abrirDialogo(): void {
+    this.erroFormulario.set(null);
+    this.dialogoAberto = this.dialogo.open(this.formularioTpl(), {
+      width: '34rem',
+      maxWidth: '95vw',
     });
   }
 

@@ -52,6 +52,16 @@ test('primeiro acesso do DEV: 2FA, troca de senha e criação de usuário', asyn
   await expect(page.getByRole('cell', { name: 'Recepcionista Fictícia' })).toBeVisible();
   await expect(page.getByRole('cell', { name: '***.016.613-**' })).toBeVisible();
 
+  // edição: muda o nome (CPF fica bloqueado)
+  await page
+    .getByRole('row', { name: /Recepcionista Fictícia/ })
+    .getByRole('button', { name: 'Editar' })
+    .click();
+  await expect(page.locator('#cpf-novo')).toBeDisabled();
+  await page.locator('#nome').fill('Recepcionista Editada');
+  await page.getByRole('button', { name: 'Salvar' }).click();
+  await expect(page.getByRole('cell', { name: 'Recepcionista Editada' })).toBeVisible();
+
   // sair: volta ao login e a sessão não é restaurada ao recarregar
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page).toHaveURL(/\/login/);

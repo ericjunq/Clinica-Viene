@@ -93,6 +93,7 @@ br.com.clinicaviene/
   `curl -s https://api.github.com/repos/ericjunq/Clinica-Viene/actions/runs?branch=main`), leia as falhas, corrija e reenvie.
 - CI vermelho na `main` é prioridade: corrija antes de seguir para a próxima implementação.
 - Nomes: testes unitários terminam em `Test` (Surefire, `./mvnw test`); de integração em `IT` (Failsafe, `./mvnw verify`).
+- E2E (Playwright): depois de abrir um diálogo, espere o foco inicial (`toBeFocused()` no primeiro campo) antes de preencher; e use `exact: true` em nomes curtos de botão/texto (`getByRole` compara sem diferenciar maiúsculas e por trecho: "Ciente" casa com "Paciente").
 
 Comandos:
 

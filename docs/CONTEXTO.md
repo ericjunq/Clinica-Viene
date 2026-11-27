@@ -27,7 +27,7 @@ O sistema será construído **em partes** (ver `docs/CHECKLIST.md`), não de uma
 | Perfil | Quem é | Pode |
 |---|---|---|
 | **DEV** | Desenvolvedor (o autor) | Administração técnica; criar o MASTER e usuários ADMIN/PROFISSIONAL; ativar/desativar ADMIN e PROFISSIONAL. **Independente do MASTER** (D-067): criado só pelo inicializador, o MASTER não vê/edita/desativa DEV, e o DEV não desativa MASTER. **Não acessa dados de pacientes em produção** (acesso técnico excepcional só com justificativa e auditoria). |
-| **MASTER** | Dono(a) da clínica | Tudo, exceto gerenciar DEV: criar usuários (ADMIN, PROFISSIONAL, MASTER), ativar/desativar usuários, configurações, relatórios, financeiro, aprovar descontos acima do limite, acesso de emergência a prontuários (com justificativa). |
+| **MASTER** | Dono(a) da clínica | Tudo, exceto gerenciar DEV: criar usuários (ADMIN, PROFISSIONAL, MASTER), ativar/desativar usuários, configurações, relatórios, financeiro, aprovar descontos acima do limite. Pode atuar na recepção. **Não lê conteúdo clínico** (anamnese, prontuário) — D-088. |
 | **ADMIN** | Recepção | Cadastro de pacientes, gerar link/QR de cadastro, agenda (marcar/remarcar/cancelar), check-in e aviso ao profissional, orçamentos, pagamentos, configuração de preços/taxas/repasses, transferir vínculo paciente↔profissional. **Não vê conteúdo clínico** (anamnese, procedimentos descritos, documentos clínicos) — só dados cadastrais, agenda e financeiro. |
 | **PROFISSIONAL** | Profissional de saúde (dentista, psicólogo, médico…), com área de atuação e registro no conselho | Ver e registrar no prontuário **apenas** de pacientes com vínculo ativo com ele; ver a própria agenda; receber aviso de chegada; ver os próprios repasses. |
 
@@ -71,15 +71,16 @@ As áreas acima são **assuntos de negócio**, não pacotes. O código é organi
 
 | Origem | Como acontece |
 |---|---|
-| `PACIENTE_LINK` | Paciente preenche no próprio celular via link (e-mail/WhatsApp) ou QR code |
-| `PACIENTE_QUIOSQUE` | Paciente (ou acompanhante) preenche e assina **ele mesmo** num tablet da recepção em modo quiosque |
-| `RECEPCAO` | Recepção preenche pelo paciente (ex.: sem celular, não alfabetizado). Ficha lida em voz alta, paciente assina; registra o usuário da recepção e, se houver, testemunha |
+| `PACIENTE_LINK` | Paciente preenche no **próprio celular** via link (e-mail/WhatsApp) ou QR code; identidade confirmada por código no e-mail |
+| `PACIENTE_QUIOSQUE` | Paciente (ou acompanhante, com registro) preenche e assina **ele mesmo** num **aparelho da clínica** (tablet ou PC da recepção virado para ele), aberto a partir da tela logada da recepção; a recepcionista confere o documento com foto e o sistema registra quem conferiu |
+
+A recepção **não preenche a anamnese** pelo paciente (D-088, D-091): faz só o pré-cadastro com os dados básicos.
 
 ### 4.2 Fluxo recomendado (link/QR)
 
 1. Recepção cria **pré-cadastro mínimo**: nome, CPF, telefone e/ou e-mail.
 2. Sistema gera `ConviteCadastro`: token aleatório (≥ 256 bits, guardado como hash), **uso único**, expira em 72h, vinculado àquele paciente. Exibe QR code e/ou envia por e-mail.
-3. Paciente abre o link → confirma identidade (data de nascimento ou últimos dígitos do CPF) → completa dados pessoais → responde anamnese → lê termos → assina (OTP + desenho opcional).
+3. Paciente abre o link → confirma identidade (código no e-mail; no quiosque, conferência do documento pela recepção) → **confere/corrige** os dados do pré-cadastro e completa o resto → responde anamnese → lê a política de privacidade e marca (ou não) os consentimentos opcionais → **assina uma única vez** o documento completo (desenho ou nome digitado — D-090).
 4. Registro selado: PDF gerado, hash SHA-256 guardado, origem `PACIENTE_LINK`.
 
 ### 4.3 Regras
@@ -91,16 +92,18 @@ As áreas acima são **assuntos de negócio**, não pacotes. O código é organi
   - Menor de 18 anos: CPF do paciente **opcional**; se ausente, o CPF do responsável legal é **obrigatório**.
   - Sem CPF: o sistema alerta possível duplicidade quando nome + data de nascimento + responsável coincidirem com outro cadastro.
   - CPF único por paciente (via `cpf_hash`, índice único parcial); validação de dígitos; normalizado (só dígitos) antes de cifrar e calcular o hash.
-- Alteração de dados cadastrais gera nova versão (histórico), com quem alterou e origem.
+- **Alterações (D-092)**: endereço, telefone e e-mail editáveis pela recepção com **versão auditada** (sem nova assinatura); **nome, CPF e data de nascimento** só mudam por nova ficha conferida e assinada pelo paciente; nova anamnese = nova ficha assinada.
 
 ---
 
 ## 5. Anamnese (ficha de triagem)
 
 - `ModeloAnamnese` versionado (perguntas, tipos, obrigatoriedade). Respostas sempre ligadas à versão do modelo usada.
-- Cada `FichaAnamnese` tem: origem (§4.1), data, hash do PDF, assinatura do paciente/responsável.
+- Cada `FichaAnamnese` tem: origem (§4.1), data, hash do PDF, assinatura do paciente/responsável. Respostas **cifradas** no banco.
+- **Quem preenche**: sempre o paciente (ou acompanhante com ele). **Quem lê**: só os profissionais de saúde vinculados ao paciente (Fase 4) — **ADMIN, MASTER e DEV nunca leem** (D-088). Toda leitura auditada.
+- Modelos **configuráveis** pelo MASTER, versionados por área de atuação, com exemplo completo de ficha odontológica como rascunho (D-089).
 - **Imutável.** Paciente atualiza → nova ficha; as anteriores permanecem.
-- **Validade**: nova ficha exigida a cada novo tratamento, antes de qualquer `CIRURGIA`/`IMPLANTE`, e quando a última tiver mais de N meses (configurável, padrão 12).
+- **Validade**: nova ficha exigida a cada novo tratamento, antes de qualquer `CIRURGIA`/`IMPLANTE`, e quando a última tiver mais de 12 meses (configurável — D-092).
 - O profissional registra que **revisou** a ficha com o paciente antes do procedimento (data/hora + usuário).
 - Alerta visual de alergias/condições relevantes no topo do prontuário.
 
@@ -113,7 +116,7 @@ As áreas acima são **assuntos de negócio**, não pacotes. O código é organi
 - Transferência pela recepção/master = encerrar vínculo + abrir novo, com motivo. Histórico preservado.
 - `Procedimento`: categoria, descrição clínica, dente/região, profissional executor, data, status de assinatura. **Imutável** após assinatura; correção via `AdendoProcedimento`.
 - Cada procedimento gera documento assinado pelo **profissional e pelo paciente** (§9).
-- **Acesso de emergência** (profissional sem vínculo, ex.: colega de férias): exige justificativa escrita, concede acesso temporário (ex.: 24h), registra em auditoria e notifica o MASTER.
+- **Acesso de emergência** (só **profissional** sem vínculo, ex.: colega de férias — nunca MASTER/ADMIN/DEV, D-088): exige justificativa escrita, concede acesso temporário (ex.: 24h), registra em auditoria e notifica o MASTER.
 - Toda leitura de prontuário é auditada (quem, quando, o quê).
 - Retenção: prontuário **não é apagado** a pedido do titular — guarda obrigatória por lei (Lei 13.787/2018 menciona 20 anos a partir do último registro; validar com advogado).
 
@@ -245,9 +248,9 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 - Tipos: ficha de cadastro + anamnese, termo de consentimento do procedimento, registro de procedimento, termos LGPD aceitos.
 - **Paciente**: assinatura eletrônica avançada (Lei 14.063/2020) — OTP por e-mail/SMS ou presencial no tablet, desenho da assinatura, IP, dispositivo, data/hora, hash, trilha de evidências.
 - **Profissional**: preferencialmente certificado digital ICP-Brasil (Resolução CFO 91/2009 – NGS2).
-- **Plataforma de assinatura**: preferência por integrar uma existente (Clicksign, ZapSign, D4Sign…) via interface `ProvedorAssinatura` — escolha A CONFIRMAR (D-016). Até lá, implementação interna de assinatura avançada atrás da mesma interface.
+- **Plataforma de assinatura: ZapSign** (D-090), via interface `ProvedorAssinatura`, com assinatura embutida no sistema (desenhada ou digitada). Até haver conta/sandbox, e nos testes, provedor interno atrás da mesma interface.
 - **Tablet na recepção** (se conseguido): assinatura presencial do próprio documento.
-- **Envio**: e-mail **não leva o PDF com dado de saúde em anexo aberto**. Envia notificação com link autenticado de uso limitado ou PDF protegido por senha. Destinatários: procedimento → profissional, clínica, paciente; ficha de cadastro → clínica, paciente.
+- **Envio**: e-mail **não leva o PDF com dado de saúde em anexo aberto**. Envia link de uso limitado; a página pede o **CPF completo** do paciente (ou do responsável) antes de liberar o download (D-094). Destinatários: procedimento → profissional, clínica, paciente; ficha de cadastro → clínica, paciente.
 
 ---
 
@@ -269,7 +272,7 @@ Cada `Pagamento` guarda: modo de cálculo, % e valor fixo da taxa, provedor, % p
 
 **Termos**
 - `TermoVersao` (tipo, versão, texto, vigência). `AceiteTermo` registra versão, data/hora, IP, dispositivo, origem.
-- Aceite da política de privacidade/termos de uso obrigatório para concluir cadastro; consentimentos opcionais em separado e desmarcados por padrão.
+- Aceite da política de privacidade/termos de uso obrigatório para concluir cadastro; consentimentos opcionais em separado e desmarcados por padrão (D-093): lembretes por WhatsApp/SMS, promoções e novidades, fotos de antes/depois em divulgação, pesquisas de satisfação — cada um revogável, e o sistema impede o uso sem consentimento ativo.
 
 **Direitos do titular**
 - Fluxo para pedidos (acesso, correção, portabilidade, informação). Pedido de exclusão responde com a retenção obrigatória do prontuário (art. 16, I).
@@ -316,9 +319,10 @@ EnvioCodigo(id, destinatarioHash, finalidade, codigoHash, tentativas, enviadoEm,
 Paciente(id, nomeCompleto, cpf? (cifrado), cpfHash? UK parcial, dataNascimento, telefone, email, endereco, origemCadastro,
          semCpfJustificativa?, semCpfAprovadoPor?, semCpfAprovadoEm?, createdAt, updatedAt)
 ResponsavelLegal(id, paciente_id, nome, cpf (cifrado, obrigatório), cpfHash, parentesco, telefone, email)
-ConviteCadastro(id, paciente_id, tokenHash, expiraEm, usadoEm, criadoPor)
-ModeloAnamnese(id, versao, perguntas jsonb, ativo)
-FichaAnamnese(id, paciente_id, modelo_id, respostas jsonb, origem, preenchidoPor, documento_id, createdAt)
+PacienteVersao(id, paciente_id, dados (cifrados), alteradoPor, origem, createdAt)   (histórico — D-092)
+ConviteCadastro(id, paciente_id, tokenHash, expiraEm, usadoEm, criadoPor, modo LINK|QUIOSQUE, documentoConferidoPor?)
+ModeloAnamnese(id, areaAtuacao, versao, perguntas jsonb, status RASCUNHO|PUBLICADO, publicadoEm)
+FichaAnamnese(id, paciente_id, modelo_id, respostas (cifradas), origem, ajudaAcompanhante, documento_id, createdAt)
 RevisaoAnamnese(id, ficha_id, profissional_id, revisadoEm)
 Prontuario(id, paciente_id UK, createdAt)
 VinculoProfissionalPaciente(id, paciente_id, profissional_id, inicio, fim, criadoPor, motivo)

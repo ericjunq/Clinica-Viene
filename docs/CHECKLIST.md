@@ -90,19 +90,43 @@ Plano aprovado em 2026-11-26 (D-048, D-066 a D-076).
 - [x] Cobertura mínima no build: 85% total, 80% em `service` e `auth` (D-087) — **CI verde**
 
 ## Fase 2 — Pacientes e anamnese
-- [ ] `TermoVersao` + `AceiteTermo` (movidos da Fase 1 — D-075)
-- [ ] Anamnese, prontuário e categorias por área de atuação (D-070 — A CONFIRMAR)
-- [ ] `Paciente`, `ResponsavelLegal`, histórico de versões
-- [ ] Criptografia do CPF: `AttributeConverter` AES-GCM com chave versionada + `cpf_hash` HMAC-SHA256 + índice único parcial (D-052) — se a Fase 1 vier antes, implementar já no `Usuario` (D-061)
-- [ ] Regras de CPF: opcional para menor (CPF do responsável obrigatório); adulto sem CPF só com aprovação do MASTER + auditoria; alerta de duplicidade (D-053)
-- [ ] Pré-cadastro pela recepção
-- [ ] `ConviteCadastro` (token hash, uso único, 72h) + QR code + e-mail
-- [ ] Página pública de cadastro via link (confirmação de identidade)
-- [ ] Modo quiosque (tablet)
-- [ ] Cadastro pela recepção com origem `RECEPCAO`
-- [ ] `ModeloAnamnese` versionado + `FichaAnamnese` + validade
-- [ ] Geração de PDF + hash + storage privado (AWS SDK S3 com endpoint configurável; testes com SeaweedFS em `GenericContainer` — D-056)
-- [ ] Testes de fluxo completo (E2E)
+Plano aprovado em 2026-11-27 (D-088 a D-095).
+
+**2A. Cadastro do paciente**
+- [ ] `IdUtils.novoId()` (UUID v7) como gerador padrão de ids (D-095)
+- [ ] `Paciente` (CPF cifrado + `cpf_hash` único parcial), `ResponsavelLegal` (CPF cifrado obrigatório), `PacienteVersao` (histórico cifrado)
+- [ ] Regras de CPF (D-053): menor sem CPF → responsável com CPF; adulto sem CPF só com aprovação do MASTER + justificativa + auditoria; alerta de duplicidade
+- [ ] Pré-cadastro pela recepção; busca por CPF/nome/nascimento; edição de endereço/telefone/e-mail com versão auditada; nome/CPF/nascimento não editáveis (D-092)
+- [ ] Leitura de ficha cadastral auditada; matriz de autorização
+
+**2B. Termos LGPD**
+- [ ] `TermoVersao` + `AceiteTermo` (D-075) + consentimentos opcionais revogáveis (D-093) + tela do MASTER com texto-exemplo (rascunho)
+
+**2C. Modelo de anamnese**
+- [ ] `ModeloAnamnese` versionado por área (tipos de pergunta, perguntas de alerta clínico), tela do MASTER, exemplo odontológico completo como rascunho (D-089)
+
+**2D. Convite**
+- [ ] `ConviteCadastro` (token hash, uso único, 72 h) + QR code + e-mail com regras de reenvio (D-073)
+
+**2E. Fluxo público do paciente**
+- [ ] Link (código no e-mail) e quiosque aberto pela recepção com conferência de documento (D-091); conferir dados, completar, anamnese, termos, consentimentos
+
+**2F. Assinatura e documento**
+- [ ] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências); adaptador ZapSign quando houver conta (D-090)
+- [ ] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado (SeaweedFS em dev/teste — D-056)
+- [ ] `FichaAnamnese` imutável (banco rejeita UPDATE/DELETE), respostas cifradas, leitura só de profissional vinculado (Fase 4) (D-088)
+- [ ] Entrega do PDF por link + CPF (D-094)
+
+**2G. Telas internas**
+- [ ] Pacientes (lista, busca, ficha cadastral com histórico, convite/QR, abrir quiosque), configurações do MASTER (modelos, termos)
+
+**Testes da fase**
+- [ ] Regra ArchUnit: só o service da anamnese usa o repository da anamnese (D-078)
+- [ ] E2E: pré-cadastro → link → anamnese → termos → assinatura → ficha concluída
+
+**Pendências que dependem do autor**
+- [ ] Conta ZapSign (sandbox) para ligar o adaptador (D-090)
+- [ ] Revisão do exemplo de anamnese (dentista) e dos termos (advogado) antes de publicar (D-089)
 
 ## Fase 3 — Agenda
 - [ ] `Consultorio`

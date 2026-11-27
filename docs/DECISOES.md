@@ -29,7 +29,7 @@ Motivo: valor probatório; prontuário é documento legal.
 **D-006 — Auditoria de leitura e alteração de dados de saúde** · 2026-11-26
 Motivo: responsabilização e prova em caso de incidente ou disputa judicial.
 
-**D-007 — Acesso de emergência ("break-glass") com justificativa, prazo e aviso ao MASTER** · 2026-11-26
+**D-007 — Acesso de emergência ("break-glass") com justificativa, prazo e aviso ao MASTER** · 2026-11-26 · **Ajustada pela D-088**: só profissionais de saúde usam o acesso de emergência (MASTER/ADMIN/DEV nunca leem conteúdo clínico)
 Motivo: atender paciente na ausência do profissional vinculado sem abrir mão do controle.
 
 **D-008 — Cadastro com origem registrada: PACIENTE_LINK, PACIENTE_QUIOSQUE, RECEPCAO** · 2026-11-26
@@ -302,6 +302,38 @@ Regras propostas pelo Claude com base nas já existentes; o autor pode ajustar.
 - Rate limit: baldes ociosos (já recarregados) removidos a cada 15 min (`@Scheduled`); o Bucket4j usa o `Clock` da aplicação (testável).
 - Imagem do backend: estágio de build com a imagem oficial `maven:3.10.2-eclipse-temurin-25-alpine` (antes o `mvnw` baixava o Maven a cada build e falhou uma vez com 429 do repositório central).
 
+**D-088 — Anamnese: preenchida só pelo paciente e lida só pelos profissionais do atendimento** · 2026-11-27
+- O paciente preenche a anamnese **diretamente no sistema** (no próprio celular ou num aparelho da clínica — D-091), cifrada no banco (D-052/§11), com controle de acesso por função.
+- **Leitura exclusiva dos profissionais de saúde envolvidos no atendimento** (vínculo profissional↔paciente — Fase 4). **ADMIN, MASTER e DEV nunca leem** o conteúdo da anamnese — nem por acesso de emergência, que fica restrito a profissionais (ajusta a D-007). A dona da clínica não atende como profissional (confirmado pelo autor).
+- **A recepção nunca preenche a anamnese** pelo paciente. Se o paciente precisar de ajuda (não lê, sem celular), um acompanhante preenche com ele, no aparelho dele ou da clínica, e isso é registrado.
+- Toda leitura e gravação registrada no `audit_log` (imutável). Até a Fase 4 (vínculo), ninguém dentro da clínica lê a anamnese pelo sistema; o paciente recebe o PDF assinado.
+
+**D-089 — Modelos de anamnese e termos configuráveis, com exemplo completo** · 2026-11-27 · Resolve a parte "anamnese e termos" da D-048
+O MASTER cria e publica versões dos modelos de anamnese (por área de atuação) e dos termos pela tela de configuração; versão publicada não muda. O sistema traz um **exemplo completo** de ficha odontológica e de termos, marcado como rascunho para revisão da dentista e do advogado antes de publicar. Nenhum conteúdo real é carregado por migration.
+
+**D-090 — Plataforma de assinatura: ZapSign** · 2026-11-27 · Resolve a D-016
+Escolhida pelo custo (o autor conhece a D4Sign; ZapSign é equivalente e mais barata). Requisito do autor: assinatura **no próprio documento**, desenhada (tablet, celular, mouse) ou **digitada**, dentro do sistema. Implementação: interface `ProvedorAssinatura` com o adaptador **ZapSign** (assinatura embutida no sistema) quando houver conta/sandbox; até lá, e nos testes, um **provedor interno** (desenho com `signature_pad` ou nome digitado + código de confirmação + trilha de evidências: IP, aparelho, data/hora, hash do PDF). Na Fase 2 o paciente assina a **ficha** (cadastro + anamnese + termos); assinatura de procedimento (paciente + profissional) é da Fase 6.
+
+**D-091 — Fluxo de cadastro: pré-cadastro na recepção + paciente completa e assina uma vez** · 2026-11-27
+- A recepção faz o **pré-cadastro** (nome, CPF, nascimento, e-mail, telefone) e gera o convite.
+- O paciente abre o convite com esses dados já preenchidos, **confere/corrige**, completa o resto (endereço, responsável se menor), responde a anamnese, aceita os termos e faz **uma única assinatura** do documento completo — atestando inclusive os dados digitados pela recepção.
+- **Onde preencheu** muda a prova de identidade e fica registrado: no **próprio celular** (link/QR) → código no e-mail do paciente, origem `PACIENTE_LINK`; num **aparelho da clínica** (tablet ou PC da recepção virado para o paciente), aberto só a partir da tela logada da recepção ("abrir para o paciente neste aparelho") → a recepcionista confere o documento com foto e registra quem conferiu, origem `PACIENTE_QUIOSQUE`. Substitui o preenchimento pela recepção (origem `RECEPCAO` deixa de existir para a anamnese).
+
+**D-092 — Alterações cadastrais** · 2026-11-27
+- **Nova anamnese** → sempre nova ficha assinada (as anteriores permanecem).
+- **Endereço, telefone e e-mail** podem ser alterados pela recepção, sem nova assinatura, gerando **versão auditada** (quem, quando, o que mudou); a próxima ficha assinada já sai com os dados novos.
+- **Nome, CPF e data de nascimento** não são editáveis: correção só por nova ficha conferida e assinada pelo paciente.
+- Validade da anamnese: 12 meses, configurável (resolve a D-039).
+
+**D-093 — Consentimentos opcionais** · 2026-11-27
+Separados da ciência da política de privacidade (obrigatória, base legal de saúde/obrigação legal — o paciente não "desliga" o prontuário). Opcionais, **desmarcados por padrão** e revogáveis a qualquer momento: lembretes de consulta por WhatsApp/SMS; promoções e novidades (campanhas só para quem marcou); uso de fotos de antes/depois em divulgação; pesquisas de satisfação. Cada marcação/revogação registrada (versão do texto, data/hora, IP, aparelho); o sistema impede usar o dado para um fim sem consentimento ativo. Não consentir não impede o atendimento.
+
+**D-094 — Entrega do PDF ao paciente: link + CPF** · 2026-11-27
+E-mail só com o link (uso limitado, expira em alguns dias); a página pede o **CPF completo** do paciente (para menor sem CPF, o do responsável) antes de liberar o download. O "segredo" não vai no mesmo e-mail que o link. PDF nunca anexado (D-026).
+
+**D-095 — Ids UUID v7** · 2026-11-27
+Ids continuam UUID (não enumeráveis em URLs, gerados no construtor, sem colisão entre sistemas), agora na versão **7** (ordenados pelo tempo: inserção eficiente no índice, como uma sequence). Gerador único `IdUtils.novoId()`. Tabelas existentes não mudam (a coluna continua `UUID`). Exceção mantida: `audit_log` com identity (interno, só inclusão).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 
@@ -358,14 +390,14 @@ Seed atual usa tabela pública da InfinitePay (até R$ 20 mil/mês, Visa/Master,
 **D-036 — Tarifa do boleto e juros do carnê próprio** · A CONFIRMAR
 Seed: boleto 5% (valor legado), juros 0% a.m.
 
-**D-016 — Plataforma de assinatura (Clicksign, ZapSign, D4Sign, outra)** · A CONFIRMAR
+**D-016 — Plataforma de assinatura (Clicksign, ZapSign, D4Sign, outra)** · ~~A CONFIRMAR~~ → decidida em 2026-11-27: **ZapSign** (D-090)
 Critérios: custo por documento, API, assinatura presencial em tablet, pacote de evidências, aceitação de ICP-Brasil.
 
 **D-037 — Aquisição de tablet para a recepção** · A CONFIRMAR
 
 **D-038 — Limite de desconto sem aprovação do MASTER** · A CONFIRMAR (sugestão: 10%)
 
-**D-039 — Prazo de validade da anamnese** · A CONFIRMAR (sugestão: 12 meses)
+**D-039 — Prazo de validade da anamnese** · ~~A CONFIRMAR~~ → 12 meses, configurável (D-092)
 
 **D-040 — Prazo de retenção do prontuário e política de retenção dos demais dados** · A CONFIRMAR com advogado
 

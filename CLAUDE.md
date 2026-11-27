@@ -70,6 +70,7 @@ br.com.clinicaviene/
 - **Nomes claros**, com o papel no sufixo em inglês e o domínio em português: `UsuarioService`, `LoginService`, `UsuarioController`, `ProntuarioRepository`, `NovoUsuarioRequest`, `UsuarioResponse`, `SessaoInvalidaException`.
 - Cada arquivo vai na pasta da sua camada. Testes ficam no mesmo pacote da classe testada.
 - Dados de saúde só são lidos/alterados pelo service do assunto, que registra a auditoria (controllers e outros services não acessam esses repositories diretamente).
+- Método de service que registra auditoria (inclusive leitura auditada) usa `@Transactional` comum, **nunca** `readOnly = true`: a gravação do `audit_log` falha numa transação somente leitura.
 - Regras de camadas verificadas por teste ArchUnit (`CamadasArchTest`, D-105): só o `FichaAnamneseService` usa o `FichaAnamneseRepository`; controllers não dependem de repositories. Ao criar um novo repository de dado de saúde (ex.: prontuário), inclua a regra equivalente nesse teste.
 
 ## Lombok (D-051)

@@ -162,16 +162,16 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] `Consultorio` e `CategoriaProcedimento` (por área, código estável, exemplo de odontologia) — MASTER (D-106) — V17 — `AgendaConfiguracaoControllerIT`, `CategoriaProcedimentoServiceTest` — **CI verde**
 - [x] `DisponibilidadeProfissional` (fixos semanais) + `ExcecaoAgenda` (horário extra / ausência) + cálculo de disponibilidade, grade de 15 min (D-106) — `DisponibilidadeCalculoTest`, `AgendaConfiguracaoControllerIT` — **CI verde**
 - [ ] `BloqueioAgenda` (bloqueio de consultório sem paciente)
-- [x] `Agendamento` com itens (categoria + descrição), status completo, exclusão de conflitos no banco e recusa fora da disponibilidade (D-106); aviso de ficha pendente — V18 — `AgendamentoControllerIT`, `StatusAgendamentoTest` — implementado — testes pendentes de execução
-- [x] Marcar / remarcar / cancelar (com motivo), alterar itens, confirmar/check-in/atendimento/falta (backend) — implementado — testes pendentes de execução
-- [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — implementado — testes pendentes de execução
+- [x] `Agendamento` com itens (categoria + descrição), status completo, exclusão de conflitos no banco e recusa fora da disponibilidade (D-106); aviso de ficha pendente — V18 — `AgendamentoControllerIT`, `StatusAgendamentoTest` — **CI verde**
+- [x] Marcar / remarcar / cancelar (com motivo), alterar itens, confirmar/check-in/atendimento/falta (backend) — **CI verde**
+- [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — **CI verde**
 - [ ] Check-in + notificação WebSocket ao profissional
 - [ ] Calendário próprio (D-085): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, bloqueios, indisponibilidade esmaecida, cor por status); clicar em horário livre → novo agendamento
 - [ ] Calendário próprio: semana de um profissional
 - [ ] Calendário próprio: lista do dia para o check-in
 - [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo)
 - [ ] Testes do calendário: cálculo de posições e sobreposição (unitários) + agendar/remarcar no navegador (E2E)
-- [x] Testes de concorrência de agendamento (4 recepcionistas no mesmo horário → 1 grava) — `AgendamentoControllerIT` — implementado — testes pendentes de execução
+- [x] Testes de concorrência de agendamento (4 recepcionistas no mesmo horário → 1 grava) — `AgendamentoControllerIT` — **CI verde**
 
 ## Fase 4 — Prontuário
 - [ ] `Prontuario`, `VinculoProfissionalPaciente`, transferência

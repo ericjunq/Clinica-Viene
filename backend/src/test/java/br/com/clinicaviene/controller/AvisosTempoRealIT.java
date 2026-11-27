@@ -41,6 +41,7 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
@@ -134,7 +135,8 @@ class AvisosTempoRealIT {
             conectar.add("Authorization", "Bearer " + token);
         }
         return cliente.connectAsync(
-                        "ws://localhost:" + porta + "/api/v1/ws", null, conectar, new StompSessionHandlerAdapter() {})
+                        "ws://localhost:" + porta + "/api/v1/ws", new WebSocketHttpHeaders(), conectar,
+                        new StompSessionHandlerAdapter() {})
                 .get(5, TimeUnit.SECONDS);
     }
 

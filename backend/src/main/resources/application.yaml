@@ -89,6 +89,11 @@ clinicaviene:
     url-publica: ${APP_URL_PUBLICA:http://localhost:4200}
     validade-link: 72h
     validade-quiosque: 2h
+  cadastro-publico:
+    # Tempo para o paciente preencher depois de confirmar a identidade (D-100).
+    validade-sessao: 2h
+    # Modelo de anamnese do cadastro (enquanto o convite não escolhe a área).
+    area-anamnese: ODONTOLOGIA
   dev-inicial:
     # D-048 — só usados com o banco sem usuários; depois remova do ambiente.
     cpf: ${DEV_INICIAL_CPF:}

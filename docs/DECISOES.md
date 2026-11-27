@@ -355,6 +355,15 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 **D-099 — README profissional mantido junto com o código** · 2026-11-27
 `README.md` na raiz no padrão de projetos profissionais (badges, sumário, sobre, funcionalidades com situação, tecnologias, arquitetura, pré-requisitos, clonar, `.env` com geração das chaves, rodar em containers ou em modo dev, primeiro acesso, portas, testes, estrutura, segurança/LGPD, documentação, contribuição, roadmap, licença). O `frontend/README.md` gerado pelo Angular CLI foi trocado por um específico. O README é atualizado a cada implementação que mude como rodar/testar, variáveis, portas ou a situação dos módulos (regra no `CLAUDE.md`). Licença declarada como **proprietária, todos os direitos reservados** (o repositório não concede licença de uso).
 
+**D-100 — Fluxo público do cadastro: identidade, sessão de preenchimento e revisão** · 2026-11-27 · Detalha a D-091
+- **Identidade**: no modo LINK o paciente só entra com o **código de 6 dígitos** enviado ao e-mail do convite (do paciente ou, se menor sem e-mail, do responsável) — 10 min, 5 tentativas, esperas da D-073. Por isso **convite LINK exige e-mail cadastrado**; sem e-mail, só quiosque. No QUIOSQUE a sessão abre direto (o documento foi conferido ao gerar o convite).
+- **Sessão de preenchimento** (`sessao_cadastro`): token próprio, válido por **2 h** (configurável), ligado ao convite; perde a validade se o convite for usado ou cancelado. Só hashes do código e do token no banco.
+- **Tokens fora da URL da API**: convite no cabeçalho `X-Convite-Cadastro`, sessão em `X-Sessao-Cadastro` (o link para o paciente continua `/cadastro/{token}` no frontend). Rotas públicas com limite por IP, separado do login.
+- **Formulário**: pré-cadastro para conferir, modelo de anamnese vigente da área configurada (Q-013) e termos vigentes. Leitura auditada sem usuário ("pelo próprio paciente").
+- **Revisão**: confere a ficha inteira — dados (endereço completo exigido; CPF válido e não usado por outro paciente; adulto sem CPF só se já aprovado pelo MASTER; menor com responsável), respostas contra o modelo vigente e **uma decisão para cada termo vigente** com a política aceita. Se a clínica publicar nova versão durante o preenchimento, pede para recarregar.
+- **Nada da ficha é gravado antes da assinatura** (2F): as respostas da anamnese só chegam ao banco junto com a ficha assinada e cifrada — menos dado de saúde guardado sem necessidade.
+- Acompanhante (quem ajudou a preencher) é campo opcional da ficha (D-088).
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

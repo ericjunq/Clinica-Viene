@@ -1,6 +1,7 @@
 package br.com.clinicaviene.service;
 
 import br.com.clinicaviene.auth.PacientePermissoes;
+import br.com.clinicaviene.dto.DadosCadastroDto;
 import br.com.clinicaviene.dto.EnderecoDto;
 import br.com.clinicaviene.dto.NovoPacienteRequest;
 import br.com.clinicaviene.dto.PacienteRetratoDto;
@@ -248,6 +249,88 @@ public class PacienteService {
         }
         auditoriaService.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.PACIENTE_LIDO, ENTIDADE, id));
         return pacienteVersaoRepository.findByPacienteIdOrderByCriadoEmDesc(id);
+    }
+
+    /**
+     * Pré-cadastro para o próprio paciente conferir no fluxo público (D-091). Quem chama já validou a sessão de
+     * preenchimento; a leitura é auditada sem usuário (foi o paciente).
+     */
+    @Transactional
+    public DadosCadastroDto dadosParaConferencia(UUID id) {
+        Paciente p = pacienteRepository.findById(id).orElseThrow(PacienteNaoEncontradoException::new);
+        ResponsavelLegalDto responsavel = responsavelLegalRepository
+                .findByPacienteId(id)
+                .map(r -> new ResponsavelLegalDto(r.getNomeCompleto(), r.getCpf(), r.getParentesco(), r.getTelefone(), r.getEmail()))
+                .orElse(null);
+        auditoriaService.registrar(new RegistroAuditoria(
+                null, AcaoAuditoria.PACIENTE_LIDO, ENTIDADE, id.toString(), "conferência pelo próprio paciente (cadastro)"));
+        return new DadosCadastroDto(
+                p.getNomeCompleto(), p.getCpf(), p.getDataNascimento(), p.getEmail(), p.getTelefone(), p.endereco(),
+                responsavel);
+    }
+
+    /**
+     * Confere os dados que o paciente corrigiu/completou (D-091, D-053) e devolve-os normalizados. Não grava: a
+     * gravação acontece com a assinatura da ficha (2F). Diferente do pré-cadastro, o endereço completo é exigido.
+     */
+    @Transactional(readOnly = true)
+    public DadosCadastroDto validarFicha(UUID id, DadosCadastroDto dados) {
+        Paciente paciente = pacienteRepository.findById(id).orElseThrow(PacienteNaoEncontradoException::new);
+        LocalDate hoje = hoje();
+        String nome = semEspacosExtras(dados.nomeCompleto());
+        if (nome == null || nome.isBlank()) {
+            throw new RegraNegocioException("Informe o nome completo.");
+        }
+        validarNascimento(dados.dataNascimento(), hoje);
+        String email = normalizarEmail(dados.email());
+        String telefone = vazioComoNulo(dados.telefone());
+        if (email == null && telefone == null) {
+            throw new RegraNegocioException("Informe ao menos um contato: e-mail ou telefone.");
+        }
+        EnderecoDto endereco = normalizarEndereco(dados.endereco());
+        if (endereco.cep() == null || endereco.logradouro() == null || endereco.numero() == null
+                || endereco.bairro() == null || endereco.cidade() == null || endereco.uf() == null) {
+            throw new RegraNegocioException("Preencha o endereço completo (CEP, rua, número, bairro, cidade e UF).");
+        }
+        boolean menor = dados.dataNascimento().plusYears(Paciente.MAIORIDADE).isAfter(hoje);
+
+        String cpf = vazioComoNulo(CpfUtils.normalizar(dados.cpf()));
+        if (cpf != null) {
+            if (!CpfUtils.valido(cpf)) {
+                throw new RegraNegocioException("CPF inválido.");
+            }
+            boolean deOutro = pacienteRepository
+                    .findByCpfHash(cpfHasher.calcular(cpf))
+                    .filter(outro -> !outro.getId().equals(id))
+                    .isPresent();
+            if (deOutro) {
+                throw new RegraNegocioException("Este CPF já está em outro cadastro. Fale com a recepção.");
+            }
+        } else if (!menor && paciente.getSemCpfAprovadoEm() == null) {
+            throw new RegraNegocioException("Informe o CPF.");
+        }
+
+        ResponsavelLegalDto responsavel = dados.responsavel();
+        if (menor && responsavel == null) {
+            throw new RegraNegocioException("Paciente menor de idade precisa de responsável legal (LGPD art. 14).");
+        }
+        if (responsavel != null) {
+            String responsavelCpf = CpfUtils.normalizar(responsavel.cpf());
+            if (!CpfUtils.valido(responsavelCpf)) {
+                throw new RegraNegocioException("CPF do responsável inválido.");
+            }
+            if (responsavelCpf.equals(cpf)) {
+                throw new RegraNegocioException("O CPF do responsável não pode ser o mesmo do paciente.");
+            }
+            String nomeResponsavel = semEspacosExtras(responsavel.nomeCompleto());
+            if (nomeResponsavel == null || nomeResponsavel.isBlank()) {
+                throw new RegraNegocioException("Informe o nome do responsável.");
+            }
+            responsavel = new ResponsavelLegalDto(
+                    nomeResponsavel, responsavelCpf, responsavel.parentesco(), vazioComoNulo(responsavel.telefone()),
+                    normalizarEmail(responsavel.email()));
+        }
+        return new DadosCadastroDto(nome, cpf, dados.dataNascimento(), email, telefone, endereco, responsavel);
     }
 
     public LocalDate hoje() {

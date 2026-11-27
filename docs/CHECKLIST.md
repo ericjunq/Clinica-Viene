@@ -111,7 +111,8 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] `ConviteCadastro` (token hash, uso único, um ativo por paciente; LINK 72 h com QR/e-mail e reenvio D-073; QUIOSQUE 2 h com documento conferido) (D-098) — backend (V14) — `ConviteServiceIT`, `ConviteControllerIT` — **CI verde**; telas na 2G
 
 **2E. Fluxo público do paciente**
-- [ ] Link (código no e-mail) e quiosque aberto pela recepção com conferência de documento (D-091); conferir dados, completar, anamnese, termos, consentimentos
+- [~] Backend: abrir convite, código no e-mail (LINK) ou sessão direta (QUIOSQUE), sessão de preenchimento de 2 h, formulário (pré-cadastro + anamnese vigente + termos vigentes), revisão completa da ficha (D-091, D-100) — V15 — implementado — testes pendentes de execução (`CadastroPublicoServiceIT`, `CadastroPublicoControllerIT`)
+- [ ] Frontend: telas públicas `/cadastro/:token` (código, conferir dados, anamnese, termos, revisão) + E2E
 
 **2F. Assinatura e documento**
 - [ ] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências); adaptador ZapSign quando houver conta (D-090)

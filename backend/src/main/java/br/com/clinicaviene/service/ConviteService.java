@@ -65,7 +65,8 @@ public class ConviteService {
         if (modo == ModoConvite.QUIOSQUE && enviarEmail) {
             throw new RegraNegocioException("O convite de quiosque é aberto neste aparelho; não é enviado por e-mail.");
         }
-        String destinatario = enviarEmail ? destinatario(paciente) : null;
+        // LINK sempre precisa de e-mail: é por ele que o paciente confirma a identidade ao abrir (D-100).
+        String destinatario = modo == ModoConvite.LINK ? destinatario(paciente) : null;
         Instant podeReenviarEm = null;
         if (enviarEmail) {
             List<ConviteCadastro> recentes = conviteCadastroRepository
@@ -101,7 +102,7 @@ public class ConviteService {
         }
         return new ConviteCriadoResponse(
                 convite.getId(), modo, link, QrCodeUtils.pngDataUri(link), expiraEm,
-                destinatario == null ? null : mascararEmail(destinatario), podeReenviarEm);
+                enviarEmail ? mascararEmail(destinatario) : null, podeReenviarEm);
     }
 
     @Transactional(readOnly = true)
@@ -144,13 +145,14 @@ public class ConviteService {
     }
 
     /** E-mail do paciente; se menor sem e-mail próprio, o do responsável (que é quem preenche e assina). */
-    private String destinatario(Paciente paciente) {
+    public String destinatario(Paciente paciente) {
         String email = paciente.getEmail();
         if (email == null) {
             email = responsavelLegalRepository.findByPacienteId(paciente.getId()).map(ResponsavelLegal::getEmail).orElse(null);
         }
         if (email == null) {
-            throw new RegraNegocioException("Paciente sem e-mail cadastrado: mostre o QR code ou use o quiosque.");
+            throw new RegraNegocioException(
+                    "Paciente sem e-mail cadastrado: o link exige confirmação por código no e-mail. Use o quiosque.");
         }
         return email;
     }
@@ -165,7 +167,7 @@ public class ConviteService {
                 + "Se você não esperava esta mensagem, ignore-a e avise a clínica.\n";
     }
 
-    static String mascararEmail(String email) {
+    public static String mascararEmail(String email) {
         int arroba = email.indexOf('@');
         if (arroba <= 1) {
             return "***" + email.substring(Math.max(arroba, 0));

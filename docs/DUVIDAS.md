@@ -15,3 +15,5 @@ Respondidas em 2026-11-26: Q-001 → D-056/D-060 · Q-002 → D-061 · Q-003 →
 **Q-012 — Arquivo oficial do logo** · 2026-11-26
 O monograma "V" do sistema é um desenho em SVG que reproduz o logo das imagens. Se houver o arquivo original (de preferência SVG, ou PNG com fundo transparente), ele substitui o desenho.
 
+**Q-013 — Área da anamnese escolhida no convite** · 2026-11-27
+Hoje o cadastro usa o modelo de anamnese vigente de uma área configurada (`clinicaviene.cadastro-publico.area-anamnese`, padrão ODONTOLOGIA). Quando a clínica tiver outras áreas (psicologia etc.), a recepção precisará escolher a área ao gerar o convite. Isso exige uma coluna nova em `convite_cadastro` (**`ALTER TABLE`**, que pela D-047 só com sua aprovação) — ou uma tabela nova ligada ao convite. Aprova o `ALTER` quando chegar a hora, ou prefere a tabela nova?

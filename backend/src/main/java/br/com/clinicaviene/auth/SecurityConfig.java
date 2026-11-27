@@ -56,6 +56,9 @@ public class SecurityConfig {
                                     "/api/v1/auth/renovar",
                                     "/api/v1/auth/logout")
                             .permitAll();
+                    // Cadastro do paciente pelo convite (D-100): a autorização é o token do convite + sessão de
+                    // preenchimento, conferidos no CadastroPublicoService.
+                    rotas.requestMatchers("/api/v1/publico/**").permitAll();
                     if (openApiHabilitado) {
                         rotas.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                                 .permitAll();

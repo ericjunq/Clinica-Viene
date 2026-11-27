@@ -34,6 +34,7 @@ public class LimiteTentativasService {
     private final Clock clock;
     private final Map<String, Bucket> porIp = new ConcurrentHashMap<>();
     private final Map<String, Bucket> falhasPorCpf = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> cadastroPublicoPorIp = new ConcurrentHashMap<>();
 
     /** Consome uma tentativa do IP e confere se o CPF ainda pode tentar. */
     public void verificarLogin(String ip, String cpfHash) {
@@ -49,6 +50,19 @@ public class LimiteTentativasService {
         }
     }
 
+    /**
+     * Rotas públicas do cadastro do paciente (abrir link, pedir e conferir código): toda chamada conta, por IP.
+     * Mesmo limite do login, em baldes separados.
+     */
+    public void verificarCadastroPublico(String ip) {
+        Bucket doIp = cadastroPublicoPorIp.computeIfAbsent(
+                ip == null ? "desconhecido" : ip, k -> novo(propriedades.limiteLoginPorIp()));
+        ConsumptionProbe consumo = doIp.tryConsumeAndReturnRemaining(1);
+        if (!consumo.isConsumed()) {
+            throw new MuitasTentativasException(TimeUnit.NANOSECONDS.toSeconds(consumo.getNanosToWaitForRefill()));
+        }
+    }
+
     public void registrarFalha(String cpfHash) {
         if (cpfHash != null) {
             falhasPorCpf.computeIfAbsent(cpfHash, k -> novo(propriedades.limiteFalhasPorCpf())).tryConsume(1);
@@ -60,11 +74,12 @@ public class LimiteTentativasService {
     public void limparOciosos() {
         porIp.values().removeIf(balde -> balde.getAvailableTokens() >= propriedades.limiteLoginPorIp());
         falhasPorCpf.values().removeIf(balde -> balde.getAvailableTokens() >= propriedades.limiteFalhasPorCpf());
+        cadastroPublicoPorIp.values().removeIf(balde -> balde.getAvailableTokens() >= propriedades.limiteLoginPorIp());
     }
 
     /** Quantos IPs/CPFs estão sendo acompanhados agora (para testes e monitoramento). */
     int emAcompanhamento() {
-        return porIp.size() + falhasPorCpf.size();
+        return porIp.size() + falhasPorCpf.size() + cadastroPublicoPorIp.size();
     }
 
     private Bucket novo(int limite) {

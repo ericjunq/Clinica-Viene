@@ -162,7 +162,7 @@ class ConviteServiceIT {
     }
 
     @Test
-    void menorRecebeNoEmailDoResponsavelESemEmailNaoEnvia() {
+    void menorRecebeNoEmailDoResponsavelESemEmailSoQuiosque() {
         UsuarioAutenticado recepcao = usuario(Perfil.ADMIN);
         String emailResponsavel = "mae." + UUID.randomUUID() + "@exemplo.com";
         UUID crianca = pacienteService
@@ -185,9 +185,12 @@ class ConviteServiceIT {
                                 pacienteService.hoje().minusYears(40), null, "77999992222", null, null, null, false),
                         recepcao)
                 .getId();
+        // sem e-mail não há como confirmar a identidade pelo link: só quiosque (D-100)
         assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, true, false, recepcao))
                 .isInstanceOf(RegraNegocioException.class);
-        assertThatCode(() -> conviteService.criar(semEmail, ModoConvite.LINK, false, false, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, false, false, recepcao))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatCode(() -> conviteService.criar(semEmail, ModoConvite.QUIOSQUE, false, true, recepcao))
                 .doesNotThrowAnyException();
     }
 

@@ -59,7 +59,7 @@ public class DocumentoService {
     }
 
     /** Pacientes (dentre os informados) que já têm ficha de cadastro assinada — para o aviso de ficha pendente. */
-    @Transactional // sem readOnly: também é chamado no meio de gravações
+    @Transactional(readOnly = true)
     public Set<UUID> comFichaAssinada(Collection<UUID> pacienteIds) {
         if (pacienteIds.isEmpty()) {
             return Set.of();

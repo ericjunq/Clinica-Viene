@@ -100,7 +100,7 @@ public class CategoriaProcedimentoService {
     }
 
     /** Categoria ativa (para um novo agendamento). */
-    @Transactional // sem readOnly: também é chamado no meio de gravações
+    @Transactional(readOnly = true)
     public CategoriaProcedimento ativa(UUID id) {
         return categoriaRepository.findById(id)
                 .filter(CategoriaProcedimento::isAtiva)

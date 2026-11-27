@@ -54,7 +54,10 @@ test('primeiro acesso do DEV: 2FA, troca de senha e criação de usuário', asyn
   await expect(page.getByRole('cell', { name: '***.016.613-**' })).toBeVisible();
 
   // dona da clínica (MASTER), usada no E2E do cadastro de paciente
+  // espera o diálogo anterior fechar: senão o nome é digitado no formulário que está saindo
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Novo usuário' }).click();
+  await expect(page.getByRole('heading', { name: 'Novo usuário' })).toBeVisible();
   await page.locator('#nome').fill('Dona Fictícia');
   await page.locator('#cpf-novo').pressSequentially(CPF_MASTER);
   await page.locator('#email').fill('master.e2e@exemplo.com');

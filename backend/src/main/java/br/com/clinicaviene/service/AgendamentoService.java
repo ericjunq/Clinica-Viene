@@ -84,8 +84,11 @@ public class AgendamentoService {
         return respostas(List.of(novo)).getFirst();
     }
 
-    /** Agenda entre os dias {@code de} e {@code ate} (inclusive, hora local). O profissional só vê a própria. */
-    @Transactional(readOnly = true)
+    /**
+     * Agenda entre os dias {@code de} e {@code ate} (inclusive, hora local). O profissional só vê a própria. Não é
+     * somente leitura: registra a consulta na auditoria.
+     */
+    @Transactional
     public List<AgendamentoResponse> listar(
             LocalDate de, LocalDate ate, UUID profissionalId, UUID consultorioId, UsuarioAutenticado ator) {
         if (!AgendaPermissoes.usaAgenda(ator.perfil())) {
@@ -131,7 +134,6 @@ public class AgendamentoService {
         a.definirItens(List.of(), texto(observacao), agora());
         agendamentoRepository.flush();
         a.definirItens(novos, texto(observacao), agora());
-        gravar();
         auditoriaService.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.AGENDAMENTO_ALTERADO, ENTIDADE, id));
         return respostas(List.of(a)).getFirst();
     }
@@ -152,7 +154,6 @@ public class AgendamentoService {
             throw new AccessDeniedException("Sem permissão para mudar esta consulta");
         }
         a.mudarStatus(novo, agora());
-        gravar();
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.AGENDAMENTO_STATUS_ALTERADO, ENTIDADE, id.toString(), novo.name()));
         return respostas(List.of(a)).getFirst();
@@ -163,7 +164,6 @@ public class AgendamentoService {
         exigirGestao(ator);
         Agendamento a = agendamento(id);
         a.cancelar(motivo.trim(), ator.id(), agora());
-        gravar();
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.AGENDAMENTO_CANCELADO, ENTIDADE, id.toString(), motivo.trim()));
         return respostas(List.of(a)).getFirst();
@@ -306,14 +306,6 @@ public class AgendamentoService {
     }
 
     // --- apoio ---
-
-    /**
-     * Grava as mudanças antes de montar a resposta: as consultas da resposta passam por métodos somente leitura, e
-     * uma gravação pendente disparada dentro deles falharia.
-     */
-    private void gravar() {
-        agendamentoRepository.flush();
-    }
 
     private Agendamento agendamento(UUID id) {
         return agendamentoRepository.findById(id)

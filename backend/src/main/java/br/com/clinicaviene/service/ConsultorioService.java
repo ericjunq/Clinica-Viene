@@ -64,7 +64,7 @@ public class ConsultorioService {
     }
 
     /** Consultório que pode receber horários e agendamentos. */
-    @Transactional // sem readOnly: também é chamado no meio de gravações
+    @Transactional(readOnly = true)
     public Consultorio ativo(UUID id) {
         return consultorioRepository.findById(id)
                 .filter(Consultorio::isAtivo)

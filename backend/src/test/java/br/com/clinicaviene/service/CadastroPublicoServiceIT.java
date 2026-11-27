@@ -375,7 +375,7 @@ class CadastroPublicoServiceIT {
 
     private String convite(UUID paciente, ModoConvite modo) {
         String link = conviteService.criar(paciente, modo, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
-        return link.substring(link.lastIndexOf('/') + 1);
+        return link.substring(link.lastIndexOf('#') + 1);
     }
 
     private UUID adulto(String email) {

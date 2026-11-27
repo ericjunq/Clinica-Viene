@@ -4,8 +4,12 @@ import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-/** Rotas que não usam o token de acesso (login em 2 passos e as que usam o cookie de renovação). */
+/**
+ * Rotas que não usam o token de acesso: login em 2 passos, as que usam o cookie de renovação e o cadastro
+ * público do paciente (que tem tokens próprios — num quiosque, o aparelho pode estar logado pela recepção).
+ */
 const ROTAS_SEM_TOKEN = [
+  '/api/v1/publico/',
   '/api/v1/auth/login',
   '/api/v1/auth/2fa/',
   '/api/v1/auth/renovar',

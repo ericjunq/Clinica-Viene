@@ -78,7 +78,7 @@ class ConviteServiceIT {
 
         ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.LINK, false, false, recepcao);
 
-        assertThat(criado.link()).startsWith("http://localhost:4200/cadastro/");
+        assertThat(criado.link()).startsWith("http://localhost:4200/cadastro#");
         assertThat(criado.qrCode()).startsWith("data:image/png;base64,");
         assertThat(Duration.between(relogio.instant(), criado.expiraEm())).isEqualTo(Duration.ofHours(72));
         assertThat(criado.emailEnviadoPara()).isNull();
@@ -145,7 +145,7 @@ class ConviteServiceIT {
         assertThat(criado.emailEnviadoPara()).isEqualTo(email.charAt(0) + "***@exemplo.com");
         assertThat(Duration.between(relogio.instant(), criado.podeReenviarEm())).isEqualTo(Duration.ofMinutes(1));
         String corpo = GreenMailUtil.getBody(ultimaMensagem(email));
-        assertThat(corpo).contains(criado.link().substring(criado.link().lastIndexOf('/') + 1)).contains("72 horas");
+        assertThat(corpo).contains(criado.link().substring(criado.link().lastIndexOf('#') + 1)).contains("72 horas");
         assertThat(contarAuditoria("CONVITE_ENVIADO_EMAIL", paciente)).isEqualTo(1);
 
         assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.LINK, true, false, recepcao))
@@ -214,7 +214,7 @@ class ConviteServiceIT {
     // --- apoio ---
 
     private static String token(ConviteCriadoResponse criado) {
-        return criado.link().substring(criado.link().lastIndexOf('/') + 1);
+        return criado.link().substring(criado.link().lastIndexOf('#') + 1);
     }
 
     private UUID adulto(UsuarioAutenticado recepcao, String email) {

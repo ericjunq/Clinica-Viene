@@ -91,7 +91,7 @@ public class ConviteService {
         ConviteCadastro convite = conviteCadastroRepository.save(new ConviteCadastro(
                 pacienteId, TokenUtils.sha256(token), modo, ator.id(), modo == ModoConvite.QUIOSQUE ? ator.id() : null, agora,
                 expiraEm));
-        String link = conviteProperties.urlPublica().replaceAll("/+$", "") + "/cadastro/" + token;
+        String link = conviteProperties.urlPublica().replaceAll("/+$", "") + "/cadastro#" + token;
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.CONVITE_CRIADO, ENTIDADE, pacienteId.toString(), "modo " + modo));
 

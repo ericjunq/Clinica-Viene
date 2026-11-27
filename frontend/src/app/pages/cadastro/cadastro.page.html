@@ -1,0 +1,333 @@
+<main class="pagina-publica cadastro">
+  <app-logo />
+
+  @switch (etapa()) {
+    @case ('carregando') {
+      <mat-card appearance="raised">
+        <mat-card-content class="centralizado">
+          <mat-spinner diameter="40" aria-label="Carregando" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('invalido') {
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>Link indisponível</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="alerta erro" role="alert">{{ erro() }}</div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('codigo') {
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>Olá, {{ convite()?.primeiroNome }}!</mat-card-title>
+          <mat-card-subtitle>Vamos completar seu cadastro</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="formulario">
+          @if (!codigoEnviadoPara()) {
+            <p>
+              Para sua segurança, vamos enviar um código para
+              <strong>{{ convite()?.emailMascarado }}</strong>.
+            </p>
+            <button
+              mat-flat-button
+              type="button"
+              class="largura-total botao-principal"
+              [disabled]="enviando()"
+              (click)="enviarCodigo()"
+            >
+              Enviar código
+            </button>
+          } @else {
+            <p>
+              Enviamos um código de 6 dígitos para <strong>{{ codigoEnviadoPara() }}</strong>.
+            </p>
+            <mat-form-field appearance="outline">
+              <mat-label>Código</mat-label>
+              <input
+                matInput
+                id="codigo"
+                [formControl]="codigo"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+              />
+            </mat-form-field>
+            @if (avisoReenvio(); as aviso) {
+              <p class="ajuda">{{ aviso }}</p>
+            }
+            <button
+              mat-flat-button
+              type="button"
+              class="largura-total botao-principal"
+              [disabled]="enviando()"
+              (click)="confirmarCodigo()"
+            >
+              Continuar
+            </button>
+            <button mat-button type="button" [disabled]="enviando()" (click)="enviarCodigo()">
+              Enviar outro código
+            </button>
+          }
+          @if (erro(); as mensagem) {
+            <div class="alerta erro" role="alert">{{ mensagem }}</div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('quiosque') {
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>Olá, {{ convite()?.primeiroNome }}!</mat-card-title>
+          <mat-card-subtitle>Seu cadastro na Viene</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="formulario">
+          <p>
+            Você vai conferir seus dados, responder a ficha de saúde e ler a política de
+            privacidade. Leva poucos minutos.
+          </p>
+          <button
+            mat-flat-button
+            type="button"
+            class="largura-total botao-principal"
+            [disabled]="enviando()"
+            (click)="comecarNoQuiosque()"
+          >
+            Começar
+          </button>
+          @if (erro(); as mensagem) {
+            <div class="alerta erro" role="alert">{{ mensagem }}</div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('preenchendo') {
+      @if (formulario(); as f) {
+        <mat-card appearance="raised" class="cartao-largo">
+          @if (f.menorDeIdade) {
+            <div class="alerta info">
+              Como o paciente é menor de idade, quem preenche e assina é o responsável legal.
+            </div>
+          }
+          <mat-stepper orientation="vertical">
+            <mat-step label="Seus dados" [stepControl]="dados">
+              <form [formGroup]="dados" class="formulario">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nome completo</mat-label>
+                  <input matInput formControlName="nomeCompleto" autocomplete="name" />
+                </mat-form-field>
+                <div class="linha">
+                  <mat-form-field appearance="outline">
+                    <mat-label>CPF</mat-label>
+                    <input matInput appCpfMask formControlName="cpf" inputmode="numeric" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Data de nascimento</mat-label>
+                    <input matInput type="date" formControlName="dataNascimento" />
+                  </mat-form-field>
+                </div>
+                <div class="linha">
+                  <mat-form-field appearance="outline">
+                    <mat-label>E-mail</mat-label>
+                    <input matInput type="email" formControlName="email" autocomplete="email" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Telefone</mat-label>
+                    <input matInput type="tel" formControlName="telefone" autocomplete="tel" />
+                  </mat-form-field>
+                </div>
+
+                <h3>Endereço</h3>
+                <div formGroupName="endereco">
+                  <div class="linha">
+                    <mat-form-field appearance="outline">
+                      <mat-label>CEP</mat-label>
+                      <input
+                        matInput
+                        formControlName="cep"
+                        inputmode="numeric"
+                        autocomplete="postal-code"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="estreito">
+                      <mat-label>UF</mat-label>
+                      <input matInput formControlName="uf" maxlength="2" />
+                    </mat-form-field>
+                  </div>
+                  <mat-form-field appearance="outline" class="largura-total">
+                    <mat-label>Rua</mat-label>
+                    <input matInput formControlName="logradouro" autocomplete="address-line1" />
+                  </mat-form-field>
+                  <div class="linha">
+                    <mat-form-field appearance="outline" class="estreito">
+                      <mat-label>Número</mat-label>
+                      <input matInput formControlName="numero" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Complemento</mat-label>
+                      <input matInput formControlName="complemento" />
+                    </mat-form-field>
+                  </div>
+                  <div class="linha">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Bairro</mat-label>
+                      <input matInput formControlName="bairro" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Cidade</mat-label>
+                      <input matInput formControlName="cidade" autocomplete="address-level2" />
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                @if (temResponsavel()) {
+                  <h3>Responsável legal</h3>
+                  <div formGroupName="responsavel">
+                    <mat-form-field appearance="outline" class="largura-total">
+                      <mat-label>Nome do responsável</mat-label>
+                      <input matInput formControlName="nomeCompleto" />
+                    </mat-form-field>
+                    <div class="linha">
+                      <mat-form-field appearance="outline">
+                        <mat-label>CPF do responsável</mat-label>
+                        <input matInput appCpfMask formControlName="cpf" inputmode="numeric" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Parentesco</mat-label>
+                        <mat-select formControlName="parentesco">
+                          @for (p of parentescos; track p.valor) {
+                            <mat-option [value]="p.valor">{{ p.rotulo }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="linha">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Telefone do responsável</mat-label>
+                        <input matInput type="tel" formControlName="telefone" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>E-mail do responsável</mat-label>
+                        <input matInput type="email" formControlName="email" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                }
+
+                <mat-checkbox formControlName="comAcompanhante">
+                  Alguém está me ajudando a preencher
+                </mat-checkbox>
+                @if (dados.controls.comAcompanhante.value) {
+                  <div class="linha">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nome de quem está ajudando</mat-label>
+                      <input matInput formControlName="acompanhanteNome" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Motivo (opcional)</mat-label>
+                      <input matInput formControlName="acompanhanteMotivo" />
+                    </mat-form-field>
+                  </div>
+                }
+                <div class="acoes-passo">
+                  <button mat-flat-button matStepperNext type="button">Próximo</button>
+                </div>
+              </form>
+            </mat-step>
+
+            <mat-step label="Ficha de saúde">
+              <p class="ajuda">
+                Suas respostas são sigilosas: só os profissionais que atenderem você poderão vê-las.
+              </p>
+              <app-anamnese-form
+                [perguntas]="f.anamnese.perguntas"
+                [respostas]="respostas"
+                [mostrarPendentes]="mostrarPendentes()"
+              />
+              <div class="acoes-passo">
+                <button mat-button matStepperPrevious type="button">Voltar</button>
+                <button mat-flat-button matStepperNext type="button">Próximo</button>
+              </div>
+            </mat-step>
+
+            <mat-step label="Privacidade">
+              <mat-accordion multi>
+                @for (t of f.termos; track t.id) {
+                  <mat-expansion-panel class="termo">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>{{ t.titulo }}</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="texto-termo">{{ t.texto }}</div>
+                  </mat-expansion-panel>
+                  <mat-checkbox [(ngModel)]="decisoes[t.id]" [attr.data-termo]="t.tipo">
+                    @if (t.obrigatorio) {
+                      Li e estou ciente da política de privacidade *
+                    } @else {
+                      Autorizo: {{ t.titulo }} (opcional)
+                    }
+                  </mat-checkbox>
+                }
+              </mat-accordion>
+              <p class="ajuda">
+                As autorizações opcionais não interferem no seu atendimento e podem ser retiradas a
+                qualquer momento.
+              </p>
+              <div class="acoes-passo">
+                <button mat-button matStepperPrevious type="button">Voltar</button>
+                <button mat-flat-button matStepperNext type="button">Próximo</button>
+              </div>
+            </mat-step>
+
+            <mat-step label="Conferir e enviar">
+              <p>
+                Confira se está tudo certo. Na próxima etapa você assina a ficha uma única vez, e
+                ela vale para todo o seu cadastro.
+              </p>
+              @if (erro(); as mensagem) {
+                <div class="alerta erro" role="alert">{{ mensagem }}</div>
+              }
+              <div class="acoes-passo">
+                <button mat-button matStepperPrevious type="button">Voltar</button>
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="botao-principal"
+                  [disabled]="enviando()"
+                  (click)="revisar()"
+                >
+                  Conferir ficha
+                </button>
+              </div>
+            </mat-step>
+          </mat-stepper>
+        </mat-card>
+      }
+    }
+
+    @case ('revisado') {
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>Ficha conferida</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="alerta sucesso" role="status">
+            Tudo certo com seus dados, sua ficha de saúde e suas escolhas de privacidade.
+          </div>
+          <p>
+            @if (revisao()?.peloResponsavel) {
+              O próximo passo é a assinatura da ficha pelo responsável legal.
+            } @else {
+              O próximo passo é a assinatura da ficha.
+            }
+          </p>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</main>

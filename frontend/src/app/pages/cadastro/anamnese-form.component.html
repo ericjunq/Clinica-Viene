@@ -1,0 +1,112 @@
+@for (secao of secoes(); track secao.nome) {
+  <section class="secao-anamnese">
+    @if (secao.nome) {
+      <h3>{{ secao.nome }}</h3>
+    }
+    @for (p of secao.perguntas; track p.codigo) {
+      <div class="pergunta" [class.pendente]="pendente(p)" [attr.data-pergunta]="p.codigo">
+        <p class="texto-pergunta" [id]="'pergunta-' + p.codigo">
+          {{ p.texto }}
+          @if (p.obrigatoria) {
+            <span class="obrigatoria" aria-label="obrigatória">*</span>
+          }
+        </p>
+        @if (p.ajuda) {
+          <p class="ajuda">{{ p.ajuda }}</p>
+        }
+        @switch (p.tipo) {
+          @case ('SIM_NAO') {
+            <mat-radio-group
+              [(ngModel)]="respostas()[p.codigo].valor"
+              [attr.aria-labelledby]="'pergunta-' + p.codigo"
+            >
+              <mat-radio-button value="SIM">Sim</mat-radio-button>
+              <mat-radio-button value="NAO">Não</mat-radio-button>
+            </mat-radio-group>
+          }
+          @case ('SIM_NAO_DETALHE') {
+            <mat-radio-group
+              [(ngModel)]="respostas()[p.codigo].valor"
+              [attr.aria-labelledby]="'pergunta-' + p.codigo"
+            >
+              <mat-radio-button value="SIM">Sim</mat-radio-button>
+              <mat-radio-button value="NAO">Não</mat-radio-button>
+            </mat-radio-group>
+            @if (respostas()[p.codigo].valor === 'SIM') {
+              <mat-form-field appearance="outline" class="largura-total">
+                <mat-label>Qual?</mat-label>
+                <input matInput maxlength="300" [(ngModel)]="respostas()[p.codigo].detalhe" />
+              </mat-form-field>
+            }
+          }
+          @case ('ESCOLHA_UNICA') {
+            <mat-radio-group
+              class="opcoes"
+              [(ngModel)]="respostas()[p.codigo].valor"
+              [attr.aria-labelledby]="'pergunta-' + p.codigo"
+            >
+              @for (opcao of p.opcoes; track opcao) {
+                <mat-radio-button [value]="opcao">{{ opcao }}</mat-radio-button>
+              }
+            </mat-radio-group>
+          }
+          @case ('MULTIPLA_ESCOLHA') {
+            <div class="opcoes" role="group" [attr.aria-labelledby]="'pergunta-' + p.codigo">
+              @for (opcao of p.opcoes; track opcao) {
+                <mat-checkbox
+                  [checked]="marcada(p, opcao)"
+                  (change)="alternar(p, opcao, $event.checked)"
+                  >{{ opcao }}</mat-checkbox
+                >
+              }
+            </div>
+          }
+          @case ('TEXTO_LONGO') {
+            <mat-form-field appearance="outline" class="largura-total">
+              <textarea
+                matInput
+                rows="3"
+                maxlength="4000"
+                [attr.aria-labelledby]="'pergunta-' + p.codigo"
+                [(ngModel)]="respostas()[p.codigo].valor"
+              ></textarea>
+            </mat-form-field>
+          }
+          @case ('DATA') {
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                type="date"
+                [attr.aria-labelledby]="'pergunta-' + p.codigo"
+                [(ngModel)]="respostas()[p.codigo].valor"
+              />
+            </mat-form-field>
+          }
+          @case ('NUMERO') {
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                inputmode="decimal"
+                [attr.aria-labelledby]="'pergunta-' + p.codigo"
+                [(ngModel)]="respostas()[p.codigo].valor"
+              />
+            </mat-form-field>
+          }
+          @default {
+            <mat-form-field appearance="outline" class="largura-total">
+              <input
+                matInput
+                maxlength="300"
+                [attr.aria-labelledby]="'pergunta-' + p.codigo"
+                [(ngModel)]="respostas()[p.codigo].valor"
+              />
+            </mat-form-field>
+          }
+        }
+        @if (pendente(p)) {
+          <p class="aviso-pendente" role="alert">Responda esta pergunta.</p>
+        }
+      </div>
+    }
+  </section>
+}

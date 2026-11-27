@@ -1,0 +1,102 @@
+/* Cadastro do paciente: telas mais largas que o login, legíveis no celular. */
+.cadastro {
+  justify-content: flex-start;
+
+  mat-card.cartao-largo {
+    max-width: 46rem;
+  }
+}
+
+.centralizado {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+
+  mat-form-field {
+    flex: 1 1 14rem;
+  }
+
+  .estreito {
+    flex: 0 1 8rem;
+  }
+}
+
+h3 {
+  margin: 1rem 0 0.5rem;
+  font-family: var(--viene-fonte-titulo);
+  font-size: 1.35rem;
+  color: var(--viene-marrom);
+}
+
+.ajuda {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.acoes-passo {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.secao-anamnese {
+  margin-bottom: 1rem;
+}
+
+.pergunta {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  &.pendente {
+    border-left: 3px solid var(--viene-erro);
+    padding-left: 0.75rem;
+  }
+}
+
+.texto-pergunta {
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+}
+
+.obrigatoria {
+  color: var(--viene-erro);
+  margin-left: 0.15rem;
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+mat-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.aviso-pendente {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--viene-erro);
+}
+
+.termo {
+  margin-top: 0.75rem;
+}
+
+.texto-termo {
+  white-space: pre-wrap;
+  max-height: 22rem;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

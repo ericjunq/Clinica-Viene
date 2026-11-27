@@ -86,7 +86,7 @@ class ConviteControllerIT {
                 .post(convites(paciente))
                 .then()
                 .statusCode(201)
-                .body("link", startsWith("http://localhost:4200/cadastro/"))
+                .body("link", startsWith("http://localhost:4200/cadastro#"))
                 .body("qrCode", startsWith("data:image/png;base64,"))
                 .extract()
                 .path("id");

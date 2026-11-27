@@ -173,7 +173,7 @@ class CadastroPublicoControllerIT {
                         recepcao)
                 .getId();
         String link = conviteService.criar(paciente, modo, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
-        return link.substring(link.lastIndexOf('/') + 1);
+        return link.substring(link.lastIndexOf('#') + 1);
     }
 
     private UsuarioAutenticado usuario(Perfil perfil) {

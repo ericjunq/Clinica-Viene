@@ -34,6 +34,12 @@ export const routes: Routes = [
     title: 'Trocar senha — ClinicaViene',
   },
   {
+    // Cadastro do paciente pelo convite (público; o token vem depois do # — D-100).
+    path: 'cadastro',
+    loadComponent: () => import('./pages/cadastro/cadastro.page').then((m) => m.CadastroPage),
+    title: 'Cadastro — Viene Odontologia & Saúde',
+  },
+  {
     path: '',
     loadComponent: () => import('./layout/shell.component').then((m) => m.ShellComponent),
     canActivate: [autenticadoGuard, sessaoCompletaGuard],

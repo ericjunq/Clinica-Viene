@@ -122,7 +122,7 @@ public class PacienteService {
         }
 
         String responsavelCpfHash = responsavelCpf == null ? null : cpfHasher.calcular(responsavelCpf);
-        if (cpf == null && !dados.confirmarDuplicidade()) {
+        if (cpf == null && !dados.duplicidadeConfirmada()) {
             List<UUID> semelhantes = semelhantes(nome, dados.dataNascimento(), responsavelCpfHash);
             if (!semelhantes.isEmpty()) {
                 throw new PossivelDuplicidadeException(semelhantes);

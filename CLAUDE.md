@@ -76,6 +76,7 @@ br.com.clinicaviene/
 - **Proibido**: `@Data`, `@EqualsAndHashCode`, `@ToString` e `@AllArgsConstructor` em entidades JPA; `@Value` (usar `record`).
 - `equals`/`hashCode` de entidades escritos à mão, baseados apenas no `id`.
 - DTOs sempre como `record`.
+- Em DTOs de **requisição**, campos opcionais usam tipos wrapper (`Boolean`, `Integer`), nunca primitivos: o Jackson 3 (Boot 4) rejeita com 400 um primitivo ausente no JSON.
 - Regras verificadas por teste ArchUnit (`EntidadesLombokArchTest`).
 
 ## Testes — honestidade obrigatória

@@ -22,7 +22,12 @@ public record NovoPacienteRequest(
         @Valid EnderecoDto endereco,
         @Valid ResponsavelLegalDto responsavel,
         @Size(max = 500) String semCpfJustificativa,
-        boolean confirmarDuplicidade) {
+        Boolean confirmarDuplicidade) {
+
+    /** Ausente no JSON = não confirmado (Jackson 3 não aceita primitivo ausente). */
+    public boolean duplicidadeConfirmada() {
+        return Boolean.TRUE.equals(confirmarDuplicidade);
+    }
 
     @Override
     public String toString() {

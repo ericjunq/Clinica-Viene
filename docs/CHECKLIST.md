@@ -119,7 +119,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 
 **2F. Assinatura e documento**
 - [x] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências) — `ProvedorAssinaturaInternoTest` — **CI verde**
-- [x] Estrutura do adaptador ZapSign (`ZapSignClient`, desligado por padrão, limite de 10 MB) (D-103) — `ZapSignClientTest` — implementado — testes pendentes de execução
+- [x] Estrutura do adaptador ZapSign (`ZapSignClient`, desligado por padrão, limite de 10 MB) (D-103) — `ZapSignClientTest` — **CI verde**
 - [ ] Ligar a ZapSign ao fluxo da ficha e testar com documento real (quando o projeto estiver avançado — plano gratuito: 3 documentos/mês) (D-090, D-103)
 - [x] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado cifrado pela aplicação (SeaweedFS em dev/teste, contêiner nos testes — D-056, D-102) — `ArmazenamentoServiceIT`, `CifradorAesGcmTest` — **CI verde**
 - [x] `FichaAnamnese`, `Documento`, `Assinatura` imutáveis (V16, banco rejeita UPDATE/DELETE), respostas e evidências cifradas; ao assinar grava dados conferidos (versão), decisões dos termos e encerra o convite (D-088, D-102) — `FichaAssinaturaServiceIT`, `CadastroPublicoControllerIT` — **CI verde**

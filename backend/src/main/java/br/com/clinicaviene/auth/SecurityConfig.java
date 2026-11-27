@@ -59,6 +59,8 @@ public class SecurityConfig {
                     // Cadastro do paciente pelo convite (D-100): a autorização é o token do convite + sessão de
                     // preenchimento, conferidos no CadastroPublicoService.
                     rotas.requestMatchers("/api/v1/publico/**").permitAll();
+                    // WebSocket (D-108): o handshake é aberto; a autenticação é no CONNECT do STOMP.
+                    rotas.requestMatchers("/api/v1/ws", "/api/v1/ws/**").permitAll();
                     if (openApiHabilitado) {
                         rotas.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                                 .permitAll();

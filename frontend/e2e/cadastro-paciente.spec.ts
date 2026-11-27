@@ -149,7 +149,9 @@ test('MASTER configura, cadastra o paciente, ele assina no quiosque e baixa o PD
 /** Dia da semana (rótulo da tela) de uma data aaaa-mm-dd. */
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-test('agenda: profissional, consultório, horário fixo, consulta marcada no calendário e check-in', async () => {
+test('agenda: profissional, horários, consulta marcada no calendário, check-in e aviso em tempo real', async ({
+  browser,
+}) => {
   test.setTimeout(180_000);
   // mesmo dia da semana, daqui a 7 dias (sempre no futuro), na hora da clínica (UTC−3)
   const hojeClinica = new Date(Date.now() - 3 * 3600_000);
@@ -224,11 +226,44 @@ test('agenda: profissional, consultório, horário fixo, consulta marcada no cal
   await expect(bloco).toBeVisible();
   await expect(bloco).toContainText('09:00–09:30');
 
-  // check-in: o paciente chegou
-  await bloco.click();
-  await expect(page.getByText('Ortodontia')).toBeVisible();
-  await page.getByRole('button', { name: 'Paciente chegou' }).click();
-  await expect(page.getByRole('button', { name: 'Iniciar atendimento' })).toBeVisible();
-  await page.getByRole('button', { name: 'Fechar' }).click();
-  await expect(bloco).toContainText('Chegou');
+  // a dentista entra no sistema (outro navegador) e fica com a agenda aberta
+  const contextoDentista = await browser.newContext();
+  const dentista = await contextoDentista.newPage();
+  await dentista.goto('/login');
+  await dentista.locator('#cpf').pressSequentially('86241307940');
+  await dentista.locator('#senha').fill('Provisoria#Dentista1');
+  await dentista.getByRole('button', { name: 'Entrar' }).click();
+  await expect(dentista).toHaveURL(/\/dois-fatores/);
+  const segredo = (await dentista.getByTestId('segredo-2fa').textContent())?.trim() ?? '';
+  await dentista.locator('#codigo-cadastro').fill(codigoTotp(segredo));
+  await dentista.getByRole('button', { name: 'Confirmar' }).click();
+  await dentista.getByRole('button', { name: 'Já guardei os códigos' }).click();
+  await dentista.locator('#senha-atual').fill('Provisoria#Dentista1');
+  await dentista.locator('#nova-senha').fill('Nova#SenhaDentista26');
+  await dentista.locator('#confirmacao').fill('Nova#SenhaDentista26');
+  await dentista.getByRole('button', { name: 'Salvar' }).click();
+  await dentista.getByRole('link', { name: 'Agenda' }).click();
+  await dentista.locator('#agenda-data').fill(alvo);
+  await expect(dentista.locator('.bloco', { hasText: NOME_PACIENTE })).toBeVisible();
+
+  // a recepção faz o check-in pela lista do dia
+  await page.getByText('Lista do dia', { exact: true }).click();
+  const linha = page.getByTestId(`consulta-${NOME_PACIENTE}`);
+  await expect(linha).toContainText('Ortodontia');
+  await linha.getByRole('button', { name: 'Chegou' }).click();
+  await expect(linha).toContainText('Chegou');
+
+  // a dentista recebe o aviso na hora e a agenda dela se atualiza
+  await expect(dentista.getByText(`Paciente chegou: ${NOME_PACIENTE}`)).toBeVisible({
+    timeout: 10_000,
+  });
+  await dentista.getByRole('button', { name: 'Ciente' }).click();
+  await expect(dentista.locator('.bloco', { hasText: NOME_PACIENTE })).toContainText('Chegou');
+
+  // ela inicia o atendimento pelos detalhes da consulta
+  await dentista.locator('.bloco', { hasText: NOME_PACIENTE }).click();
+  await dentista.getByRole('button', { name: 'Iniciar atendimento' }).click();
+  await expect(dentista.getByRole('button', { name: 'Concluir' })).toBeVisible();
+  await dentista.getByRole('button', { name: 'Fechar' }).click();
+  await contextoDentista.close();
 });

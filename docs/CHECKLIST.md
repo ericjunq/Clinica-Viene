@@ -166,11 +166,12 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Marcar / remarcar / cancelar (com motivo), alterar itens, confirmar/check-in/atendimento/falta (backend) — **CI verde**
 - [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — **CI verde**
 - [x] Check-in na tela (detalhes da consulta: confirmar, chegou, faltou, iniciar/concluir atendimento, cancelar, remarcar) (D-107) — E2E (check-in) — **CI verde**
-- [ ] Notificação de chegada em tempo real ao profissional (WebSocket)
+- [x] Aviso de chegada em tempo real ao profissional (STOMP/WebSocket, som + aviso até "Ciente") e atualização automática das agendas abertas (D-108) — `AvisosTempoRealIT`, `StompAutenticacaoInterceptorTest`, Vitest, E2E — implementado — testes pendentes de execução
+- [ ] Confirmação de leitura do aviso registrada no sistema (hoje o "Ciente" só fecha o aviso na tela)
 - [x] Calendário próprio (D-085, D-107): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, indisponibilidade esmaecida, cor por status, aviso de ficha pendente); clicar em horário livre → nova consulta com itens — Vitest + E2E — **CI verde**
 - [x] Telas: horários dos profissionais (fixos, extras, ausências) e configurações de consultórios e categorias (D-107) — E2E — **CI verde**
 - [ ] Calendário próprio: semana de um profissional
-- [ ] Calendário próprio: lista do dia para o check-in
+- [x] Calendário próprio: lista do dia para o check-in (um clique em "Chegou") (D-108) — E2E — implementado — testes pendentes de execução
 - [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo)
 - [x] Testes do calendário: hora da clínica, posições e sobreposição (unitários, `calendario.spec.ts`) + marcar e check-in no navegador (E2E) — **CI verde**
 - [ ] E2E de remarcar pelo navegador (junto do arrastar para remarcar)

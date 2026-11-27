@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -19,6 +20,7 @@ import {
 import { mensagemDeErro } from '../../core/models/erro.model';
 import { AuthService } from '../../core/services/auth.service';
 import { AgendaService } from '../../core/services/agenda.service';
+import { AvisosService } from '../../core/services/avisos.service';
 import {
   cabeEm,
   distribuirRaias,
@@ -36,7 +38,7 @@ import { DadosNovoAgendamento, NovoAgendamentoDialog } from './novo-agendamento.
 /** Pixels por minuto na grade (15 min = 24 px). */
 const PX_POR_MINUTO = 1.6;
 
-type Visao = 'consultorio' | 'profissional';
+type Visao = 'consultorio' | 'profissional' | 'lista';
 
 interface Trecho {
   inicio: number;
@@ -79,8 +81,10 @@ interface Coluna {
 export class AgendaPage implements OnInit {
   private readonly agenda = inject(AgendaService);
   private readonly dialogo = inject(MatDialog);
-  private readonly avisos = inject(MatSnackBar);
+  private readonly avisosTela = inject(MatSnackBar);
   private readonly usuario = inject(AuthService).usuario;
+  private readonly avisos = inject(AvisosService);
+  private readonly destruir = inject(DestroyRef);
 
   protected readonly rotuloStatus = ROTULO_STATUS;
   protected readonly gestao = computed(() =>
@@ -155,10 +159,22 @@ export class AgendaPage implements OnInit {
     );
   });
 
+  /** Lista do dia (check-in rápido): consultas em ordem de horário. */
+  protected readonly lista = computed(() =>
+    this.agendamentos()
+      .filter((a) => this.mostrarCancelados() || a.status !== 'CANCELADO')
+      .filter((a) => !this.ehProfissional() || a.profissional.id === this.usuario()?.id)
+      .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+  );
+
   ngOnInit(): void {
     if (this.ehProfissional()) {
       this.visao.set('profissional');
     }
+    // outra recepcionista (ou o profissional) mudou a agenda deste dia: recarrega
+    this.avisos.agendaAlterada
+      .pipe(takeUntilDestroyed(this.destruir))
+      .subscribe((dia) => dia === this.data() && this.carregarDia());
     forkJoin({
       consultorios: this.agenda.consultorios(),
       profissionais: this.agenda.profissionais(),
@@ -193,7 +209,7 @@ export class AgendaPage implements OnInit {
     const y = evento.clientY - alvo.getBoundingClientRect().top;
     const minutos = naGrade(this.faixa().inicio + y / PX_POR_MINUTO, GRADE_MINUTOS);
     if (!cabeEm(coluna.livres, minutos, minutos + GRADE_MINUTOS)) {
-      this.avisos.open(
+      this.avisosTela.open(
         'Fora dos horários de atendimento. Cadastre um horário extra para encaixar.',
         'OK',
         {
@@ -245,7 +261,7 @@ export class AgendaPage implements OnInit {
       .afterClosed()
       .subscribe((criado) => {
         if (criado) {
-          this.avisos.open('Consulta marcada.', 'OK', { duration: 3000 });
+          this.avisosTela.open('Consulta marcada.', 'OK', { duration: 3000 });
           this.carregarDia();
         }
       });
@@ -267,6 +283,23 @@ export class AgendaPage implements OnInit {
       )
       .afterClosed()
       .subscribe(() => this.carregarDia());
+  }
+
+  /** Check-in em um clique, na lista do dia. */
+  protected chegou(a: Agendamento): void {
+    this.agenda.mudarStatus(a.id, 'PACIENTE_CHEGOU').subscribe({
+      next: () => {
+        this.avisos.agendaAlterada.next(this.data());
+        this.avisosTela.open(`Chegada de ${a.paciente.nomeCompleto} registrada.`, 'OK', {
+          duration: 3000,
+        });
+      },
+      error: (e: unknown) => this.erro.set(mensagemDeErro(e)),
+    });
+  }
+
+  protected podeCheckIn(a: Agendamento): boolean {
+    return this.gestao() && (a.status === 'AGENDADO' || a.status === 'CONFIRMADO');
   }
 
   protected horaDe(a: Agendamento): string {

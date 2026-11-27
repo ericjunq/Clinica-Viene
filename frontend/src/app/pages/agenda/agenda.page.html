@@ -24,16 +24,19 @@
     [ngModel]="data()"
     (ngModelChange)="irPara($event)"
   />
-  @if (!ehProfissional()) {
-    <mat-button-toggle-group
-      [value]="visao()"
-      (change)="visao.set($event.value)"
-      aria-label="Colunas da agenda"
-    >
+  <mat-button-toggle-group
+    [value]="visao()"
+    (change)="visao.set($event.value)"
+    aria-label="Como ver a agenda"
+  >
+    @if (!ehProfissional()) {
       <mat-button-toggle value="consultorio">Por consultório</mat-button-toggle>
       <mat-button-toggle value="profissional">Por profissional</mat-button-toggle>
-    </mat-button-toggle-group>
-  }
+    } @else {
+      <mat-button-toggle value="profissional">Calendário</mat-button-toggle>
+    }
+    <mat-button-toggle value="lista">Lista do dia</mat-button-toggle>
+  </mat-button-toggle-group>
   <mat-checkbox [checked]="mostrarCancelados()" (change)="mostrarCancelados.set($event.checked)">
     Mostrar cancelados
   </mat-checkbox>
@@ -46,7 +49,49 @@
   <p class="alerta erro" role="alert">{{ e }}</p>
 }
 
-@if (!colunas().length) {
+@if (visao() === 'lista') {
+  <div class="lista-dia">
+    @for (a of lista(); track a.id) {
+      <div
+        class="consulta"
+        [attr.data-status]="a.status"
+        [attr.data-testid]="'consulta-' + a.paciente.nomeCompleto"
+      >
+        <span class="hora-lista">{{ horaDe(a) }}</span>
+        <span class="quem">
+          <strong>
+            @if (a.paciente.fichaPendente) {
+              <mat-icon
+                fontSet="material-symbols-outlined"
+                class="pendente"
+                aria-label="Ficha pendente"
+                >assignment_late</mat-icon
+              >
+            }
+            {{ a.paciente.nomeCompleto }}
+          </strong>
+          <span class="nota">
+            {{ a.profissional.nome }} · {{ a.consultorio.nome }} ·
+            @for (i of a.itens; track $index; let ultimo = $last) {
+              {{ i.categoriaNome }}{{ ultimo ? '' : ', ' }}
+            }
+          </span>
+        </span>
+        <span class="etiqueta status-lista" [attr.data-status]="a.status">{{
+          rotuloStatus[a.status]
+        }}</span>
+        <span class="acoes-lista">
+          @if (podeCheckIn(a)) {
+            <button mat-flat-button (click)="chegou(a)">Chegou</button>
+          }
+          <button mat-button (click)="abrirDetalhe(a)">Detalhes</button>
+        </span>
+      </div>
+    } @empty {
+      <p class="nota vazio-lista">Nenhuma consulta neste dia.</p>
+    }
+  </div>
+} @else if (!colunas().length) {
   <p class="alerta info">
     @if (visao() === 'consultorio') {
       Nenhum consultório ativo. O MASTER cadastra em Configurações → Consultórios.

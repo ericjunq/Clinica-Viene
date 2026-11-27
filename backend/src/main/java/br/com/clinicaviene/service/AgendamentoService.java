@@ -2,6 +2,7 @@ package br.com.clinicaviene.service;
 
 import br.com.clinicaviene.auth.AgendaPermissoes;
 import br.com.clinicaviene.config.AgendaProperties;
+import br.com.clinicaviene.dto.AgendaAlteradaDto;
 import br.com.clinicaviene.dto.AgendamentoResponse;
 import br.com.clinicaviene.dto.ItemAgendamentoRequest;
 import br.com.clinicaviene.dto.NovoAgendamentoRequest;
@@ -39,6 +40,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,7 @@ public class AgendamentoService {
     private final DocumentoService documentoService;
     private final AuditoriaService auditoriaService;
     private final AgendaProperties agenda;
+    private final ApplicationEventPublisher eventos;
     private final Clock clock;
 
     @Transactional
@@ -81,6 +84,7 @@ public class AgendamentoService {
                 pedido.pacienteId(), pedido.profissionalId(), pedido.consultorioId(), pedido.inicio(), duracao,
                 itens(pedido.itens(), pedido.profissionalId()), texto(pedido.observacao()), null, ator);
         auditoriaService.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.AGENDAMENTO_CRIADO, ENTIDADE, novo.getId()));
+        avisarMudanca(novo);
         return respostas(List.of(novo)).getFirst();
     }
 
@@ -135,6 +139,7 @@ public class AgendamentoService {
         agendamentoRepository.flush();
         a.definirItens(novos, texto(observacao), agora());
         auditoriaService.registrar(RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.AGENDAMENTO_ALTERADO, ENTIDADE, id));
+        avisarMudanca(a);
         return respostas(List.of(a)).getFirst();
     }
 
@@ -156,6 +161,10 @@ public class AgendamentoService {
         a.mudarStatus(novo, agora());
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.AGENDAMENTO_STATUS_ALTERADO, ENTIDADE, id.toString(), novo.name()));
+        avisarMudanca(a);
+        if (novo == StatusAgendamento.PACIENTE_CHEGOU) {
+            eventos.publishEvent(new AvisosAgendaService.ChegadaRegistrada(a.getId()));
+        }
         return respostas(List.of(a)).getFirst();
     }
 
@@ -166,6 +175,7 @@ public class AgendamentoService {
         a.cancelar(motivo.trim(), ator.id(), agora());
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.AGENDAMENTO_CANCELADO, ENTIDADE, id.toString(), motivo.trim()));
+        avisarMudanca(a);
         return respostas(List.of(a)).getFirst();
     }
 
@@ -190,6 +200,10 @@ public class AgendamentoService {
                 itens(mesmosItens, profissional), antigo.getObservacao(), antigo.getId(), ator);
         auditoriaService.registrar(new RegistroAuditoria(
                 ator.id(), AcaoAuditoria.AGENDAMENTO_REMARCADO, ENTIDADE, id.toString(), "novo agendamento " + novo.getId()));
+        avisarMudanca(antigo);
+        if (!dia(antigo).equals(dia(novo))) {
+            avisarMudanca(novo);
+        }
         return respostas(List.of(novo)).getFirst();
     }
 
@@ -306,6 +320,15 @@ public class AgendamentoService {
     }
 
     // --- apoio ---
+
+    /** Telas abertas da agenda recarregam o dia (só a data vai no aviso). */
+    private void avisarMudanca(Agendamento a) {
+        eventos.publishEvent(new AgendaAlteradaDto(dia(a)));
+    }
+
+    private LocalDate dia(Agendamento a) {
+        return a.getInicio().atZone(agenda.fuso()).toLocalDate();
+    }
 
     private Agendamento agendamento(UUID id) {
         return agendamentoRepository.findById(id)

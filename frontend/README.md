@@ -33,4 +33,4 @@ src/app/
 e2e/            testes Playwright
 ```
 
-O token de acesso fica só em memória; a renovação usa um cookie `HttpOnly` definido pelo backend. Em container, o frontend é servido pelo Nginx (`nginx.conf`), que também encaminha `/api` ao backend.
+O token de acesso fica só em memória; a renovação usa um cookie `HttpOnly` definido pelo backend. Em container, o frontend é servido pelo Nginx (`nginx.conf`), que também encaminha `/api` ao backend. Os avisos em tempo real (chegada do paciente, agenda alterada) usam STOMP sobre WebSocket em `/api/v1/ws` (`@stomp/stompjs`); o Nginx e o proxy de desenvolvimento (`proxy.conf.json`, `ws: true`) repassam o `Upgrade`.

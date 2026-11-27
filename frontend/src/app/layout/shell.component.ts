@@ -1,9 +1,10 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { AvisosService } from '../core/services/avisos.service';
 import { LogoComponent } from '../shared/logo/logo.component';
 
 interface ItemMenu {
@@ -27,9 +28,10 @@ interface ItemMenu {
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly avisos = inject(AvisosService);
 
   protected readonly usuario = this.auth.usuario;
   protected readonly itens = computed<ItemMenu[]>(() => {
@@ -51,7 +53,16 @@ export class ShellComponent {
     return itens;
   });
 
+  ngOnInit(): void {
+    this.avisos.conectar();
+  }
+
+  ngOnDestroy(): void {
+    this.avisos.desconectar();
+  }
+
   protected sair(): void {
+    this.avisos.desconectar();
     this.auth.logout().subscribe({
       complete: () => void this.router.navigate(['/login']),
       error: () => void this.router.navigate(['/login']),

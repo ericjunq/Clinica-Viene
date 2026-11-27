@@ -419,6 +419,16 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - **Hora da clínica**: o calendário mostra sempre America/Bahia, qualquer que seja o fuso do computador. A Bahia não tem horário de verão desde 2012, então o frontend usa UTC−3 fixo (se isso mudar, ajustar `calendario.ts`).
 - Ainda faltam (próximas etapas): aviso em tempo real ao profissional (WebSocket), semana de um profissional, lista do dia para o check-in e arrastar para remarcar.
 
+**D-108 — Avisos em tempo real (STOMP sobre WebSocket) e lista do dia** · 2026-11-27 · Detalha D-023
+- **STOMP sobre WebSocket** no próprio Spring (broker simples em memória), endpoint `/api/v1/ws` — mesmo caminho da API, para o nginx encaminhar (com `Upgrade`). Cliente no frontend: `@stomp/stompjs` (Apache-2.0), reconecta sozinho e usa o token atual a cada reconexão.
+- **Autenticação no CONNECT** do STOMP com o mesmo token de acesso e as mesmas regras da API (usuário ativo, sessão completa). Só se assina `/user/queue/avisos` (os próprios avisos) e, quem usa a agenda (ADMIN, MASTER, PROFISSIONAL), `/topic/agenda`. O cliente não envia mensagens.
+- **Aviso de chegada**: no check-in, só o profissional da consulta recebe "Paciente chegou: nome — consultório (horário)", com som e destaque até clicar em "Ciente". Sem dado clínico.
+- **Agenda alterada**: qualquer mudança publica só a **data** do dia afetado; as telas abertas nesse dia recarregam.
+- Avisos saem **depois do commit** (nada é avisado se a gravação falhar). Os eventos do Spring Modulith ficam guardados/arquivados (D-059), por isso levam **só ids e datas** — o nome do paciente é lido na hora de enviar.
+- Quem não está conectado não recebe o aviso (a agenda mostra a situação ao abrir). Limitação conhecida: a conexão aberta não é derrubada na hora se o usuário for desativado (o token só é conferido ao conectar/reconectar) — aceito por enquanto: o canal só leva avisos de agenda.
+- **Lista do dia** na agenda: consultas em ordem de horário com check-in em um clique ("Chegou"); o profissional vê a própria lista.
+- Pendente: registrar no sistema a confirmação de leitura do aviso.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

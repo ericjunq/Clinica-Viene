@@ -176,3 +176,10 @@ a {
 .botao-principal {
   height: 2.75rem !important;
 }
+
+/* Aviso de chegada do paciente (D-108): destaque em verde até o profissional clicar em "Ciente" */
+.mat-mdc-snack-bar-container.aviso-chegada {
+  --mat-snack-bar-container-color: var(--viene-sucesso);
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #fff;
+}

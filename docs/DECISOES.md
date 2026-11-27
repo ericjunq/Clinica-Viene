@@ -395,6 +395,18 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 **D-105 — Regras de camadas verificadas por ArchUnit** · 2026-11-27 · Detalha a D-078
 Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1) só o `FichaAnamneseService` depende do `FichaAnamneseRepository` — dado de saúde passa sempre pelo service que confere a permissão e grava a auditoria (D-088); (2) classes de `controller` não dependem de `repository` (controller só converte e delega). Fixtures em `src/test/java/fixtures/arquitetura` provam que as regras pegam as violações. Cada novo repository de dado de saúde (prontuário, procedimentos — Fase 4) ganha a regra equivalente; a orientação está no `CLAUDE.md`.
 
+**D-106 — Agenda: horários dos profissionais, grade e itens do agendamento** · 2026-11-27 · Detalha D-022
+- **Grade de 15 min** (horários começam de 15 em 15 min) e **consulta padrão de 30 min**, que a recepção ajusta em cada agendamento — configuráveis (`clinicaviene.agenda.*`). Horários fixos e extras precisam respeitar a grade.
+- **Horários do profissional**, cadastrados pela recepção (ADMIN) ou pelo MASTER com o que o profissional passar:
+  - **Fixos semanais** por consultório (ex.: toda segunda 10h–15h), em hora local da clínica, com vigência. Encerrar = definir o último dia (o histórico fica); um horário que ainda nem começou a valer é removido.
+  - **Horários extras**: as brechas fora da rotina (ex.: quinta 8h–11h), sempre num consultório.
+  - **Ausências**: folga, férias, feriado — num consultório ou em todos.
+  - Disponibilidade = fixos + extras − ausências. Um profissional não pode ter dois horários fixos sobrepostos no mesmo dia da semana (nem em salas diferentes), nem dois extras sobrepostos.
+- **Fora da disponibilidade não se marca consulta** (decisão do autor): para encaixar, cadastra-se antes um horário extra.
+- **Itens do agendamento**: um agendamento pode ter **vários itens**, cada um com **categoria + descrição própria** (ex.: "Ortodontia — manutenção" + "Clínica geral — limpeza"); cada item vira um procedimento separado no prontuário e no financeiro. **Categorias por área**, com **código estável** (o financeiro liga preço e repasse ao código) e nome editável; o MASTER configura, com exemplo de odontologia (as categorias da §8.6) carregado por ação, sem migration de `INSERT`.
+- **Paciente só com pré-cadastro pode ser agendado**, com aviso de "ficha pendente" na agenda e no check-in.
+- Permissões: consultórios e categorias — MASTER; horários e agendamentos — ADMIN e MASTER; o profissional vê a própria agenda e os próprios horários; DEV não acessa a agenda.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

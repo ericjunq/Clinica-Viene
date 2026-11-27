@@ -3,6 +3,7 @@ package br.com.clinicaviene.repository;
 import br.com.clinicaviene.entity.Usuario;
 import br.com.clinicaviene.enums.ConselhoProfissional;
 import br.com.clinicaviene.enums.Perfil;
+import br.com.clinicaviene.enums.StatusUsuario;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,4 +28,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     List<Usuario> findAllByOrderByNomeCompletoAsc();
 
     List<Usuario> findAllByPerfilNotOrderByNomeCompletoAsc(Perfil perfil);
+
+    List<Usuario> findAllByPerfilAndStatusOrderByNomeCompletoAsc(Perfil perfil, StatusUsuario status);
 }

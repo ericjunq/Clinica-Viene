@@ -1,0 +1,10 @@
+[
+  { "codigo": "CLINICA", "nome": "Clínica geral (avaliação, limpeza, restauração)" },
+  { "codigo": "ORTODONTIA", "nome": "Ortodontia" },
+  { "codigo": "ENDODONTIA", "nome": "Endodontia (canal)" },
+  { "codigo": "PROTESE", "nome": "Prótese" },
+  { "codigo": "CIRURGIA", "nome": "Cirurgia" },
+  { "codigo": "IMPLANTE", "nome": "Implante" },
+  { "codigo": "FACETA", "nome": "Faceta" },
+  { "codigo": "HARMONIZACAO_FACIAL", "nome": "Harmonização facial" }
+]

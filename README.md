@@ -338,8 +338,8 @@ As regras completas de código, testes e banco estão em [`CLAUDE.md`](CLAUDE.md
 
 - [x] **Fase 0**: fundação do repositório, CI e ambiente Docker
 - [x] **Fase 1**: identidade, 2FA, usuários, auditoria e telas de acesso
-- [ ] **Fase 2**: pacientes, termos LGPD, anamnese e assinatura *(em andamento)*
-- [ ] **Fase 3**: agenda
+- [x] **Fase 2**: pacientes, termos LGPD, anamnese e assinatura *(código concluído; aguardando revisão dos textos e o teste real da ZapSign)*
+- [ ] **Fase 3**: agenda *(em andamento)*
 - [ ] **Fase 4**: prontuário
 - [ ] **Fase 5**: financeiro
 - [ ] **Fase 6**: documentos e assinaturas

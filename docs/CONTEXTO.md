@@ -128,10 +128,11 @@ Telas internas (D-104): **Pacientes** (busca, pré-cadastro, ficha com abas Cada
 ## 7. Agenda
 
 - `Consultorio` (nome, ativo). Hoje 1, sistema suporta N.
-- `DisponibilidadeProfissional`: regras recorrentes por profissional **e** consultório (dia da semana, hora início/fim, vigência) — horários fixos diários/semanais.
-- `ExcecaoAgenda`: folgas, férias, feriados, horários extras pontuais (dinâmicos).
+- `DisponibilidadeProfissional`: horários **fixos semanais** por profissional **e** consultório (dia da semana, hora início/fim em hora local, vigência).
+- `ExcecaoAgenda`: `HORARIO_EXTRA` (brecha fora da rotina, num consultório) ou `AUSENCIA` (folga, férias, feriado). Disponibilidade = fixos + extras − ausências; **fora dela não se marca** (D-106).
+- `CategoriaProcedimento` (área, código estável, nome, ativa) configurada pelo MASTER. Grade de 15 min, consulta padrão de 30 min (D-106).
 - `BloqueioAgenda`: bloqueio de horário sem paciente.
-- `Agendamento`: paciente, profissional, consultório, início, fim, procedimento previsto, observação, origem.
+- `Agendamento`: paciente, profissional, consultório, início, fim, observação, origem, e **itens** (categoria + descrição, vários por agendamento — D-106). Paciente só com pré-cadastro pode ser agendado (aviso de ficha pendente).
 - Status: `AGENDADO → CONFIRMADO → PACIENTE_CHEGOU → EM_ATENDIMENTO → CONCLUIDO`, ou `FALTOU` / `CANCELADO` (com motivo e quem cancelou). Remarcar = cancelar com motivo "remarcado" + novo agendamento ligado ao anterior.
 - **Conflitos impedidos no banco**: `EXCLUDE USING gist` com `tstzrange` para (profissional, período) e (consultório, período), ignorando cancelados.
 - **Check-in**: recepção marca `PACIENTE_CHEGOU` → notificação em tempo real para o profissional (WebSocket/STOMP), com som e confirmação de leitura.

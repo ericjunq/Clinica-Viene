@@ -104,6 +104,11 @@ clinicaviene:
     validade: 7d
     maximo-downloads: 5
     tentativas-cpf: 5
+  agenda:
+    # D-106 — horários começam de 15 em 15 min; consulta vem com 30 min (a recepção ajusta).
+    grade: 15m
+    duracao-padrao: 30m
+    fuso: America/Bahia
   zapsign:
     # D-090/D-103 — estrutura pronta, desligada: nenhuma chamada sai enquanto habilitado=false.
     # Sandbox (sem validade jurídica, não cobra): https://sandbox.api.zapsign.com.br/api/v1

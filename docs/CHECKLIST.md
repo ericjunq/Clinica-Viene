@@ -4,6 +4,21 @@
 > Item concluído sem testes executados: marcar `[~]` e anotar **"testes pendentes de execução"**.
 > Desenvolvimento direto na `main` (D-058). Itens antigos citam a branch em que foram feitos.
 
+## Pendências em aberto (resumo — atualizado em 2026-11-27)
+Itens que ficaram para depois, com o motivo. O detalhe fica na fase de origem.
+
+**Dependem do autor**
+- [ ] Revisão da ficha de saúde (dentista) e dos termos (advogado) — arquivo enviado: `Revisao-ficha-de-saude-e-termos` (PDF/DOCX) (D-089)
+- [ ] Dados da clínica para os termos: razão social, CNPJ, endereço, encarregado de dados (DPO), prazo de guarda do prontuário (D-040)
+- [ ] Ligar a ZapSign ao fluxo da ficha e testar com documento real — quando o projeto estiver avançado (plano gratuito: 3 documentos/mês) (D-103)
+- [ ] Logo oficial em SVG/PNG para substituir o monograma desenhado (Q-012, D-082)
+- [ ] Decisões A CONFIRMAR das próximas fases: hospedagem e backups (D-041), storage de produção (D-060), retenção (D-040), regras financeiras (D-012, D-015, D-035, D-036, D-038), tablet da recepção (D-037), impactos multiprofissionais (D-070)
+
+**Técnicas**
+- [ ] Formatar o backend (Spotless/palantir) e ligar `spotless:check` no CI (D-063) — pode ser feito pelo próprio CI
+- [ ] Fonte completa no PDF da ficha (hoje caracteres fora do português, como emoji, saem como `#`) — só se fizer falta (D-102)
+- [ ] E2E do botão "Abrir neste aparelho" (encerra a sessão da recepção e abre o quiosque) — o E2E atual abre o link do convite direto (D-104)
+
 ## Fase 0 — Fundação do repositório
 Feita inicialmente em branches empilhadas (D-054), integradas na `main` por fast-forward em 2026-11-26. Daqui em diante, tudo direto na `main` (D-058).
 
@@ -140,12 +155,14 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 
 **Pendências que dependem do autor**
 - [x] Conta ZapSign criada (plano gratuito, 3 documentos/mês) — teste real adiado (D-103)
-- [ ] Revisão do exemplo de anamnese (dentista) e dos termos (advogado) antes de publicar (D-089)
+- [ ] Revisão do exemplo de anamnese (dentista) e dos termos (advogado) antes de publicar (D-089) — arquivo de revisão gerado em 2026-11-27, aguardando retorno
+- [ ] Ligar a ZapSign e testar com documento real (D-103)
 
 ## Fase 3 — Agenda
-- [ ] `Consultorio`
-- [ ] `DisponibilidadeProfissional` (recorrente) + `ExcecaoAgenda` + `BloqueioAgenda`
-- [ ] `Agendamento` com status completo + exclusão de conflitos no banco
+- [x] `Consultorio` e `CategoriaProcedimento` (por área, código estável, exemplo de odontologia) — MASTER (D-106) — V17 — `AgendaConfiguracaoControllerIT`, `CategoriaProcedimentoServiceTest` — implementado — testes pendentes de execução
+- [x] `DisponibilidadeProfissional` (fixos semanais) + `ExcecaoAgenda` (horário extra / ausência) + cálculo de disponibilidade, grade de 15 min (D-106) — `DisponibilidadeCalculoTest`, `AgendaConfiguracaoControllerIT` — implementado — testes pendentes de execução
+- [ ] `BloqueioAgenda` (bloqueio de consultório sem paciente)
+- [ ] `Agendamento` com itens (categoria + descrição), status completo, exclusão de conflitos no banco e recusa fora da disponibilidade (D-106); aviso de ficha pendente
 - [ ] Marcar / remarcar / cancelar (com motivo)
 - [ ] Check-in + notificação WebSocket ao profissional
 - [ ] Calendário próprio (D-085): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, bloqueios, indisponibilidade esmaecida, cor por status); clicar em horário livre → novo agendamento

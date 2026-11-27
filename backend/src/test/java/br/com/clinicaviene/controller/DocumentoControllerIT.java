@@ -140,6 +140,8 @@ class DocumentoControllerIT {
         UUID paciente = pacienteSemEmail(CpfsFicticios.gerar());
         UUID documento = assinarNoQuiosque(paciente).documentoId();
         comoUsuario(perfil)
+                .contentType(ContentType.JSON)
+                .body(Map.of())
                 .post(documentos(paciente.toString()) + "/" + documento + "/entregas")
                 .then()
                 .statusCode(status);
@@ -174,6 +176,8 @@ class DocumentoControllerIT {
                 .body("detail", startsWith("Paciente sem e-mail cadastrado"));
 
         String link = comoUsuario(Perfil.ADMIN)
+                .contentType(ContentType.JSON)
+                .body(Map.of("enviarEmail", false))
                 .post(entregas)
                 .then()
                 .statusCode(201)
@@ -236,6 +240,8 @@ class DocumentoControllerIT {
         UUID outro = pacienteSemEmail(CpfsFicticios.gerar());
 
         comoUsuario(Perfil.ADMIN)
+                .contentType(ContentType.JSON)
+                .body(Map.of())
                 .post(documentos(outro.toString()) + "/" + documento + "/entregas")
                 .then()
                 .statusCode(404);

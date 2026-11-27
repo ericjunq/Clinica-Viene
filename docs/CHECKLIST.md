@@ -4,6 +4,18 @@
 > Item concluído sem testes executados: marcar `[~]` e anotar **"testes pendentes de execução"**.
 > Desenvolvimento direto na `main` (D-058). Itens antigos citam a branch em que foram feitos.
 
+## ▶ Onde paramos / próximo passo (atualizado em 2026-11-27)
+Estado: **Fases 0–2 concluídas** (Fase 2 aguarda só itens do autor); **Fase 3 (agenda) em andamento**, com CI verde no último commit da `main`.
+
+**Falta na Fase 3, nesta ordem sugerida:**
+1. **Semana de um profissional** no calendário (7 colunas, uma por dia; reaproveitar `pages/agenda/calendario.ts` e o componente do dia). Backend já pronto: `GET /api/v1/agendamentos?de&ate&profissionalId` e `GET /api/v1/profissionais/{id}/disponibilidade?de&ate` aceitam até 62 dias.
+2. **Arrastar para remarcar** (Angular CDK Drag & Drop, já no projeto): soltar num horário pede confirmação e motivo e chama `POST /api/v1/agendamentos/{id}/remarcar` (backend pronto). Incluir o **E2E de remarcar** pelo navegador.
+3. **`BloqueioAgenda`**: bloqueio de consultório sem paciente (ex.: manutenção) — falta tudo: migration (só `CREATE`, nova V19), entidade, regra "não marca em horário bloqueado" (somar ao cálculo de disponibilidade por consultório), tela e testes. Decidir com o autor se o bloqueio pode ser também de um profissional.
+4. **Confirmação de leitura do aviso de chegada** registrada no sistema (hoje o "Ciente" só fecha o aviso na tela — D-108): ex. `POST /api/v1/agendamentos/{id}/aviso-lido` + auditoria.
+5. Ao terminar: atualizar README (tabela de funcionalidades e roadmap: Fase 3 concluída), CONTEXTO §7, DECISOES e este checklist.
+
+**Para continuar em outra máquina:** ler `CLAUDE.md` e `docs/` (CONTEXTO, DECISOES, CHECKLIST, DUVIDAS); perguntar o ambiente da sessão (completo ou só código). Nesta máquina do autor não há Java/Docker: o backend é testado pelo CI (GitHub Actions); o frontend roda local (`npm test`, `npm run lint`, `npx ng build`). Depois de cada push, acompanhar o CI (`gh run watch`).
+
 ## Pendências em aberto (resumo — atualizado em 2026-11-27)
 Itens que ficaram para depois, com o motivo. O detalhe fica na fase de origem.
 
@@ -161,7 +173,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 ## Fase 3 — Agenda
 - [x] `Consultorio` e `CategoriaProcedimento` (por área, código estável, exemplo de odontologia) — MASTER (D-106) — V17 — `AgendaConfiguracaoControllerIT`, `CategoriaProcedimentoServiceTest` — **CI verde**
 - [x] `DisponibilidadeProfissional` (fixos semanais) + `ExcecaoAgenda` (horário extra / ausência) + cálculo de disponibilidade, grade de 15 min (D-106) — `DisponibilidadeCalculoTest`, `AgendaConfiguracaoControllerIT` — **CI verde**
-- [ ] `BloqueioAgenda` (bloqueio de consultório sem paciente)
+- [ ] `BloqueioAgenda` (bloqueio de consultório sem paciente, ex.: manutenção) — falta backend e tela
 - [x] `Agendamento` com itens (categoria + descrição), status completo, exclusão de conflitos no banco e recusa fora da disponibilidade (D-106); aviso de ficha pendente — V18 — `AgendamentoControllerIT`, `StatusAgendamentoTest` — **CI verde**
 - [x] Marcar / remarcar / cancelar (com motivo), alterar itens, confirmar/check-in/atendimento/falta (backend) — **CI verde**
 - [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — **CI verde**
@@ -170,9 +182,9 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [ ] Confirmação de leitura do aviso registrada no sistema (hoje o "Ciente" só fecha o aviso na tela)
 - [x] Calendário próprio (D-085, D-107): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, indisponibilidade esmaecida, cor por status, aviso de ficha pendente); clicar em horário livre → nova consulta com itens — Vitest + E2E — **CI verde**
 - [x] Telas: horários dos profissionais (fixos, extras, ausências) e configurações de consultórios e categorias (D-107) — E2E — **CI verde**
-- [ ] Calendário próprio: semana de um profissional
+- [ ] Calendário próprio: semana de um profissional (backend pronto; falta a tela)
 - [x] Calendário próprio: lista do dia para o check-in (um clique em "Chegou") (D-108) — E2E — **CI verde**
-- [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo)
+- [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo) (backend de remarcar pronto; falta a tela)
 - [x] Testes do calendário: hora da clínica, posições e sobreposição (unitários, `calendario.spec.ts`) + marcar e check-in no navegador (E2E) — **CI verde**
 - [ ] E2E de remarcar pelo navegador (junto do arrastar para remarcar)
 - [x] Testes de concorrência de agendamento (4 recepcionistas no mesmo horário → 1 grava) — `AgendamentoControllerIT` — **CI verde**

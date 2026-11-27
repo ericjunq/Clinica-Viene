@@ -320,7 +320,7 @@ Paciente(id, nomeCompleto, cpf? (cifrado), cpfHash? UK parcial, dataNascimento, 
          semCpfJustificativa?, semCpfAprovadoPor?, semCpfAprovadoEm?, createdAt, updatedAt)
 ResponsavelLegal(id, paciente_id, nome, cpf (cifrado, obrigatório), cpfHash, parentesco, telefone, email)
 PacienteVersao(id, paciente_id, dados (cifrados), alteradoPor, origem, createdAt)   (histórico — D-092)
-ConviteCadastro(id, paciente_id, tokenHash, modo LINK|QUIOSQUE, criadoPor, criadoEm, expiraEm, enviadoPorEmailEm?, documentoConferidoPor?, usadoEm?, canceladoEm?)
+ConviteCadastro(id, paciente_id, tokenHash, modo LINK|QUIOSQUE, areaAtuacao, criadoPor, criadoEm, expiraEm, enviadoPorEmailEm?, documentoConferidoPor?, usadoEm?, canceladoEm?)
 SessaoCadastro(id, convite_id, codigoHash?, codigoExpiraEm?, tentativasCodigo, codigoEnviadoEm?, tokenHash?, criadaEm, confirmadaEm?, expiraEm?, ip, dispositivo)
 ModeloAnamnese(id, areaAtuacao, versao, perguntas jsonb, status RASCUNHO|PUBLICADO, publicadoEm)
 FichaAnamnese(id, paciente_id, modelo_id, respostas (cifradas), origem, ajudaAcompanhante, documento_id, createdAt)

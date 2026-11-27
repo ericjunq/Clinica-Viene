@@ -172,7 +172,7 @@ class CadastroPublicoControllerIT {
                                 "rita." + UUID.randomUUID() + "@exemplo.com", null, null, null, null, false),
                         recepcao)
                 .getId();
-        String link = conviteService.criar(paciente, modo, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
+        String link = conviteService.criar(paciente, modo, AreaAtuacao.ODONTOLOGIA, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
         return link.substring(link.lastIndexOf('#') + 1);
     }
 

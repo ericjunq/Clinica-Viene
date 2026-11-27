@@ -76,12 +76,14 @@ class ConviteServiceIT {
         UsuarioAutenticado recepcao = usuario(Perfil.ADMIN);
         UUID paciente = adulto(recepcao, "link." + UUID.randomUUID() + "@exemplo.com");
 
-        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.LINK, false, false, recepcao);
+        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.LINK, null, false, false, recepcao);
 
         assertThat(criado.link()).startsWith("http://localhost:4200/cadastro#");
         assertThat(criado.qrCode()).startsWith("data:image/png;base64,");
         assertThat(Duration.between(relogio.instant(), criado.expiraEm())).isEqualTo(Duration.ofHours(72));
         assertThat(criado.emailEnviadoPara()).isNull();
+        // sem área escolhida, vale a padrão (D-101)
+        assertThat(conviteService.listar(paciente, recepcao).getFirst().getAreaAtuacao()).isEqualTo(AreaAtuacao.ODONTOLOGIA);
         String token = token(criado);
         assertThat(conviteService.ativoPorToken(token).getPacienteId()).isEqualTo(paciente);
         Integer comTokenPuro = jdbc.queryForObject(
@@ -100,12 +102,12 @@ class ConviteServiceIT {
         UsuarioAutenticado recepcao = usuario(Perfil.ADMIN);
         UUID paciente = adulto(recepcao, "q." + UUID.randomUUID() + "@exemplo.com");
 
-        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.QUIOSQUE, false, false, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.QUIOSQUE, null, false, false, recepcao))
                 .isInstanceOf(RegraNegocioException.class);
-        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.QUIOSQUE, true, true, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.QUIOSQUE, null, true, true, recepcao))
                 .isInstanceOf(RegraNegocioException.class);
 
-        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.QUIOSQUE, false, true, recepcao);
+        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.QUIOSQUE, null, false, true, recepcao);
         assertThat(Duration.between(relogio.instant(), criado.expiraEm())).isEqualTo(Duration.ofHours(2));
         UUID conferidoPor = jdbc.queryForObject(
                 "SELECT documento_conferido_por FROM convite_cadastro WHERE id = ?", UUID.class, criado.id());
@@ -116,8 +118,8 @@ class ConviteServiceIT {
     void novoConviteCancelaOAnteriorETokenTambemPodeSerCancelado() {
         UsuarioAutenticado recepcao = usuario(Perfil.MASTER);
         UUID paciente = adulto(recepcao, "n." + UUID.randomUUID() + "@exemplo.com");
-        String primeiro = token(conviteService.criar(paciente, ModoConvite.LINK, false, false, recepcao));
-        ConviteCriadoResponse segundo = conviteService.criar(paciente, ModoConvite.LINK, false, false, recepcao);
+        String primeiro = token(conviteService.criar(paciente, ModoConvite.LINK, null, false, false, recepcao));
+        ConviteCriadoResponse segundo = conviteService.criar(paciente, ModoConvite.LINK, null, false, false, recepcao);
 
         assertThatThrownBy(() -> conviteService.ativoPorToken(primeiro)).isInstanceOf(ConviteInvalidoException.class);
         assertThatCode(() -> conviteService.ativoPorToken(token(segundo))).doesNotThrowAnyException();
@@ -141,23 +143,23 @@ class ConviteServiceIT {
         String email = "envio." + UUID.randomUUID() + "@exemplo.com";
         UUID paciente = adulto(recepcao, email);
 
-        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.LINK, true, false, recepcao);
+        ConviteCriadoResponse criado = conviteService.criar(paciente, ModoConvite.LINK, null, true, false, recepcao);
         assertThat(criado.emailEnviadoPara()).isEqualTo(email.charAt(0) + "***@exemplo.com");
         assertThat(Duration.between(relogio.instant(), criado.podeReenviarEm())).isEqualTo(Duration.ofMinutes(1));
         String corpo = GreenMailUtil.getBody(ultimaMensagem(email));
         assertThat(corpo).contains(criado.link().substring(criado.link().lastIndexOf('#') + 1)).contains("72 horas");
         assertThat(contarAuditoria("CONVITE_ENVIADO_EMAIL", paciente)).isEqualTo(1);
 
-        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.LINK, true, false, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.LINK, null, true, false, recepcao))
                 .isInstanceOf(MuitasTentativasException.class);
         // a recusa não cancela o convite que já foi enviado
         assertThatCode(() -> conviteService.ativoPorToken(token(criado))).doesNotThrowAnyException();
         // sem e-mail (só QR) não há espera
-        assertThatCode(() -> conviteService.criar(paciente, ModoConvite.LINK, false, false, recepcao))
+        assertThatCode(() -> conviteService.criar(paciente, ModoConvite.LINK, null, false, false, recepcao))
                 .doesNotThrowAnyException();
 
         relogio.avancar(Duration.ofMinutes(1));
-        ConviteCriadoResponse reenviado = conviteService.criar(paciente, ModoConvite.LINK, true, false, recepcao);
+        ConviteCriadoResponse reenviado = conviteService.criar(paciente, ModoConvite.LINK, null, true, false, recepcao);
         assertThat(Duration.between(relogio.instant(), reenviado.podeReenviarEm())).isEqualTo(Duration.ofMinutes(2));
     }
 
@@ -175,7 +177,7 @@ class ConviteServiceIT {
                                 null, false),
                         recepcao)
                 .getId();
-        conviteService.criar(crianca, ModoConvite.LINK, true, false, recepcao);
+        conviteService.criar(crianca, ModoConvite.LINK, null, true, false, recepcao);
         assertThat(ultimaMensagem(emailResponsavel)).isNotNull();
 
         UUID semEmail = pacienteService
@@ -186,11 +188,11 @@ class ConviteServiceIT {
                         recepcao)
                 .getId();
         // sem e-mail não há como confirmar a identidade pelo link: só quiosque (D-100)
-        assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, true, false, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, null, true, false, recepcao))
                 .isInstanceOf(RegraNegocioException.class);
-        assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, false, false, recepcao))
+        assertThatThrownBy(() -> conviteService.criar(semEmail, ModoConvite.LINK, null, false, false, recepcao))
                 .isInstanceOf(RegraNegocioException.class);
-        assertThatCode(() -> conviteService.criar(semEmail, ModoConvite.QUIOSQUE, false, true, recepcao))
+        assertThatCode(() -> conviteService.criar(semEmail, ModoConvite.QUIOSQUE, null, false, true, recepcao))
                 .doesNotThrowAnyException();
     }
 
@@ -199,7 +201,7 @@ class ConviteServiceIT {
         UUID paciente = adulto(usuario(Perfil.ADMIN), "perm." + UUID.randomUUID() + "@exemplo.com");
         for (Perfil perfil : List.of(Perfil.PROFISSIONAL, Perfil.DEV)) {
             UsuarioAutenticado ator = usuario(perfil);
-            assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.LINK, false, false, ator))
+            assertThatThrownBy(() -> conviteService.criar(paciente, ModoConvite.LINK, null, false, false, ator))
                     .isInstanceOf(AccessDeniedException.class);
             assertThatThrownBy(() -> conviteService.listar(paciente, ator)).isInstanceOf(AccessDeniedException.class);
         }

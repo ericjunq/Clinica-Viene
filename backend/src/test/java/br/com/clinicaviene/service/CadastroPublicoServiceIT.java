@@ -319,6 +319,20 @@ class CadastroPublicoServiceIT {
     }
 
     @Test
+    void fichaDeSaudeEDaAreaEscolhidaNoConvite() {
+        UUID paciente = adulto("ivo." + UUID.randomUUID() + "@exemplo.com");
+        String link = conviteService
+                .criar(paciente, ModoConvite.QUIOSQUE, AreaAtuacao.FONOAUDIOLOGIA, false, true, recepcao)
+                .link();
+        String convite = link.substring(link.lastIndexOf('#') + 1);
+        String sessao = cadastroPublicoService.iniciarQuiosque(convite, IP, APARELHO).token();
+        // nenhum teste publica modelo de fonoaudiologia
+        assertThatThrownBy(() -> cadastroPublicoService.formulario(convite, sessao))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessageContaining("ainda não publicou a ficha de saúde");
+    }
+
+    @Test
     void conviteInvalidoTemSempreAMesmaResposta() {
         assertThatThrownBy(() -> cadastroPublicoService.abrir("nao-existe", IP)).isInstanceOf(ConviteInvalidoException.class);
         assertThatThrownBy(() -> cadastroPublicoService.abrir(null, IP)).isInstanceOf(ConviteInvalidoException.class);
@@ -374,7 +388,7 @@ class CadastroPublicoServiceIT {
     }
 
     private String convite(UUID paciente, ModoConvite modo) {
-        String link = conviteService.criar(paciente, modo, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
+        String link = conviteService.criar(paciente, modo, AreaAtuacao.ODONTOLOGIA, false, modo == ModoConvite.QUIOSQUE, recepcao).link();
         return link.substring(link.lastIndexOf('#') + 1);
     }
 

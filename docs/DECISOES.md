@@ -360,10 +360,14 @@ O job Docker falhou de forma intermitente com **429 (Too Many Requests)** do Mav
 - **Sessão de preenchimento** (`sessao_cadastro`): token próprio, válido por **2 h** (configurável), ligado ao convite; perde a validade se o convite for usado ou cancelado. Só hashes do código e do token no banco.
 - **Tokens fora das URLs**: na API, convite no cabeçalho `X-Convite-Cadastro` e sessão em `X-Sessao-Cadastro`; o link para o paciente é **`/cadastro#<token>`** — o que vem depois do `#` não é enviado ao servidor (não aparece em log do Nginx nem em `Referer`), e a tela apaga o token da barra de endereço ao abrir. Rotas públicas com limite por IP, separado do login.
 - **Frontend**: tela `/cadastro` (pública) com confirmação do código ou botão "Começar" (quiosque) e passo a passo: seus dados → ficha de saúde → privacidade (consentimentos opcionais desmarcados) → conferir. Tokens e respostas só em memória (o aparelho pode ser o quiosque da clínica); recarregar a página exige abrir o link de novo. O interceptor não manda o token da equipe nas rotas `/api/v1/publico/`.
-- **Formulário**: pré-cadastro para conferir, modelo de anamnese vigente da área configurada (Q-013) e termos vigentes. Leitura auditada sem usuário ("pelo próprio paciente").
+- **Formulário**: pré-cadastro para conferir, modelo de anamnese vigente da área do convite (D-101) e termos vigentes. Leitura auditada sem usuário ("pelo próprio paciente").
 - **Revisão**: confere a ficha inteira — dados (endereço completo exigido; CPF válido e não usado por outro paciente; adulto sem CPF só se já aprovado pelo MASTER; menor com responsável), respostas contra o modelo vigente e **uma decisão para cada termo vigente** com a política aceita. Se a clínica publicar nova versão durante o preenchimento, pede para recarregar.
 - **Nada da ficha é gravado antes da assinatura** (2F): as respostas da anamnese só chegam ao banco junto com a ficha assinada e cifrada — menos dado de saúde guardado sem necessidade.
 - Acompanhante (quem ajudou a preencher) é campo opcional da ficha (D-088).
+
+**D-101 — Área da ficha de saúde no convite; coluna incluída no CREATE da V14** · 2026-11-27 · Resolve a Q-013
+- A recepção escolhe a **área** (odontologia, psicologia…) ao gerar o convite; o paciente responde o modelo de anamnese vigente **daquela área**. Sem escolha, vale a área padrão (`clinicaviene.convite.area-padrao`, ODONTOLOGIA). Área sem modelo publicado: o paciente vê o aviso para falar com a recepção.
+- **Aprovado pelo autor**: como nenhum banco tem dado real (só testes; o CI cria banco novo a cada execução), a coluna `area_atuacao` entrou **editando o `CREATE TABLE` da V14**, em vez de um `ALTER`. Efeito colateral: banco local que já rodou a V14 acusa checksum diferente no Flyway — recriar com `docker compose down -v`. A aprovação vale para este caso; a regra geral da D-047 continua (mudanças de schema só com aprovação).
 
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.

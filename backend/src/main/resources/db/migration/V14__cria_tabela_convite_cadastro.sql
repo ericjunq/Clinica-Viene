@@ -6,6 +6,8 @@ CREATE TABLE convite_cadastro
     paciente_id             UUID                     NOT NULL REFERENCES paciente (id),
     token_hash              VARCHAR(64)              NOT NULL,
     modo                    VARCHAR(15)              NOT NULL,
+    -- Área da ficha de saúde (modelo de anamnese) que o paciente vai responder (Q-013/D-101).
+    area_atuacao            VARCHAR(30)              NOT NULL,
     criado_por              UUID                     NOT NULL REFERENCES usuario (id),
     criado_em               TIMESTAMP WITH TIME ZONE NOT NULL,
     expira_em               TIMESTAMP WITH TIME ZONE NOT NULL,

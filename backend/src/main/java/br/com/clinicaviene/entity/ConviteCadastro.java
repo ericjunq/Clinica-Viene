@@ -1,5 +1,6 @@
 package br.com.clinicaviene.entity;
 
+import br.com.clinicaviene.enums.AreaAtuacao;
 import br.com.clinicaviene.enums.ModoConvite;
 import br.com.clinicaviene.enums.SituacaoConvite;
 import br.com.clinicaviene.util.IdUtils;
@@ -35,6 +36,11 @@ public class ConviteCadastro {
     @Column(nullable = false, length = 15, updatable = false)
     private ModoConvite modo;
 
+    /** Área da ficha de saúde que o paciente responde (D-101). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "area_atuacao", nullable = false, length = 30, updatable = false)
+    private AreaAtuacao areaAtuacao;
+
     @Column(name = "criado_por", nullable = false, updatable = false)
     private UUID criadoPor;
 
@@ -58,12 +64,13 @@ public class ConviteCadastro {
     private Instant canceladoEm;
 
     public ConviteCadastro(
-            UUID pacienteId, String tokenHash, ModoConvite modo, UUID criadoPor, UUID documentoConferidoPor, Instant agora,
+            UUID pacienteId, String tokenHash, ModoConvite modo, AreaAtuacao areaAtuacao, UUID criadoPor, UUID documentoConferidoPor, Instant agora,
             Instant expiraEm) {
         this.id = IdUtils.novoId();
         this.pacienteId = pacienteId;
         this.tokenHash = tokenHash;
         this.modo = modo;
+        this.areaAtuacao = areaAtuacao;
         this.criadoPor = criadoPor;
         this.documentoConferidoPor = documentoConferidoPor;
         this.criadoEm = agora;

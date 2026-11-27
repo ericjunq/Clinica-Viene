@@ -173,7 +173,7 @@ public class CadastroPublicoService {
     public FormularioCadastroResponse formulario(String token, String tokenSessao) {
         ConviteCadastro convite = conviteDaSessao(token, tokenSessao);
         DadosCadastroDto dados = pacienteService.dadosParaConferencia(convite.getPacienteId());
-        ModeloAnamnese modelo = modeloVigente();
+        ModeloAnamnese modelo = modeloVigente(convite);
         List<FormularioCadastroResponse.Termo> termos = termosVigentes().stream()
                 .map(t -> new FormularioCadastroResponse.Termo(
                         t.getId(), t.getTipo(), t.getTipo().obrigatorio(), t.getVersao(), t.getTitulo(), t.getTexto()))
@@ -198,7 +198,7 @@ public class CadastroPublicoService {
         ConviteCadastro convite = conviteDaSessao(token, tokenSessao);
         DadosCadastroDto dados = pacienteService.validarFicha(convite.getPacienteId(), ficha.dados());
 
-        ModeloAnamnese modelo = modeloVigente();
+        ModeloAnamnese modelo = modeloVigente(convite);
         if (!modelo.getId().equals(ficha.modeloAnamneseId())) {
             throw new RegraNegocioException("A ficha de saúde foi atualizada pela clínica. Recarregue a página para continuar.");
         }
@@ -250,9 +250,9 @@ public class CadastroPublicoService {
                 .orElseThrow(SessaoCadastroInvalidaException::new);
     }
 
-    private ModeloAnamnese modeloVigente() {
+    private ModeloAnamnese modeloVigente(ConviteCadastro convite) {
         return modeloAnamneseService
-                .vigente(propriedades.areaAnamnese())
+                .vigente(convite.getAreaAtuacao())
                 .orElseThrow(() -> new RegraNegocioException(
                         "A clínica ainda não publicou a ficha de saúde. Avise a recepção."));
     }

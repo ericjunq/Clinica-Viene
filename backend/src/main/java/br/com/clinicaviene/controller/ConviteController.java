@@ -32,7 +32,7 @@ public class ConviteController {
     @ResponseStatus(HttpStatus.CREATED)
     public ConviteCriadoResponse criar(@PathVariable UUID pacienteId, @Valid @RequestBody NovoConviteRequest request) {
         return conviteService.criar(
-                pacienteId, request.modo(), request.deveEnviarEmail(), request.documentoFoiConferido(),
+                pacienteId, request.modo(), request.areaAtuacao(), request.deveEnviarEmail(), request.documentoFoiConferido(),
                 usuarioAutenticadoProvider.obter());
     }
 

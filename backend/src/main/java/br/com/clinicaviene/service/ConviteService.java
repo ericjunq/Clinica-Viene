@@ -10,6 +10,7 @@ import br.com.clinicaviene.entity.ConviteCadastro;
 import br.com.clinicaviene.entity.Paciente;
 import br.com.clinicaviene.entity.ResponsavelLegal;
 import br.com.clinicaviene.enums.AcaoAuditoria;
+import br.com.clinicaviene.enums.AreaAtuacao;
 import br.com.clinicaviene.enums.ModoConvite;
 import br.com.clinicaviene.enums.SituacaoConvite;
 import br.com.clinicaviene.exceptions.ConviteInvalidoException;
@@ -54,7 +55,12 @@ public class ConviteService {
 
     @Transactional
     public ConviteCriadoResponse criar(
-            UUID pacienteId, ModoConvite modo, boolean enviarEmail, boolean documentoConferido, UsuarioAutenticado ator) {
+            UUID pacienteId,
+            ModoConvite modo,
+            AreaAtuacao area,
+            boolean enviarEmail,
+            boolean documentoConferido,
+            UsuarioAutenticado ator) {
         exigirRecepcao(ator);
         Paciente paciente = pacienteRepository.findById(pacienteId).orElseThrow(PacienteNaoEncontradoException::new);
         Instant agora = agora();
@@ -89,7 +95,7 @@ public class ConviteService {
         String token = TokenUtils.gerar();
         Instant expiraEm = agora.plus(modo == ModoConvite.LINK ? conviteProperties.validadeLink() : conviteProperties.validadeQuiosque());
         ConviteCadastro convite = conviteCadastroRepository.save(new ConviteCadastro(
-                pacienteId, TokenUtils.sha256(token), modo, ator.id(), modo == ModoConvite.QUIOSQUE ? ator.id() : null, agora,
+                pacienteId, TokenUtils.sha256(token), modo, area == null ? conviteProperties.areaPadrao() : area, ator.id(), modo == ModoConvite.QUIOSQUE ? ator.id() : null, agora,
                 expiraEm));
         String link = conviteProperties.urlPublica().replaceAll("/+$", "") + "/cadastro#" + token;
         auditoriaService.registrar(new RegistroAuditoria(

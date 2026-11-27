@@ -115,6 +115,8 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Frontend: tela pública `/cadastro#<token>` (código ou quiosque, seus dados, ficha de saúde, privacidade, conferir) — Vitest — **CI verde**
 - [ ] E2E do fluxo do paciente (Playwright) — junto da 2G, quando as telas internas gerarem o convite
 
+- [~] Área da ficha de saúde escolhida no convite (D-101, Q-013) — coluna no CREATE da V14 — implementado — testes pendentes de execução (CI)
+
 **2F. Assinatura e documento**
 - [ ] `ProvedorAssinatura` + provedor interno (desenho/nome digitado + evidências); adaptador ZapSign quando houver conta (D-090)
 - [ ] PDF (Thymeleaf → openhtmltopdf) + SHA-256 + storage S3 privado (SeaweedFS em dev/teste — D-056)

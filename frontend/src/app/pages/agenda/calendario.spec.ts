@@ -8,6 +8,7 @@ import {
   hojeNaClinica,
   inicioDaSemana,
   instanteDaClinica,
+  minutosAposArrastar,
   minutosDaHora,
   minutosNoDia,
   naGrade,
@@ -87,6 +88,16 @@ describe('calendário da agenda', () => {
     expect(por['d']).toMatchObject({ raia: 1, raias: 2 });
     expect(por['b']).toMatchObject({ raia: 1, raias: 2 });
     expect(por['c']).toMatchObject({ raia: 0, raias: 1 });
+  });
+
+  it('encaixa o bloco arrastado no horário da grade mais próximo', () => {
+    // 9h, 1,6 px por minuto: 96 px = 60 min
+    expect(minutosAposArrastar(540, 96, 1.6, 15)).toBe(600);
+    // 20 px ≈ 12,5 min → arredonda para 15
+    expect(minutosAposArrastar(540, 20, 1.6, 15)).toBe(555);
+    // 10 px ≈ 6 min → fica no mesmo horário
+    expect(minutosAposArrastar(540, 10, 1.6, 15)).toBe(540);
+    expect(minutosAposArrastar(540, -48, 1.6, 15)).toBe(510);
   });
 
   it('confere se o horário cabe na disponibilidade', () => {

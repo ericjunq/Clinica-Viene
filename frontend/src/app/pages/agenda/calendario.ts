@@ -139,6 +139,19 @@ export function distribuirRaias<T extends { inicio: number; fim: number }>(
   return resultado;
 }
 
+/**
+ * Novo início (minutos no dia) de um bloco arrastado {@code deslocamentoPx} na vertical, encaixado no horário da grade
+ * mais próximo.
+ */
+export function minutosAposArrastar(
+  inicio: number,
+  deslocamentoPx: number,
+  pxPorMinuto: number,
+  grade: number,
+): number {
+  return Math.round((inicio + deslocamentoPx / pxPorMinuto) / grade) * grade;
+}
+
 /** O trecho [inicio, fim) cabe inteiro em algum trecho disponível? */
 export function cabeEm(
   disponiveis: { inicio: number; fim: number }[],

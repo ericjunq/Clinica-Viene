@@ -1,3 +1,4 @@
+import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +32,7 @@ import {
   faixaDoDia,
   formatarHora,
   hojeNaClinica,
+  minutosAposArrastar,
   minutosNoDia,
   naGrade,
   posicao,
@@ -39,6 +41,7 @@ import {
 } from './calendario';
 import { DadosDetalheAgendamento, DetalheAgendamentoDialog } from './detalhe-agendamento.dialog';
 import { DadosNovoAgendamento, NovoAgendamentoDialog } from './novo-agendamento.dialog';
+import { DadosRemarcarArraste, RemarcarArrasteDialog } from './remarcar-arraste.dialog';
 
 /** Pixels por minuto na grade (15 min = 24 px). */
 const PX_POR_MINUTO = 1.6;
@@ -79,6 +82,7 @@ interface Coluna {
 @Component({
   selector: 'app-agenda-page',
   imports: [
+    CdkDrag,
     FormsModule,
     RouterLink,
     MatButtonModule,
@@ -116,6 +120,8 @@ export class AgendaPage implements OnInit {
   private readonly profissionais = signal<Profissional[]>([]);
   private readonly agendamentos = signal<Agendamento[]>([]);
   private readonly disponibilidade = signal<Record<string, IntervaloDisponivel[]>>({});
+  /** Houve arrasto: o clique que vem junto com o soltar não abre os detalhes. */
+  private arrastou = false;
   /** Profissional escolhido para a visão da semana (vazio: o primeiro da lista). */
   private readonly escolhidoSemana = signal<string | null>(null);
 
@@ -318,7 +324,108 @@ export class AgendaPage implements OnInit {
       });
   }
 
+  /** Só a recepção/MASTER arrasta, e só consultas que ainda podem ser remarcadas (D-106). */
+  protected podeArrastar(a: Agendamento): boolean {
+    return this.gestao() && (a.status === 'AGENDADO' || a.status === 'CONFIRMADO');
+  }
+
+  protected comecouArrastar(): void {
+    this.arrastou = true;
+  }
+
+  /**
+   * Soltou uma consulta arrastada: o bloco volta ao lugar e, se o horário ou a coluna mudou, abre a confirmação com
+   * motivo. Nada muda na agenda antes de confirmar.
+   */
+  protected soltar(bloco: Bloco, origem: Coluna, evento: CdkDragEnd): void {
+    // o clique que o navegador dispara ao soltar não deve abrir os detalhes
+    setTimeout(() => (this.arrastou = false));
+    evento.source.reset();
+    const alvo = document
+      .elementsFromPoint(evento.dropPoint.x, evento.dropPoint.y)
+      .find((el) => el.classList.contains('coluna')) as HTMLElement | undefined;
+    const destino = this.colunas().find((c) => c.id === alvo?.dataset['id']);
+    if (!destino) return;
+    const minutos = minutosAposArrastar(
+      bloco.inicio,
+      evento.distance.y,
+      PX_POR_MINUTO,
+      GRADE_MINUTOS,
+    );
+    if (destino.id === origem.id && minutos === bloco.inicio) return;
+    const duracao = bloco.fim - bloco.inicio;
+    if (!cabeEm(destino.livres, minutos, minutos + duracao)) {
+      this.avisosTela.open(
+        'Fora dos horários de atendimento. Cadastre um horário extra para encaixar.',
+        'OK',
+        { duration: 4000 },
+      );
+      return;
+    }
+    const a = bloco.agendamento;
+    const profissional = destino.profissionalId
+      ? this.profissionais().find((p) => p.id === destino.profissionalId)
+      : null;
+    const profissionalDestino = profissional
+      ? { id: profissional.id, nome: profissional.nomeCompleto }
+      : a.profissional;
+    const consultorioDestino = this.consultorioDestino(
+      destino,
+      profissionalDestino.id,
+      minutos,
+      duracao,
+      a,
+    );
+    const dados: DadosRemarcarArraste = {
+      agendamento: a,
+      destino: {
+        dia: destino.dia,
+        minutos,
+        duracaoMinutos: duracao,
+        profissional: profissionalDestino,
+        consultorio: consultorioDestino,
+      },
+    };
+    this.dialogo
+      .open<RemarcarArrasteDialog, DadosRemarcarArraste, Agendamento>(RemarcarArrasteDialog, {
+        data: dados,
+        maxWidth: '95vw',
+      })
+      .afterClosed()
+      .subscribe((nova) => {
+        if (nova) {
+          this.avisosTela.open('Consulta remarcada.', 'OK', { duration: 3000 });
+          this.carregarDia();
+        }
+      });
+  }
+
+  /**
+   * Consultório de destino: o da coluna (visão por consultório); senão o atual, se o profissional atende nele no novo
+   * horário, ou aquele em que ele atende nesse horário.
+   */
+  private consultorioDestino(
+    destino: Coluna,
+    profissionalId: string,
+    minutos: number,
+    duracao: number,
+    a: Agendamento,
+  ): { id: string; nome: string } {
+    const nome = (id: string) => this.consultorios().find((c) => c.id === id)?.nome ?? '';
+    if (destino.consultorioId) {
+      return { id: destino.consultorioId, nome: nome(destino.consultorioId) };
+    }
+    const atende = (this.disponibilidade()[profissionalId] ?? []).filter((i) =>
+      cabeEm([this.trecho(i, destino.dia)], minutos, minutos + duracao),
+    );
+    if (atende.some((i) => i.consultorioId === a.consultorio.id) || !atende.length) {
+      return a.consultorio;
+    }
+    return { id: atende[0].consultorioId, nome: nome(atende[0].consultorioId) };
+  }
+
   protected abrirDetalhe(a: Agendamento): void {
+    if (this.arrastou) return;
     const dados: DadosDetalheAgendamento = {
       agendamento: a,
       gestao: this.gestao(),

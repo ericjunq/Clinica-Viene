@@ -148,6 +148,7 @@
           class="coluna"
           [attr.data-coluna]="c.titulo"
           [attr.data-dia]="c.dia"
+          [attr.data-id]="c.id"
           [class.clicavel]="gestao()"
           (click)="clicarColuna(c, $event)"
           (keydown.enter)="abrirMarcacao(c, c.livres[0]?.inicio ?? 480)"
@@ -163,6 +164,12 @@
             <button
               type="button"
               class="bloco"
+              cdkDrag
+              cdkDragBoundary=".corpo"
+              [cdkDragDisabled]="!podeArrastar(b.agendamento)"
+              [class.arrastavel]="podeArrastar(b.agendamento)"
+              (cdkDragStarted)="comecouArrastar()"
+              (cdkDragEnded)="soltar(b, c, $event)"
               [attr.data-status]="b.agendamento.status"
               [style.top.px]="b.topo"
               [style.height.px]="b.altura"
@@ -199,6 +206,9 @@
   <p class="legenda nota">
     Áreas brancas: horários de atendimento. Clique num horário livre para marcar; clique numa
     consulta para ver os detalhes.
+    @if (gestao()) {
+      Arraste uma consulta agendada ou confirmada para outro horário (ou coluna) para remarcar.
+    }
     <mat-icon fontSet="material-symbols-outlined" class="pendente">assignment_late</mat-icon> ficha
     de cadastro pendente.
   </p>

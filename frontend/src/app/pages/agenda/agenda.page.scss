@@ -170,6 +170,17 @@
   }
 }
 
+.bloco.arrastavel {
+  cursor: grab;
+}
+
+/* enquanto arrasta: por cima de tudo e com sombra */
+.bloco.cdk-drag-dragging {
+  z-index: 5;
+  cursor: grabbing;
+  box-shadow: 0 6px 18px rgba(74, 54, 38, 0.3);
+}
+
 .bloco-hora {
   font-weight: 600;
 }

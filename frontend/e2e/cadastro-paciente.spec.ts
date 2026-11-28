@@ -245,6 +245,29 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
   await page.getByRole('button', { name: 'Semana anterior' }).click();
   await expect(colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE })).toBeVisible();
 
+  // arrastar para remarcar: 9h → 10h no mesmo dia (60 min = 96 px), com confirmação e motivo
+  const caixa = await colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE }).boundingBox();
+  if (!caixa) throw new Error('bloco da consulta não encontrado');
+  const x = caixa.x + caixa.width / 2;
+  const y = caixa.y + caixa.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 48, { steps: 8 });
+  await page.mouse.move(x, y + 96, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByRole('heading', { name: 'Remarcar consulta' })).toBeVisible();
+  await expect(page.getByTestId('remarcar-de')).toContainText('09:00–09:30');
+  await expect(page.getByTestId('remarcar-para')).toContainText('10:00–10:30');
+  await expect(page.locator('#motivo-arraste')).toBeFocused();
+  await page.locator('#motivo-arraste').fill('Paciente pediu mais tarde');
+  await page.getByRole('button', { name: 'Remarcar', exact: true }).click();
+  await expect(page.getByText('Consulta remarcada.')).toBeVisible();
+  // a antiga fica cancelada (oculta); a nova aparece às 10h
+  await expect(colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE })).toHaveCount(1);
+  await expect(colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE })).toContainText(
+    '10:00–10:30',
+  );
+
   // a dentista entra no sistema (outro navegador) e fica com a agenda aberta
   const contextoDentista = await browser.newContext();
   const dentista = await contextoDentista.newPage();

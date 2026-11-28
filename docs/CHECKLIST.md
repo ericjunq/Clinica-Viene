@@ -9,7 +9,7 @@ Estado: **Fases 0–2 concluídas** (Fase 2 aguarda só itens do autor); **Fase 
 
 **Falta na Fase 3, nesta ordem sugerida:**
 1. ~~**Semana de um profissional** no calendário~~ — feita (D-109).
-2. **Arrastar para remarcar** (Angular CDK Drag & Drop, já no projeto): soltar num horário pede confirmação e motivo e chama `POST /api/v1/agendamentos/{id}/remarcar` (backend pronto). Incluir o **E2E de remarcar** pelo navegador.
+2. ~~**Arrastar para remarcar**~~ — feito, com E2E (D-110).
 3. **`BloqueioAgenda`**: bloqueio de consultório sem paciente (ex.: manutenção) — falta tudo: migration (só `CREATE`, nova V19), entidade, regra "não marca em horário bloqueado" (somar ao cálculo de disponibilidade por consultório), tela e testes. Decidir com o autor se o bloqueio pode ser também de um profissional.
 4. **Confirmação de leitura do aviso de chegada** registrada no sistema (hoje o "Ciente" só fecha o aviso na tela — D-108): ex. `POST /api/v1/agendamentos/{id}/aviso-lido` + auditoria.
 5. Ao terminar: atualizar README (tabela de funcionalidades e roadmap: Fase 3 concluída), CONTEXTO §7, DECISOES e este checklist.
@@ -29,6 +29,7 @@ Itens que ficaram para depois, com o motivo. O detalhe fica na fase de origem.
 **Técnicas**
 - [ ] Formatar o backend (Spotless/palantir) e ligar `spotless:check` no CI (D-063) — pode ser feito pelo próprio CI
 - [ ] Fonte completa no PDF da ficha (hoje caracteres fora do português, como emoji, saem como `#`) — só se fizer falta (D-102)
+- [ ] E2E instável: falhou uma vez no commit `c564152` (só docs) e passou no seguinte com o mesmo código — investigar pelo log do job no GitHub se repetir
 - [ ] E2E do botão "Abrir neste aparelho" (encerra a sessão da recepção e abre o quiosque) — o E2E atual abre o link do convite direto (D-104)
 
 ## Fase 0 — Fundação do repositório
@@ -184,9 +185,9 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Telas: horários dos profissionais (fixos, extras, ausências) e configurações de consultórios e categorias (D-107) — E2E — **CI verde**
 - [~] Calendário próprio: semana de um profissional (segunda a domingo, escolha do profissional, setas por semana) (D-109) — Vitest (`calendario.spec.ts`) **executado localmente: 81 passaram**, lint e build ok; E2E incluído em `cadastro-paciente.spec.ts` — aguardando CI
 - [x] Calendário próprio: lista do dia para o check-in (um clique em "Chegou") (D-108) — E2E — **CI verde**
-- [ ] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, com confirmação e motivo) (backend de remarcar pronto; falta a tela)
+- [~] Calendário próprio: arrastar para remarcar (CDK Drag & Drop, confirmação "De → Para" com motivo; troca horário, consultório, profissional ou dia conforme a coluna) (D-110) — Vitest (`calendario.spec.ts`, `remarcar-arraste.dialog.spec.ts`) **executado localmente: 86 passaram**, lint e build ok — aguardando CI
 - [x] Testes do calendário: hora da clínica, posições e sobreposição (unitários, `calendario.spec.ts`) + marcar e check-in no navegador (E2E) — **CI verde**
-- [ ] E2E de remarcar pelo navegador (junto do arrastar para remarcar)
+- [~] E2E de remarcar pelo navegador: arrasta 9h → 10h na semana, confirma com motivo (`cadastro-paciente.spec.ts`) (D-110) — aguardando CI
 - [x] Testes de concorrência de agendamento (4 recepcionistas no mesmo horário → 1 grava) — `AgendamentoControllerIT` — **CI verde**
 
 ## Fase 4 — Prontuário

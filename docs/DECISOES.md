@@ -435,6 +435,13 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - Carrega a semana em duas chamadas, que o backend já aceitava (até 62 dias): `GET /agendamentos?de&ate&profissionalId` e `GET /profissionais/{id}/disponibilidade?de&ate`. Cada consulta vai para a coluna do seu dia na hora da clínica. Sem mudança no backend.
 - Semana começando na **segunda** (semana de trabalho), com o domingo no fim — proposta do Claude; o autor pode pedir domingo primeiro.
 
+**D-110 — Arrastar para remarcar** · 2026-11-27 · Detalha D-085, D-106
+- Na agenda (dia por consultório, dia por profissional e semana), a recepção e o MASTER **arrastam** uma consulta **agendada ou confirmada** para outro horário e/ou outra coluna (Angular CDK Drag & Drop, sem `cdkDropList`: o destino é a coluna sob o ponteiro). O início encaixa no horário da grade (15 min) mais próximo; a duração se mantém. O profissional não arrasta (não remarca — D-106).
+- Soltar **não muda nada**: o bloco volta ao lugar e abre a confirmação "De → Para" com **motivo obrigatório**; só ao confirmar chama `POST /agendamentos/{id}/remarcar` (cancela com "Remarcado: motivo" + nova consulta ligada, mesmos itens). Desistir não deixa rastro.
+- **Destino por coluna**: por consultório → troca o consultório, mantém o profissional; por profissional → troca o profissional (consultório: o atual, se ele atende ali no novo horário, senão aquele em que atende nesse horário); semana → troca o dia. O pedido só manda profissional/consultório quando mudam (o endpoint já aceitava os dois).
+- Soltar fora dos horários de atendimento avisa (como o clique para marcar) sem abrir a confirmação; conflitos, horário no passado e categoria de outra área são recusados pelo backend e a mensagem aparece no diálogo, que deixa tentar de novo.
+- Remarcar pelos detalhes da consulta (dia, hora, duração) continua existindo — é o caminho por teclado.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

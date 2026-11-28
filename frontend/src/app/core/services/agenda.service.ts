@@ -172,9 +172,16 @@ export class AgendaService {
     return this.http.post<Agendamento>(`/api/v1/agendamentos/${id}/cancelar`, { motivo });
   }
 
+  /** Remarcar; profissional e consultório ausentes (ou nulos) = os mesmos da consulta. */
   remarcar(
     id: string,
-    pedido: { inicio: string; duracaoMinutos: number | null; motivo: string },
+    pedido: {
+      inicio: string;
+      duracaoMinutos: number | null;
+      motivo: string;
+      profissionalId?: string | null;
+      consultorioId?: string | null;
+    },
   ): Observable<Agendamento> {
     return this.http.post<Agendamento>(`/api/v1/agendamentos/${id}/remarcar`, pedido);
   }

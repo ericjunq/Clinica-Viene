@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Remarcar consulta</h2>
+<mat-dialog-content class="dialogo-agenda">
+  <p>
+    <strong>{{ dados.agendamento.paciente.nomeCompleto }}</strong>
+  </p>
+  <dl class="dados-consulta">
+    <dt>De</dt>
+    <dd data-testid="remarcar-de">{{ de.quando }} · {{ de.onde }}</dd>
+    <dt>Para</dt>
+    <dd data-testid="remarcar-para">{{ para.quando }} · {{ para.onde }}</dd>
+  </dl>
+  <mat-form-field appearance="outline" class="largura-total">
+    <mat-label>Motivo da remarcação</mat-label>
+    <input
+      matInput
+      id="motivo-arraste"
+      [(ngModel)]="motivo"
+      maxlength="300"
+      cdkFocusInitial
+      (keydown.enter)="confirmar()"
+    />
+  </mat-form-field>
+  @if (erro(); as e) {
+    <p class="alerta erro" role="alert">{{ e }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="ocupado()">Desistir</button>
+  <button mat-flat-button (click)="confirmar()" [disabled]="ocupado()">Remarcar</button>
+</mat-dialog-actions>

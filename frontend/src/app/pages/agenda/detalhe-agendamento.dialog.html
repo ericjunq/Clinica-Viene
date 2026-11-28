@@ -37,6 +37,14 @@
     @if (a().chegadaEm) {
       <dt>Chegada</dt>
       <dd>{{ a().chegadaEm | date: 'HH:mm' : '-0300' }}</dd>
+      <dt>Aviso ao profissional</dt>
+      <dd data-testid="aviso-ciente">
+        @if (a().avisoCienteEm; as ciente) {
+          Ciente às {{ ciente | date: 'HH:mm' : '-0300' }}
+        } @else {
+          Ainda não confirmado
+        }
+      </dd>
     }
   </dl>
 

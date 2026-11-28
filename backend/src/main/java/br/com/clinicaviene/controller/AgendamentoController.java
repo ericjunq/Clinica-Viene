@@ -70,6 +70,12 @@ public class AgendamentoController {
         return agendamentoService.cancelar(id, request.motivo(), usuarioAutenticadoProvider.obter());
     }
 
+    /** O profissional da consulta confirma que viu o aviso de chegada ("Ciente"). Idempotente. */
+    @PostMapping("/{id}/aviso-chegada/ciente")
+    public AgendamentoResponse avisoChegadaCiente(@PathVariable UUID id) {
+        return agendamentoService.registrarAvisoCiente(id, usuarioAutenticadoProvider.obter());
+    }
+
     @PostMapping("/{id}/remarcar")
     @ResponseStatus(HttpStatus.CREATED)
     public AgendamentoResponse remarcar(@PathVariable UUID id, @Valid @RequestBody RemarcarAgendamentoRequest request) {

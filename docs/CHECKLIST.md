@@ -10,8 +10,8 @@ Estado: **Fases 0–2 concluídas** (Fase 2 aguarda só itens do autor); **Fase 
 **Falta na Fase 3, nesta ordem sugerida:**
 1. ~~**Semana de um profissional** no calendário~~ — feita (D-109).
 2. ~~**Arrastar para remarcar**~~ — feito, com E2E (D-110).
-3. **`BloqueioAgenda`**: bloqueio de consultório sem paciente (ex.: manutenção) — falta tudo: migration (só `CREATE`, nova V19), entidade, regra "não marca em horário bloqueado" (somar ao cálculo de disponibilidade por consultório), tela e testes. Decidir com o autor se o bloqueio pode ser também de um profissional.
-4. **Confirmação de leitura do aviso de chegada** registrada no sistema (hoje o "Ciente" só fecha o aviso na tela — D-108): ex. `POST /api/v1/agendamentos/{id}/aviso-lido` + auditoria.
+3. **`BloqueioAgenda`**: bloqueio de consultório sem paciente (ex.: manutenção) — falta tudo: migration (só `CREATE`, nova V20 — a V19 é a do aviso ciente), entidade, regra "não marca em horário bloqueado" (somar ao cálculo de disponibilidade por consultório), tela e testes. Decidir com o autor se o bloqueio pode ser também de um profissional.
+4. ~~**Confirmação de leitura do aviso de chegada**~~ — feita (D-111).
 5. Ao terminar: atualizar README (tabela de funcionalidades e roadmap: Fase 3 concluída), CONTEXTO §7, DECISOES e este checklist.
 
 **Para continuar em outra máquina:** ler `CLAUDE.md` e `docs/` (CONTEXTO, DECISOES, CHECKLIST, DUVIDAS); perguntar o ambiente da sessão (completo ou só código). Numa das máquinas do autor não há Java/Docker: lá o backend é testado pelo CI (GitHub Actions) e o frontend roda local (`npm test`, `npm run lint`, `npx ng build`); outra máquina tem o ambiente completo. No Windows com `core.autocrlf=true`, o `npm run format:check` acusa todos os arquivos por causa do CRLF — conferir com `npx prettier --check --end-of-line auto …` (no CI, Linux, vale o check normal). Depois de cada push, acompanhar o CI (`gh run watch`).
@@ -180,7 +180,7 @@ Plano aprovado em 2026-11-27 (D-088 a D-095).
 - [x] Mudança de horários recusada se deixar consulta marcada fora (D-106) — **CI verde**
 - [x] Check-in na tela (detalhes da consulta: confirmar, chegou, faltou, iniciar/concluir atendimento, cancelar, remarcar) (D-107) — E2E (check-in) — **CI verde**
 - [x] Aviso de chegada em tempo real ao profissional (STOMP/WebSocket, som + aviso até "Ciente") e atualização automática das agendas abertas (D-108) — `AvisosTempoRealIT`, `StompAutenticacaoInterceptorTest`, Vitest, E2E — **CI verde**
-- [ ] Confirmação de leitura do aviso registrada no sistema (hoje o "Ciente" só fecha o aviso na tela)
+- [~] Confirmação de leitura do aviso registrada no sistema: "Ciente" → `POST /agendamentos/{id}/aviso-chegada/ciente`, tabela somente inclusão (V19), auditoria, "Ciente às HH:mm" para a recepção (D-111) — unitários do backend **executados localmente: 153 passaram**; Vitest **87 passaram**, lint e build ok; `AgendamentoControllerIT` e E2E aguardando CI
 - [x] Calendário próprio (D-085, D-107): visão do dia com uma coluna por consultório/profissional (grade de horários, agendamentos, indisponibilidade esmaecida, cor por status, aviso de ficha pendente); clicar em horário livre → nova consulta com itens — Vitest + E2E — **CI verde**
 - [x] Telas: horários dos profissionais (fixos, extras, ausências) e configurações de consultórios e categorias (D-107) — E2E — **CI verde**
 - [~] Calendário próprio: semana de um profissional (segunda a domingo, escolha do profissional, setas por semana) (D-109) — Vitest (`calendario.spec.ts`) **executado localmente: 81 passaram**, lint e build ok; E2E incluído em `cadastro-paciente.spec.ts` — aguardando CI

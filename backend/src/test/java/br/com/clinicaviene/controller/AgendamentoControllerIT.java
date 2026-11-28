@@ -2,6 +2,7 @@ package br.com.clinicaviene.controller;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -67,6 +70,9 @@ class AgendamentoControllerIT {
 
     @Autowired
     private CpfHasher cpfHasher;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     /** Quarta-feira da semana que vem (sempre no futuro). */
     private LocalDate dia;
@@ -247,6 +253,50 @@ class AgendamentoControllerIT {
                 .post(API + "/" + id + "/cancelar")
                 .then()
                 .statusCode(422);
+    }
+
+    @Test
+    void profissionalConfirmaQueViuOAvisoDeChegada() {
+        String id = marcar(paciente, profissional, sala, hora(10, 0), 30);
+        String ciente = API + "/" + id + "/aviso-chegada/ciente";
+
+        // antes do check-in não há aviso a confirmar
+        como(profissional).post(ciente).then().statusCode(422);
+        mudar(recepcao, id, "PACIENTE_CHEGOU").then().statusCode(200).body("avisoCienteEm", equalTo(null));
+
+        // só o profissional da consulta confirma: nem a recepção, nem outro profissional
+        como(recepcao).post(ciente).then().statusCode(403);
+        como(novoUsuario(Perfil.PROFISSIONAL, AreaAtuacao.ODONTOLOGIA)).post(ciente).then().statusCode(403);
+
+        String quando = como(profissional)
+                .post(ciente)
+                .then()
+                .statusCode(200)
+                .body("avisoCienteEm", not(equalTo(null)))
+                .extract()
+                .path("avisoCienteEm");
+        // repetir não cria outro registro nem muda a hora
+        como(profissional).post(ciente).then().statusCode(200).body("avisoCienteEm", equalTo(quando));
+        assertThat(jdbc.queryForObject(
+                        "SELECT count(*) FROM aviso_chegada_ciente WHERE agendamento_id = ?::uuid", Integer.class, id))
+                .isEqualTo(1);
+        assertThat(jdbc.queryForObject(
+                        "SELECT count(*) FROM audit_log WHERE acao = 'AVISO_CHEGADA_CIENTE' AND entidade_id = ?",
+                        Integer.class,
+                        id))
+                .isEqualTo(1);
+
+        // a recepção vê a confirmação na agenda
+        como(recepcao)
+                .get(API + "?de=" + dia + "&ate=" + dia)
+                .then()
+                .statusCode(200)
+                .body("find { it.id == '" + id + "' }.avisoCienteEm", equalTo(quando));
+
+        // somente inclusão: o banco recusa alterar o registro
+        assertThatThrownBy(() -> jdbc.update(
+                        "UPDATE aviso_chegada_ciente SET ciente_em = now() WHERE agendamento_id = ?::uuid", id))
+                .isInstanceOf(DataAccessException.class);
     }
 
     @Test

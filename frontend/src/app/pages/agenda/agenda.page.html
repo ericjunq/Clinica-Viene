@@ -103,9 +103,27 @@
             }
           </span>
         </span>
-        <span class="etiqueta status-lista" [attr.data-status]="a.status">{{
-          rotuloStatus[a.status]
-        }}</span>
+        <span class="etiqueta status-lista" [attr.data-status]="a.status"
+          >{{ rotuloStatus[a.status] }}
+          @if (a.status === 'PACIENTE_CHEGOU') {
+            @if (a.avisoCienteEm) {
+              <mat-icon
+                fontSet="material-symbols-outlined"
+                class="ciente"
+                aria-label="Profissional ciente"
+                data-testid="ciente"
+                >done_all</mat-icon
+              >
+            } @else {
+              <mat-icon
+                fontSet="material-symbols-outlined"
+                class="ciente"
+                aria-label="Aviso ainda não confirmado pelo profissional"
+                >schedule</mat-icon
+              >
+            }
+          }
+        </span>
         <span class="acoes-lista">
           @if (podeCheckIn(a)) {
             <button mat-flat-button (click)="chegou(a)">Chegou</button>

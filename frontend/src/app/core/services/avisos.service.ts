@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Client } from '@stomp/stompjs';
 import { Subject } from 'rxjs';
+import { AgendaService } from './agenda.service';
 import { AuthService } from './auth.service';
 
 /** Aviso pessoal: o paciente da consulta chegou (D-023). */
@@ -38,6 +39,7 @@ export function textoDoAviso(aviso: AvisoChegada): string {
 export class AvisosService {
   private readonly auth = inject(AuthService);
   private readonly avisos = inject(MatSnackBar);
+  private readonly agenda = inject(AgendaService);
   private cliente: Client | null = null;
 
   /** Data (aaaa-mm-dd) de um dia da agenda que mudou: as telas abertas recarregam. */
@@ -75,10 +77,18 @@ export class AvisosService {
     this.cliente = null;
   }
 
+  /** Mostra o aviso até "Ciente"; ao clicar, registra no sistema que o profissional viu (D-111). */
   private mostrar(aviso: AvisoChegada): void {
     if (aviso.tipo !== 'PACIENTE_CHEGOU') return;
     this.tocarSom();
-    this.avisos.open(textoDoAviso(aviso), 'Ciente', { panelClass: 'aviso-chegada' });
+    this.avisos
+      .open(textoDoAviso(aviso), 'Ciente', { panelClass: 'aviso-chegada' })
+      .onAction()
+      .subscribe(() =>
+        // a recepção é avisada pelo próprio backend (agenda alterada); se falhar (sem conexão), o aviso já fechou e
+        // só fica sem a confirmação registrada
+        this.agenda.avisoChegadaCiente(aviso.agendamentoId).subscribe({ error: () => undefined }),
+      );
   }
 
   /** Dois toques curtos (Web Audio, sem arquivo de som). Navegadores podem bloquear antes da 1ª interação. */

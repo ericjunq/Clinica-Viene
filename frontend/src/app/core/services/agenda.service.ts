@@ -172,6 +172,11 @@ export class AgendaService {
     return this.http.post<Agendamento>(`/api/v1/agendamentos/${id}/cancelar`, { motivo });
   }
 
+  /** O profissional da consulta confirma que viu o aviso de chegada (D-111). */
+  avisoChegadaCiente(id: string): Observable<Agendamento> {
+    return this.http.post<Agendamento>(`/api/v1/agendamentos/${id}/aviso-chegada/ciente`, null);
+  }
+
   /** Remarcar; profissional e consultório ausentes (ou nulos) = os mesmos da consulta. */
   remarcar(
     id: string,

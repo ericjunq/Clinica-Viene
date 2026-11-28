@@ -105,6 +105,8 @@ export interface Agendamento {
   agendamentoOrigemId: string | null;
   motivoCancelamento: string | null;
   chegadaEm: string | null;
+  /** Quando o profissional clicou em "Ciente" no aviso de chegada (D-111). */
+  avisoCienteEm: string | null;
   criadoEm: string;
 }
 

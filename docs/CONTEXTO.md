@@ -135,7 +135,7 @@ Telas internas (D-104): **Pacientes** (busca, pré-cadastro, ficha com abas Cada
 - `Agendamento`: paciente, profissional, consultório, início, fim, observação, origem, e **itens** (categoria + descrição, vários por agendamento — D-106). Paciente só com pré-cadastro pode ser agendado (aviso de ficha pendente).
 - Status: `AGENDADO → CONFIRMADO → PACIENTE_CHEGOU → EM_ATENDIMENTO → CONCLUIDO`, ou `FALTOU` / `CANCELADO` (com motivo e quem cancelou). Remarcar = cancelar com motivo "remarcado" + novo agendamento ligado ao anterior.
 - **Conflitos impedidos no banco**: `EXCLUDE USING gist` com `tstzrange` para (profissional, período) e (consultório, período), ignorando cancelados.
-- **Check-in**: recepção marca `PACIENTE_CHEGOU` (na lista do dia, em um clique) → aviso em tempo real só para o profissional da consulta (STOMP/WebSocket em `/api/v1/ws`, autenticado no CONNECT — D-108), com som e destaque até "Ciente"; agendas abertas se atualizam sozinhas.
+- **Check-in**: recepção marca `PACIENTE_CHEGOU` (na lista do dia, em um clique) → aviso em tempo real só para o profissional da consulta (STOMP/WebSocket em `/api/v1/ws`, autenticado no CONNECT — D-108), com som e destaque até "Ciente". O "Ciente" fica registrado (`AvisoChegadaCiente`, somente inclusão, auditado — D-111) e a recepção vê "Ciente às HH:mm" nos detalhes e na lista do dia; agendas abertas se atualizam sozinhas.
 - **Calendário (D-085, D-107)**: próprio, no frontend (sem biblioteca de calendário), sempre na hora da clínica (America/Bahia). Visão do dia com uma coluna por consultório ou profissional, semana de um profissional (segunda a domingo, uma coluna por dia — D-109) e lista do dia; indisponibilidade esmaecida, bloqueios hachurados, cor por status; arrastar para remarcar (com confirmação e motivo).
 
 ---
@@ -339,6 +339,7 @@ DisponibilidadeProfissional(id, profissional_id, consultorio_id, diaSemana, hora
 ExcecaoAgenda(id, profissional_id, consultorio_id?, inicio, fim, tipo, motivo)
 BloqueioAgenda(id, consultorio_id, profissional_id?, periodo tstzrange, motivo)
 Agendamento(id, paciente_id, profissional_id, consultorio_id, periodo tstzrange, categoriaPrevista, status, motivoCancelamento, agendamentoOrigem_id?, createdAt)
+AvisoChegadaCiente(id, agendamento_id UK, profissional_id, cienteEm)   (somente inclusão — D-111)
 Orcamento(id, paciente_id, status, criadoPor, createdAt)
 ItemOrcamento(id, orcamento_id, profissional_id, categoria, descricao, valorProcedimento, descontoTipo, descontoValor, descontoMotivo, aprovadoPor?)
 ConfiguracaoTaxa(id, forma, parcelas, bandeira?, percentual, valorFixo, provedor, vigenciaInicio, vigenciaFim)

@@ -10,6 +10,7 @@ import br.com.clinicaviene.dto.RegistroAuditoria;
 import br.com.clinicaviene.dto.RemarcarAgendamentoRequest;
 import br.com.clinicaviene.dto.UsuarioAutenticado;
 import br.com.clinicaviene.entity.Agendamento;
+import br.com.clinicaviene.entity.AvisoChegadaCiente;
 import br.com.clinicaviene.entity.CategoriaProcedimento;
 import br.com.clinicaviene.entity.Consultorio;
 import br.com.clinicaviene.entity.Paciente;
@@ -22,6 +23,7 @@ import br.com.clinicaviene.exceptions.PacienteNaoEncontradoException;
 import br.com.clinicaviene.exceptions.RecursoNaoEncontradoException;
 import br.com.clinicaviene.exceptions.RegraNegocioException;
 import br.com.clinicaviene.repository.AgendamentoRepository;
+import br.com.clinicaviene.repository.AvisoChegadaCienteRepository;
 import br.com.clinicaviene.repository.CategoriaProcedimentoRepository;
 import br.com.clinicaviene.repository.ConsultorioRepository;
 import br.com.clinicaviene.repository.PacienteRepository;
@@ -60,6 +62,7 @@ public class AgendamentoService {
     private static final UUID NENHUM = new UUID(0, 0);
 
     private final AgendamentoRepository agendamentoRepository;
+    private final AvisoChegadaCienteRepository avisoCienteRepository;
     private final PacienteRepository pacienteRepository;
     private final UsuarioRepository usuarioRepository;
     private final ConsultorioRepository consultorioRepository;
@@ -179,6 +182,29 @@ public class AgendamentoService {
         return respostas(List.of(a)).getFirst();
     }
 
+    /**
+     * O profissional da consulta confirma que viu o aviso de chegada (D-111): registra uma vez (somente inclusão) e
+     * audita; chamadas repetidas só devolvem a consulta.
+     */
+    @Transactional
+    public AgendamentoResponse registrarAvisoCiente(UUID id, UsuarioAutenticado ator) {
+        Agendamento a = agendamento(id);
+        if (ator.perfil() != Perfil.PROFISSIONAL || !a.getProfissionalId().equals(ator.id())) {
+            throw new AccessDeniedException("Só o profissional da consulta confirma o aviso de chegada");
+        }
+        if (a.getChegadaEm() == null) {
+            throw new RegraNegocioException("A chegada do paciente ainda não foi registrada.");
+        }
+        if (avisoCienteRepository.findByAgendamentoId(id).isEmpty()) {
+            avisoCienteRepository.save(new AvisoChegadaCiente(id, ator.id(), agora()));
+            auditoriaService.registrar(
+                    RegistroAuditoria.sobre(ator.id(), AcaoAuditoria.AVISO_CHEGADA_CIENTE, ENTIDADE, id));
+            // a recepção com a agenda aberta vê a confirmação
+            avisarMudanca(a);
+        }
+        return respostas(List.of(a)).getFirst();
+    }
+
     /** Cancela este agendamento ("Remarcado: motivo") e cria outro ligado a ele, com os mesmos itens. */
     @Transactional
     public AgendamentoResponse remarcar(UUID id, RemarcarAgendamentoRequest pedido, UsuarioAutenticado ator) {
@@ -288,6 +314,10 @@ public class AgendamentoService {
         Map<UUID, CategoriaProcedimento> mapaCategorias =
                 porId(categoriaRepository.findAllById(categorias), CategoriaProcedimento::getId);
         Set<UUID> comFicha = documentoService.comFichaAssinada(pacientes);
+        Map<UUID, Instant> cientes = lista.stream().anyMatch(a -> a.getChegadaEm() != null)
+                ? avisoCienteRepository.findByAgendamentoIdIn(lista.stream().map(Agendamento::getId).toList()).stream()
+                        .collect(Collectors.toMap(AvisoChegadaCiente::getAgendamentoId, AvisoChegadaCiente::getCienteEm))
+                : Map.of();
         return lista.stream()
                 .map(a -> new AgendamentoResponse(
                         a.getId(),
@@ -311,6 +341,7 @@ public class AgendamentoService {
                         a.getAgendamentoOrigemId(),
                         a.getMotivoCancelamento(),
                         a.getChegadaEm(),
+                        cientes.get(a.getId()),
                         a.getCriadoEm()))
                 .toList();
     }

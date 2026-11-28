@@ -442,6 +442,12 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - Soltar fora dos horários de atendimento avisa (como o clique para marcar) sem abrir a confirmação; conflitos, horário no passado e categoria de outra área são recusados pelo backend e a mensagem aparece no diálogo, que deixa tentar de novo.
 - Remarcar pelos detalhes da consulta (dia, hora, duração) continua existindo — é o caminho por teclado.
 
+**D-111 — Confirmação de leitura do aviso de chegada** · 2026-11-27 · Detalha D-108
+- Clicar em **"Ciente"** no aviso de chegada chama `POST /api/v1/agendamentos/{id}/aviso-chegada/ciente`. Só o **profissional da consulta** confirma (recepção, MASTER e outros profissionais: 403); antes do check-in: 422.
+- Registro em tabela própria `aviso_chegada_ciente` (V19, só `CREATE`), **somente inclusão** (trigger `rejeita_alteracao`) e **um por consulta**: repetir o clique não cria outro registro nem muda a hora. Auditoria `AVISO_CHEGADA_CIENTE`. Tabela separada em vez de coluna no `agendamento` para não precisar de `ALTER` (D-047) e para o registro não poder ser alterado depois.
+- A resposta da consulta ganha `avisoCienteEm`. A recepção vê **"Ciente às HH:mm"** (ou "Ainda não confirmado") nos detalhes e um ícone na lista do dia; o backend publica "agenda alterada" ao registrar, então a tela aberta da recepção se atualiza sozinha.
+- Se a confirmação falhar (sem conexão), o aviso já fechou na tela do profissional — fica só sem o registro. Fechar o aviso de outro jeito (recarregar a página) também não registra.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

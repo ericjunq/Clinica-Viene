@@ -7,7 +7,8 @@ import java.util.UUID;
 
 /**
  * Consulta na agenda. {@code paciente.fichaPendente}: ainda sem ficha de cadastro assinada (D-106) — a recepção
- * manda o convite ou abre o quiosque na chegada.
+ * manda o convite ou abre o quiosque na chegada. {@code avisoCienteEm}: quando o profissional confirmou que viu o aviso
+ * de chegada (D-111), ou nulo.
  */
 public record AgendamentoResponse(
         UUID id,
@@ -22,6 +23,7 @@ public record AgendamentoResponse(
         UUID agendamentoOrigemId,
         String motivoCancelamento,
         Instant chegadaEm,
+        Instant avisoCienteEm,
         Instant criadoEm) {
 
     public record Paciente(UUID id, String nomeCompleto, boolean fichaPendente) {}

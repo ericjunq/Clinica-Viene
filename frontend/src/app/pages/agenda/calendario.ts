@@ -35,6 +35,28 @@ export function somarDias(data: string, dias: number): string {
   return new Date(Date.UTC(ano, mes - 1, dia + dias)).toISOString().slice(0, 10);
 }
 
+/** Segunda-feira da semana de {@code data} (a semana da agenda vai de segunda a domingo). */
+export function inicioDaSemana(data: string): string {
+  const [ano, mes, dia] = data.split('-').map(Number);
+  const diaSemana = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay(); // 0 = domingo
+  return somarDias(data, -((diaSemana + 6) % 7));
+}
+
+/** Os 7 dias (segunda a domingo) da semana de {@code data}. */
+export function diasDaSemana(data: string): string[] {
+  const segunda = inicioDaSemana(data);
+  return Array.from({ length: 7 }, (_, i) => somarDias(segunda, i));
+}
+
+const ABREVIACAO_DIA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+/** "Seg 30/11" a partir de aaaa-mm-dd. */
+export function rotuloDia(data: string): string {
+  const [ano, mes, dia] = data.split('-').map(Number);
+  const diaSemana = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay();
+  return `${ABREVIACAO_DIA[diaSemana]} ${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}`;
+}
+
 /** "08:30" a partir de minutos no dia. */
 export function formatarHora(minutos: number): string {
   const h = Math.floor(minutos / 60);

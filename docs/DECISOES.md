@@ -429,6 +429,12 @@ Teste `CamadasArchTest` (roda no CI e falha o build se a regra for quebrada): (1
 - **Lista do dia** na agenda: consultas em ordem de horário com check-in em um clique ("Chegou"); o profissional vê a própria lista.
 - Pendente: registrar no sistema a confirmação de leitura do aviso.
 
+**D-109 — Semana de um profissional na agenda** · 2026-11-27 · Detalha D-085, D-107
+- Nova visão **Semana** na tela da agenda: **um profissional**, **7 colunas (segunda a domingo)**, mesma grade, cores, horários esmaecidos e marcação por clique da visão do dia. A semana é a que contém o dia escolhido; as setas andam de semana em semana e o dia de hoje fica destacado.
+- A recepção e o MASTER escolhem o profissional (padrão: o primeiro da lista); o profissional vê só a própria semana.
+- Carrega a semana em duas chamadas, que o backend já aceitava (até 62 dias): `GET /agendamentos?de&ate&profissionalId` e `GET /profissionais/{id}/disponibilidade?de&ate`. Cada consulta vai para a coluna do seu dia na hora da clínica. Sem mudança no backend.
+- Semana começando na **segunda** (semana de trabalho), com o domingo no fim — proposta do Claude; o autor pode pedir domingo primeiro.
+
 **D-055 — `docs/DUVIDAS.md` para dúvidas abertas** · 2026-11-26
 Dúvidas que surgirem com o autor ausente vão para `docs/DUVIDAS.md`; depois de discutidas, viram decisão em `DECISOES.md` e saem de lá.
 

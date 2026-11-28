@@ -1,15 +1,18 @@
 import {
   cabeEm,
   dataNaClinica,
+  diasDaSemana,
   distribuirRaias,
   faixaDoDia,
   formatarHora,
   hojeNaClinica,
+  inicioDaSemana,
   instanteDaClinica,
   minutosDaHora,
   minutosNoDia,
   naGrade,
   posicao,
+  rotuloDia,
   somarDias,
 } from './calendario';
 
@@ -26,6 +29,29 @@ describe('calendário da agenda', () => {
   it('soma dias atravessando meses e anos', () => {
     expect(somarDias('2026-12-31', 1)).toBe('2027-01-01');
     expect(somarDias('2026-03-01', -1)).toBe('2026-02-28');
+  });
+
+  it('monta a semana de segunda a domingo, atravessando meses', () => {
+    // 2026-12-02 é quarta-feira
+    expect(inicioDaSemana('2026-12-02')).toBe('2026-11-30');
+    expect(inicioDaSemana('2026-11-30')).toBe('2026-11-30');
+    // domingo pertence à semana que começou na segunda anterior
+    expect(inicioDaSemana('2026-12-06')).toBe('2026-11-30');
+    expect(diasDaSemana('2026-12-02')).toEqual([
+      '2026-11-30',
+      '2026-12-01',
+      '2026-12-02',
+      '2026-12-03',
+      '2026-12-04',
+      '2026-12-05',
+      '2026-12-06',
+    ]);
+    expect(diasDaSemana('2027-01-01')[0]).toBe('2026-12-28');
+  });
+
+  it('rotula o dia com a abreviação e a data', () => {
+    expect(rotuloDia('2026-11-30')).toBe('Seg 30/11');
+    expect(rotuloDia('2026-12-06')).toBe('Dom 06/12');
   });
 
   it('formata e lê horas e encaixa na grade', () => {

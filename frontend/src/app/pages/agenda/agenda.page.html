@@ -9,11 +9,19 @@
 </div>
 
 <div class="barra-agenda">
-  <button mat-icon-button (click)="avancar(-1)" aria-label="Dia anterior">
+  <button
+    mat-icon-button
+    (click)="avancar(-1)"
+    [attr.aria-label]="semana() ? 'Semana anterior' : 'Dia anterior'"
+  >
     <mat-icon fontSet="material-symbols-outlined">chevron_left</mat-icon>
   </button>
-  <button mat-stroked-button (click)="hoje()">Hoje</button>
-  <button mat-icon-button (click)="avancar(1)" aria-label="Próximo dia">
+  <button mat-stroked-button (click)="irParaHoje()">Hoje</button>
+  <button
+    mat-icon-button
+    (click)="avancar(1)"
+    [attr.aria-label]="semana() ? 'Próxima semana' : 'Próximo dia'"
+  >
     <mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon>
   </button>
   <input
@@ -26,7 +34,7 @@
   />
   <mat-button-toggle-group
     [value]="visao()"
-    (change)="visao.set($event.value)"
+    (change)="mudarVisao($event.value)"
     aria-label="Como ver a agenda"
   >
     @if (!ehProfissional()) {
@@ -35,8 +43,26 @@
     } @else {
       <mat-button-toggle value="profissional">Calendário</mat-button-toggle>
     }
+    <mat-button-toggle value="semana">Semana</mat-button-toggle>
     <mat-button-toggle value="lista">Lista do dia</mat-button-toggle>
   </mat-button-toggle-group>
+  @if (semana() && !ehProfissional()) {
+    <mat-form-field appearance="outline" class="campo-semana" subscriptSizing="dynamic">
+      <mat-label>Profissional</mat-label>
+      <mat-select
+        id="semana-profissional"
+        [value]="profissionalSemana()?.id"
+        (selectionChange)="escolherProfissionalSemana($event.value)"
+      >
+        @for (p of profissionaisVisiveis(); track p.id) {
+          <mat-option [value]="p.id">{{ p.nomeCompleto }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  @if (periodo(); as p) {
+    <span class="periodo" data-testid="periodo-semana">{{ p }}</span>
+  }
   <mat-checkbox [checked]="mostrarCancelados()" (change)="mostrarCancelados.set($event.checked)">
     Mostrar cancelados
   </mat-checkbox>
@@ -95,16 +121,20 @@
   <p class="alerta info">
     @if (visao() === 'consultorio') {
       Nenhum consultório ativo. O MASTER cadastra em Configurações → Consultórios.
+    } @else if (semana()) {
+      Nenhum profissional ativo para mostrar a semana.
     } @else {
       Nenhum profissional ativo.
     }
   </p>
 } @else {
-  <div class="calendario" [style.--colunas]="colunas().length">
+  <div class="calendario" [class.semana]="semana()" [style.--colunas]="colunas().length">
     <div class="cabecalho-colunas">
       <div class="canto"></div>
       @for (c of colunas(); track c.id) {
-        <div class="titulo-coluna">{{ c.titulo }}</div>
+        <div class="titulo-coluna" [class.hoje]="semana() && c.dia === hoje()">
+          {{ c.titulo }}
+        </div>
       }
     </div>
     <div class="corpo" [style.height.px]="alturaTotal()">
@@ -117,6 +147,7 @@
         <div
           class="coluna"
           [attr.data-coluna]="c.titulo"
+          [attr.data-dia]="c.dia"
           [class.clicavel]="gestao()"
           (click)="clicarColuna(c, $event)"
           (keydown.enter)="abrirMarcacao(c, c.livres[0]?.inicio ?? 480)"

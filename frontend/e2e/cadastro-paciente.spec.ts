@@ -230,6 +230,21 @@ test('agenda: profissional, horários, consulta marcada no calendário, check-in
   await expect(bloco).toBeVisible();
   await expect(bloco).toContainText('09:00–09:30');
 
+  // semana da dentista (única profissional, já escolhida): 7 colunas, a consulta na coluna do dia
+  await page.getByText('Semana', { exact: true }).click();
+  await expect(page.getByTestId('periodo-semana')).toBeVisible();
+  await expect(page.locator('.coluna')).toHaveCount(7);
+  const colunaDoDia = page.locator(`.coluna[data-dia="${alvo}"]`);
+  await expect(colunaDoDia.locator('.livre')).toHaveCount(1);
+  await expect(colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE })).toContainText(
+    '09:00–09:30',
+  );
+  // a semana seguinte não tem a consulta; voltar mostra de novo
+  await page.getByRole('button', { name: 'Próxima semana' }).click();
+  await expect(page.locator('.bloco', { hasText: NOME_PACIENTE })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Semana anterior' }).click();
+  await expect(colunaDoDia.locator('.bloco', { hasText: NOME_PACIENTE })).toBeVisible();
+
   // a dentista entra no sistema (outro navegador) e fica com a agenda aberta
   const contextoDentista = await browser.newContext();
   const dentista = await contextoDentista.newPage();

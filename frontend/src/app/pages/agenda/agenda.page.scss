@@ -15,8 +15,24 @@
   color: var(--viene-texto);
 }
 
+.campo-semana {
+  min-width: 14rem;
+}
+
+.periodo {
+  font-weight: 600;
+  color: var(--viene-marrom);
+}
+
 .calendario {
   --largura-horas: 3.5rem;
+  --largura-coluna: 11rem;
+
+  /* semana: 7 colunas mais estreitas */
+  &.semana {
+    --largura-coluna: 8rem;
+  }
+
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 8px 30px rgba(107, 74, 46, 0.08);
@@ -27,8 +43,11 @@
 .cabecalho-colunas,
 .corpo {
   display: grid;
-  grid-template-columns: var(--largura-horas) repeat(var(--colunas), minmax(11rem, 1fr));
-  min-width: calc(var(--largura-horas) + var(--colunas) * 11rem);
+  grid-template-columns: var(--largura-horas) repeat(
+      var(--colunas),
+      minmax(var(--largura-coluna), 1fr)
+    );
+  min-width: calc(var(--largura-horas) + var(--colunas) * var(--largura-coluna));
 }
 
 .cabecalho-colunas {
@@ -45,6 +64,11 @@
   color: var(--viene-marrom);
   text-align: center;
   border-left: 1px solid var(--viene-creme);
+
+  &.hoje {
+    background: var(--viene-creme);
+    border-bottom: 3px solid var(--viene-caramelo);
+  }
 }
 
 .corpo {
